@@ -248,6 +248,7 @@ apt install --yes console-setup locales
 
 # Setup locals
 # Note: always include `en_US.UTF-8`
+# Can skip if only using default english us, qwerty, etc.
 dpkg-reconfigure locales tzdata keyboard-configuration console-setup
 
 # Setup ZFS
@@ -448,8 +449,13 @@ apt install --yes mdadm
 mdadm --create /dev/md0 --metadata=1.2 --level=mirror \
     --raid-devices=2 ${DISK1}-part2 ${DISK2}-part2
 mkswap -f /dev/md0
-echo /dev/disk/by-uuid/$(blkid -s UUID -o value /dev/md0) \
-    none swap discard 0 0 >> /etc/fstab
+
+# Setup encrypted swap.
+UUID_SWAP=$(sudo blkid -s UUID -o value /dev/md0)
+echo "cryptswap_md UUID=${UUID_SWAP} /dev/urandom swap,offset=2048,cipher=aes-xts-plain64,size=512" >> /etc/crypttab
+
+# Add it to fstab
+echo "/dev/mapper/cryptswap_md none swap defaults 0 0" >> /etc/fstab
 
 swapon -av
 ```

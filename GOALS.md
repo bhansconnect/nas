@@ -1,11 +1,12 @@
 ## This is just a rough list of the current goals of the project:
 
-- [ ] Stable simple base (probably Debian)
-- [ ] Minimal well-documented install (maybe scripted)
+- [x] Stable simple base (probably Debian)
+- [x] Minimal well-documented install (maybe scripted)
 - [ ] No snowflakes. Fully rebuildable with install guide. (Ansible after install)
-- [ ] Mirrored boot drives - must boot fine with a dead drive (probably zfs, maybe btrfs)
-- [ ] Encrypted raid (any type) data drives (probably zfs, maybe btrfs)
-- [ ] Can boot without password (must get encryption key somehow, probably file on boot drive)
+- [x] Mirrored boot drives - must boot fine with a dead drive (probably zfs, maybe btrfs)
+- [x] Encrypted raid (any type) data drives (probably zfs, maybe btrfs)
+- [x] Can boot without password (load encryption key from file on boot drive) This means if you throw away a single disk without bpool, you don't have to worry about the data. If someone steals the entire server, you will have issues.
+- [x] Encrypted Swap
 - [ ] Automatic updates and reboots at least for security patches
 - [ ] Automatic snapshot creation and pruning
 - [ ] At least manual rollback of boot drive to fix bad updates
