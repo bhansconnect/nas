@@ -188,4 +188,132 @@ mkdir /mnt/run/lock
 
 # Base install
 debootstrap bullseye /mnt
+
+# Copy in zpool cache
+mkdir /mnt/etc/zfs
+cp /etc/zfs/zpool.cache /mnt/etc/zfs/
 ```
+
+### System config
+
+Setup the hostname:
+```sh
+echo HOSTNAME > /mnt/etc/hostname
+```
+
+edit `/mnt/etc/hosts` to be something like:
+```sh
+Add a line:
+127.0.1.1       HOSTNAME
+or if the system has a real name in DNS:
+127.0.1.1       FQDN HOSTNAME
+```
+
+Setup a static ip. Add a new file to `/mnt/etc/network/interfaces.d/<name>`
+It should have content similar to:
+```
+auto enp33s0
+iface enp33s0 inet static
+  address 192.168.0.2/24
+  broadcast 192.168.0.255
+  network 192.168.0.0
+  gateway 192.168.0.254
+```
+
+Update apt sources to include updates and contrib.
+The file is `/mnt/etc/apt/sources.list`. Set it to:
+```
+deb http://deb.debian.org/debian bullseye main contrib
+deb-src http://deb.debian.org/debian bullseye main contrib
+
+deb http://security.debian.org/debian-security bullseye/updates main contrib
+deb-src http://security.debian.org/debian-security bullseye/updates main contrib
+
+deb http://deb.debian.org/debian bullseye-updates main contrib
+deb-src http://deb.debian.org/debian bullseye-updates main contrib
+```
+
+Setup and chroot. Then do some basic config:
+```sh
+# Bind virtual filesystem and chroot
+mount --rbind /dev  /mnt/dev
+mount --rbind /proc /mnt/proc
+mount --rbind /sys  /mnt/sys
+chroot /mnt /usr/bin/env DISKS=$DISKS bash --login
+
+# Basic setup
+ln -s /proc/self/mounts /etc/mtab
+apt update
+apt install --yes console-setup locales
+
+# Setup locals
+# Note: always include `en_US.UTF-8`
+dpkg-reconfigure locales tzdata keyboard-configuration console-setup
+
+# Setup ZFS
+# Ignore any error messages saying `ERROR: Couldn't resolve device` and `WARNING: Couldn't determine root device`
+apt install --yes dpkg-dev linux-headers-amd64 linux-image-amd64
+
+apt install --yes zfs-initramfs
+
+echo REMAKE_INITRD=yes > /etc/dkms/zfs.conf
+
+# Setup grub on first disk. Rest handled later.
+PRIMARY_DISK=$(echo $DISKS | cut -f1 -d\ )
+
+apt install dosfstools
+
+mkdosfs -F 32 -s 1 -n EFI ${PRIMARY_DISK}-part1
+mkdir /boot/efi
+echo /dev/disk/by-uuid/$(blkid -s UUID -o value ${PRIMARY_DISK}-part1) \
+   /boot/efi vfat defaults 0 0 >> /etc/fstab
+mount /boot/efi
+apt install --yes grub-efi-amd64 shim-signed
+
+# Remove dual boot os-prober
+apt remove --purge os-prober
+```
+
+Set the root password:
+```sh
+passwd
+```
+
+Setup bpool importing by creating `/etc/systemd/system/zfs-import-bpool.service` with content:
+```
+[Unit]
+DefaultDependencies=no
+Before=zfs-import-scan.service
+Before=zfs-import-cache.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/zpool import -N -o cachefile=none bpool
+# Work-around to preserve zpool cache:
+ExecStartPre=-/bin/mv /etc/zfs/zpool.cache /etc/zfs/preboot_zpool.cache
+ExecStartPost=-/bin/mv /etc/zfs/preboot_zpool.cache /etc/zfs/zpool.cache
+
+[Install]
+WantedBy=zfs-import.target
+```
+
+Also enable it:
+```sh
+systemctl enable zfs-import-bpool.service
+```
+
+Optional minor setup stuff:
+```sh
+# Create tmpfs for /tmp
+cp /usr/share/systemd/tmp.mount /etc/systemd/system/
+systemctl enable tmp.mount
+
+# Install ssh server
+apt install --yes openssh-server
+
+# Install package popularity context to let the world know you use ZFS
+apt install --yes popularity-contest
+```
+
+> Note: we only have a root user, so if you set up ssh, make sure to permit root login by setting `PermitRootLogin yes` in `/etc/ssh/sshd_config`
