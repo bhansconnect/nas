@@ -274,6 +274,11 @@ apt install --yes grub-efi-amd64 shim-signed
 apt remove --purge os-prober
 ```
 
+Take a note of the primary disk. It is needed later:
+```sh
+echo $PRIMARY_DISK
+```
+
 Set the root password:
 ```sh
 passwd
@@ -317,3 +322,105 @@ apt install --yes popularity-contest
 ```
 
 > Note: we only have a root user, so if you set up ssh, make sure to permit root login by setting `PermitRootLogin yes` in `/etc/ssh/sshd_config`
+
+### GRUB installation
+
+Double check that boot is recognized by grub:
+```sh
+grub-probe /boot
+```
+Should print `zfs`
+
+Update initrd:
+> Note: Ignore any error messages saying `ERROR: Couldn't resolve device` and `WARNING: Couldn't determine root device`
+```sh
+update-initramfs -c -k all
+```
+
+Edit `/etc/default/grub`:
+ - Set `GRUB_CMDLINE_LINUX="root=ZFS=rpool/ROOT/debian"`
+ - Remove quiet from: `GRUB_CMDLINE_LINUX_DEFAULT`
+ - Uncomment: `GRUB_TERMINAL=console`
+
+Update grub with:
+```sh
+update-grub
+```
+
+Install uefi boot:
+```sh
+grub-install --target=x86_64-efi --efi-directory=/boot/efi \
+    --bootloader-id=debian --recheck --no-floppy
+```
+
+Fix filesystem mounting order:
+```sh
+mkdir /etc/zfs/zfs-list.cache
+touch /etc/zfs/zfs-list.cache/bpool
+touch /etc/zfs/zfs-list.cache/rpool
+ln -s /usr/lib/zfs-linux/zed.d/history_event-zfs-list-cacher.sh /etc/zfs/zed.d
+zed -F &
+```
+
+Verify the previous command by making sure these are not empty:
+```sh
+cat /etc/zfs/zfs-list.cache/bpool
+cat /etc/zfs/zfs-list.cache/rpool
+```
+If either is empty force update:
+```sh
+zfs set canmount=on     bpool/BOOT/debian
+zfs set canmount=noauto rpool/ROOT/debian
+```
+If still empty, stop zed and repeat:
+```sh
+fg
+# Press Ctrl-C.
+```
+
+Once everything is good, stop zed and remove `/mnt` from paths:
+```sh
+fg
+# Press Ctrl-C.
+
+sed -Ei "s|/mnt/?|/|" /etc/zfs/zfs-list.cache/*
+```
+
+### First boot
+
+Take snapshot of install (should remove after a few good boots to not waste space):
+```sh
+zfs snapshot bpool/BOOT/debian@install
+zfs snapshot rpool/ROOT/debian@install
+```
+
+Exit the chroot with `exit`
+
+Unmount everything and reboot:
+```sh
+mount | grep -v zfs | tac | awk '/\/mnt/ {print $3}' | \
+    xargs -i{} umount -lf {}
+zpool export -a
+
+reboot
+```
+
+### Mirror Grub
+
+> :warning: This is not automatic and can easily be messed up. so pay attention.
+
+First unmount efi:
+```sh
+umount /boot/efi
+```
+
+Then for each disk, copy the bootloader over. This comes from the PRIMARY_DISK you noted down earlier.
+Make sure to update the debian number and the disk number if using more than 2 disks.
+```sh
+dd if=/dev/disk/by-id/scsi-SATA_disk1-part1 \
+   of=/dev/disk/by-id/scsi-SATA_disk2-part1
+efibootmgr -c -g -d /dev/disk/by-id/scsi-SATA_disk2 \
+    -p 2 -L "debian-2" -l '\EFI\debian\grubx64.efi'
+
+mount /boot/efi
+```
