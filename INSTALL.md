@@ -221,6 +221,7 @@ iface enp33s0 inet static
 ```
 
 Update apt sources to include updates and contrib.
+> Note: If you see misisng firmware, you may need to comeback and add non-free. Just look up the issue.
 The file is `/mnt/etc/apt/sources.list`. Set it to:
 ```
 deb http://deb.debian.org/debian bullseye main contrib
@@ -239,7 +240,7 @@ Setup and chroot. Then do some basic config:
 mount --rbind /dev  /mnt/dev
 mount --rbind /proc /mnt/proc
 mount --rbind /sys  /mnt/sys
-chroot /mnt /usr/bin/env DISKS='$DISKS' bash --login
+chroot /mnt /usr/bin/env DISKS="$DISKS" bash --login
 
 # Basic setup
 ln -s /proc/self/mounts /etc/mtab
