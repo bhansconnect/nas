@@ -58,7 +58,7 @@ modprobe zfs
 apt install --yes zfsutils-linux
 ```
 
-## Setup disks
+### Setup disks
 
 > Note: if you have old mdadm, or partitions, you may need to explicitly clean it up. Look at the zfs guide.
 
@@ -103,7 +103,7 @@ sgdisk -n4:0:0   -t4:BF00 $i
 done
 ```
 
-# Create ZFS Pools
+### Create ZFS Pools
 
 > Note: The data pool is separate from both of these.
 
@@ -151,4 +151,41 @@ zpool create \
    $(for i in ${DISKS}; do
       printf "$i-part4 ";
      done)
+```
+
+### Base system install
+```sh
+# Container datasets
+zfs create -o canmount=off -o mountpoint=none rpool/ROOT
+zfs create -o canmount=off -o mountpoint=none bpool/BOOT
+
+# Filesystem datasets
+zfs create -o canmount=noauto -o mountpoint=/ rpool/ROOT/debian
+zfs mount rpool/ROOT/debian
+
+zfs create -o mountpoint=/boot bpool/BOOT/debian
+
+# Folder datasets for snapshoting
+zfs create                                 rpool/home
+zfs create -o mountpoint=/root             rpool/home/root
+chmod 700 /mnt/root
+zfs create -o canmount=off                 rpool/var
+zfs create -o canmount=off                 rpool/var/lib
+zfs create                                 rpool/var/log
+zfs create                                 rpool/var/spool
+
+zfs create -o com.sun:auto-snapshot=false  rpool/var/cache
+zfs create -o com.sun:auto-snapshot=false  rpool/var/tmp
+chmod 1777 /mnt/var/tmp
+
+# TODO double check docker datasets/speed/avoid this maybe
+zfs create -o com.sun:auto-snapshot=false  rpool/var/lib/docker
+
+# tmpfs at /run
+mkdir /mnt/run
+mount -t tmpfs tmpfs /mnt/run
+mkdir /mnt/run/lock
+
+# Base install
+debootstrap bullseye /mnt
 ```
