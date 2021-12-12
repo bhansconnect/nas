@@ -248,7 +248,6 @@ apt install --yes console-setup locales
 
 # Setup locals
 # Note: always include `en_US.UTF-8`
-# Can skip if only using default english us, qwerty, etc.
 dpkg-reconfigure locales tzdata keyboard-configuration console-setup
 
 # Setup ZFS
