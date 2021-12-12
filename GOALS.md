@@ -5,7 +5,7 @@
 - [ ] No snowflakes. Fully rebuildable with install guide. (Ansible after install)
 - [x] Mirrored boot drives - must boot fine with a dead drive (probably zfs, maybe btrfs)
 - [x] Encrypted raid (any type) data drives (probably zfs, maybe btrfs)
-- [x] Can boot without password (load encryption key from file on boot drive) This means if you throw away a single disk without bpool, you don't have to worry about the data. If someone steals the entire server, you will have issues.
+- [x] Can boot without password (load encryption key from file on boot drive) This means if you throw away a single data pool disk, you don't have to worry about the data. If someone steals the entire server, you will have issues.
 - [x] Encrypted Swap
 - [ ] Automatic updates and reboots at least for security patches
 - [ ] Automatic snapshot creation and pruning

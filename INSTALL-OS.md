@@ -500,8 +500,8 @@ zfs set mountpoint=/mnt/dpool <pool name>
 
 If you are making a new one, use these commands to create it with zfs encryption save to a file in the rpool:
 ```sh
-sudo openssl rand -hex -out /root/dpool_key 32
-sudo chmod u=r,go= /root/dpool_key
+sudo openssl rand -base64 -out /root/.dpool_key 32
+sudo chmod u=r,go= /root/.dpool_key
 
 sudo zpool create \
     -o ashift=12 \
@@ -516,19 +516,19 @@ sudo zpool create \
     -O xattr=sa \
     -O mountpoint=/mnt/dpool \
     -O encryption=aes-256-gcm \
-    -O keylocation=file:///root/dpool_key \
-    -O keyformat=hex \
+    -O keylocation=file:///root/.dpool_key \
+    -O keyformat=raw \
     dpool \
     <raid config with drives>
 ```
-> :warning: Write down and backup `/root/dpool_key` if it is lost, the data is gone.
+> :warning: Write down and backup `/root/.dpool_key` if it is lost, the data is gone.
 
 Create a service to load the encrypted dpool on boot by writing it to `/etc/systemd/system/zfs-mount-dpool.service`:
 ```
 [Unit]
 Description=Mount dpool
 DefaultDependencies=no
-ConditionPathExists=/root/dpool_key
+ConditionPathExists=/root/.dpool_key
 Before=local-fs.target
 After=zfs-mount.service
 Requires=zfs-mount.service
