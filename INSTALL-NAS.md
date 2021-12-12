@@ -27,6 +27,6 @@ To [setup the inventory](https://docs.ansible.com/ansible/latest/user_guide/intr
 
 Verify ansible can connect:
 ```ssh
-ansible -i inventory nas -m ping
+ansible nas -m ping
 ```
 You should get a success, and it should discover python3.
