@@ -62,7 +62,6 @@ apt install --yes zfsutils-linux
 
 > Note: if you have old mdadm, or partitions, you may need to explicitly clean it up. Look at the zfs guide.
 
-
 It is important to pick the correct disks here and use `/dev/disk/by-id`.
 Simply run `ls /dev/disk/by-id` and pick the disks you want to use.
 Then set the `$DISKS` varibale to match:
@@ -214,10 +213,10 @@ It should have content similar to:
 ```
 auto enp33s0
 iface enp33s0 inet static
-  address 192.168.0.2/24
-  broadcast 192.168.0.255
-  network 192.168.0.0
-  gateway 192.168.0.254
+  address 192.168.1.2/24
+  broadcast 192.168.1.255
+  network 192.168.1.0
+  gateway 192.168.1.254
 ```
 
 Update apt sources to include updates and contrib.
@@ -227,8 +226,8 @@ The file is `/mnt/etc/apt/sources.list`. Set it to:
 deb http://deb.debian.org/debian bullseye main contrib
 deb-src http://deb.debian.org/debian bullseye main contrib
 
-deb http://security.debian.org/debian-security bullseye/updates main contrib
-deb-src http://security.debian.org/debian-security bullseye/updates main contrib
+deb http://security.debian.org/debian-security bullseye-security main contrib
+deb-src http://security.debian.org/debian-security bullseye-security main contrib
 
 deb http://deb.debian.org/debian bullseye-updates main contrib
 deb-src http://deb.debian.org/debian bullseye-updates main contrib
