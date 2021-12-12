@@ -239,7 +239,7 @@ Setup and chroot. Then do some basic config:
 mount --rbind /dev  /mnt/dev
 mount --rbind /proc /mnt/proc
 mount --rbind /sys  /mnt/sys
-chroot /mnt /usr/bin/env DISKS=$DISKS bash --login
+chroot /mnt /usr/bin/env DISKS='$DISKS' bash --login
 
 # Basic setup
 ln -s /proc/self/mounts /etc/mtab
