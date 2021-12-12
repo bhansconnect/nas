@@ -405,6 +405,18 @@ zpool export -a
 reboot
 ```
 
+### Create User account
+```sh
+username=YOUR_USERNAME
+
+zfs create rpool/home/$username
+adduser $username
+
+cp -a /etc/skel/. /home/$username
+chown -R $username:$username /home/$username
+usermod -a -G audio,cdrom,dip,floppy,netdev,plugdev,sudo,video $username
+```
+
 ### Mirror Grub
 
 > :warning: This is not automatic and can easily be messed up. so pay attention.
