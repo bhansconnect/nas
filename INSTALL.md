@@ -436,3 +436,107 @@ efibootmgr -c -g -d /dev/disk/by-id/scsi-SATA_disk2 \
 
 mount /boot/efi
 ```
+
+### Configure swap
+
+Grab your 2 disk ids and run the following to have mirrored swap:
+```sh
+apt install --yes mdadm
+
+# Adjust the level (ZFS raidz = MD raid5, raidz2 = raid6) and
+# raid-devices if necessary and specify the actual devices.
+mdadm --create /dev/md0 --metadata=1.2 --level=mirror \
+    --raid-devices=2 ${DISK1}-part2 ${DISK2}-part2
+mkswap -f /dev/md0
+echo /dev/disk/by-uuid/$(blkid -s UUID -o value /dev/md0) \
+    none swap discard 0 0 >> /etc/fstab
+
+swapon -av
+```
+
+### Full Software install
+```sh
+apt full-upgrade
+
+# Disable log compression because zfs will do it
+for file in /etc/logrotate.d/* ; do
+    if grep -Eq "(^|[^#y])compress" "$file" ; then
+        sed -i -r "s/(^|[^#y])(compress)/\1#\2/" "$file"
+    fi
+done
+
+reboot
+```
+
+# Cleanup
+```sh
+# remove install snapshot since booting is good
+sudo zfs destroy bpool/BOOT/debian@install
+sudo zfs destroy rpool/ROOT/debian@install
+
+# remove root password
+sudo usermod -p '*' root
+```
+
+Disable root ssh login by commenting out `PermitRootLogin yes` in `/etc/ssh/sshd_config`
+Then run `sudo systemctl restart ssh`
+
+## Setup or import data pool
+
+> Note: zfs related commands may not be found unless they are called with `sudo`
+If you already have a data pool, just import it with `zpool import ...`.
+If the pool may mount in a bad location, you may need to specify a temporary root with `-R` before setting the mountpoints.
+
+Finally set the data pool mountpoint to where the nas expects it:
+```sh
+zfs set mountpoint=/mnt/dpool <pool name>
+```
+
+If you are making a new one, use these commands to create it with zfs encryption save to a file in the rpool:
+```sh
+sudo openssl rand -hex -out /root/dpool_key 32
+sudo chmod u=r,go= /root/dpool_key
+
+sudo zpool create \
+    -o ashift=12 \
+    -o autotrim=on \
+    -O acltype=posixacl \
+    -O canmount=on \
+    -O compression=zstd \
+    -O dnodesize=auto \
+    -O normalization=formD \
+    -O atime=off \
+    -O relatime=off \
+    -O xattr=sa \
+    -O mountpoint=/mnt/dpool \
+    -O encryption=aes-256-gcm \
+    -O keylocation=file:///root/dpool_key \
+    -O keyformat=hex \
+    dpool \
+    <raid config with drives>
+```
+> :warning: Write down and backup `/root/dpool_key` if it is lost, the data is gone.
+
+Create a service to load the encrypted dpool on boot by writing it to `/etc/systemd/system/zfs-mount-dpool.service`:
+```
+[Unit]
+Description=Mount dpool
+DefaultDependencies=no
+ConditionPathExists=/root/dpool_key
+Before=local-fs.target
+After=zfs-mount.service
+Requires=zfs-mount.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/zfs mount -l dpool
+
+[Install]
+WantedBy=zfs.target
+```
+
+Then enable it with:
+```ssh
+sudo systemctl enable zfs-mount-dpool.service
+```
