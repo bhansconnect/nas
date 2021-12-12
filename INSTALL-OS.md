@@ -64,7 +64,7 @@ apt install --yes zfsutils-linux
 
 It is important to pick the correct disks here and use `/dev/disk/by-id`.
 Simply run `ls /dev/disk/by-id` and pick the disks you want to use.
-Then set the `$DISKS` varibale to match:
+Then set the `$DISKS` variable to match:
 ```sh
 DISKS='/dev/disk/by-id/ata-FOO /dev/disk/by-id/nvme-BAR'
 ```
@@ -456,8 +456,6 @@ echo "cryptswap_md UUID=${UUID_SWAP} /dev/urandom swap,offset=2048,cipher=aes-xt
 
 # Add it to fstab
 echo "/dev/mapper/cryptswap_md none swap defaults 0 0" >> /etc/fstab
-
-swapon -av
 ```
 
 ### Full Software install
