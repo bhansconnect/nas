@@ -543,3 +543,32 @@ Then enable it with:
 ```ssh
 sudo systemctl enable zfs-mount-dpool.service
 ```
+
+### Optional ssh key setup
+
+On local laptop generate an ssh key and send it over:
+```sh
+ssh-keygen -t ed25519 -C "some comment"
+ssh-copy-id -i ~/.ssh/id_ed25519 nas@ip
+```
+
+On the nas update `/etc/ssh/sshd_config` with:
+```
+# Also set the port to something random because endlessh will be on 22.
+Port 12345
+
+# Make things more secure.
+PermitRootLogin no
+PasswordAuthentication no
+UsePAM no
+ChallengeResponseAuthentication no
+
+# Allow local ssh with password if needed.
+Match Address 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+    PasswordAuthentication yes
+```
+
+Then restart sshd:
+```sh
+sudo systemctl restart sshd.service
+```
