@@ -12,15 +12,15 @@
 - [x] At least manual rollback of boot drive to fix bad updates
 - [ ] Automatic backup (only essential data) to cloud or another device else (probably restic)
 - [x] Docker containers for apps (maybe with limited memory/cpu)
-- [ ] Automatic updates for Docker containers (maybe this is a bad idea???)
+- [x] Automatic updates for Docker containers (maybe this is a bad idea???)
 - [ ] VPN container that some other containers are piped through
 - [ ] Hosts web site with let's encrypt, DDNS, and good security
-- [ ] Can be remotely ssh'd into (only with keyfile)
+- [x] Can be remotely ssh'd into (only with keyfile)
 - [ ] Sends email notifications if it notices any failures
 
 ## Current likely app plan:
 
-- [x] DDClient of DDNS
+- [x] DDClient for DDNS
 - [x] Endlessh for fake ssh
 - [ ] Traefik
 - [ ] OpenVPN
