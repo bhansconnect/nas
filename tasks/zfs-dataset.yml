@@ -5,7 +5,21 @@
     name: "{{ apps_dataset }}"
     state: present
 
+- name: "Ensure {{ apps_dir }} has correct permissions"
+  file:
+    path: "{{ apps_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "u=rwx,g=rwx,o=rx"
+
 - name: "Ensure {{ data_dataset }} exists"
   community.general.zfs:
     name: "{{ data_dataset }}"
     state: present
+
+- name: "Ensure {{ data_dir }} has correct permissions"
+  file:
+    path: "{{ data_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "u=rwx,g=rwx,o=rx"

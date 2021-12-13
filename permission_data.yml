@@ -15,5 +15,5 @@
         path: "/mnt/dpool"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
-        mode: "u=rwX,g=rwX,o=rX"
+        mode: "u=rwx,g=rwx,o=rx"
         recurse: true

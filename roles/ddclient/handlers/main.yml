@@ -1,0 +1,5 @@
+- name: restart ddclient
+  docker_container:
+    name: ddclient
+    state: started
+    restart: yes

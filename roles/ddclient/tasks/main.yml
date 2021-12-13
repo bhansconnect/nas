@@ -4,21 +4,37 @@
     name: "{{ ddclient_dataset }}"
     state: present
 
-- name: Set ddclinet config
+- name: "Ensure ddclient dir has correct permissions"
+  file:
+    path: "{{ ddclient_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx
+
+- name: "Ensure ddclient dir is owned by user"
+  community.general.zfs:
+    name: "{{ ddclient_dataset }}"
+    state: present
+
+- name: Set ddclient config
   template:
     src: config.j2
     dest: "{{ ddclient_dir }}/ddclient.conf"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: u=rw,g=r,o=r
+    mode: u=rw
+  notify: restart ddclient
 
 - name: ddclient
   docker_container:
-    name: ddclinet
+    name: ddclient
     image: linuxserver/ddclient
     pull: true
     volumes:
       - "{{ ddclient_dir }}:/config:rw"
     env:
       TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
     restart_policy: unless-stopped
