@@ -22,8 +22,9 @@
 
 - [x] DDClient for DDNS
 - [x] Endlessh for fake ssh
-- [ ] Traefik
 - [ ] OpenVPN
+- [ ] Openspeedtest
+- [ ] Traefik
 - [ ] Gitea / Gitlab (mirror public repos on github)
 - [ ] Github CI action runner
 - [ ] Nextcloud
@@ -33,6 +34,8 @@
 - [ ] Sonarr
 - [ ] Radarr
 - [ ] Bazarr?
+- [ ] Readarr?
+- [ ] lidarr?
 - [ ] Prowlarr?
 - [ ] Jackett
 - [ ] Torrent app (needs to deal well with old stalled torrents)
