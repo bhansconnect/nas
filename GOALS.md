@@ -14,7 +14,7 @@
 - [x] Docker containers for apps (maybe with limited memory/cpu)
 - [x] Automatic updates for Docker containers (maybe this is a bad idea???)
 - [ ] VPN container that some other containers are piped through
-- [ ] Hosts web site with let's encrypt, DDNS, and good security
+- [ ] Hosts web site with let's encrypt, DDNS, and authentication
 - [x] Can be remotely ssh'd into (only with keyfile)
 - [ ] Sends email notifications if it notices any failures (maybe use discord)
 
@@ -22,15 +22,19 @@
 
 - [x] DDClient for DDNS
 - [x] Endlessh for fake ssh
-- [ ] Uptime Kuma looks nice for service monitor
-- [ ] NordVPN
-- [ ] Openspeedtest
 - [ ] Traefik
+- [ ] Authelia
+- [ ] Heimdall or Homer
+- [ ] Uptime Kuma looks nice for service monitor
+- [ ] Portainer (only for status, not snowflake containers)?
+- [ ] Openspeedtest
 - [ ] Gitea / Gitlab (mirror public repos on github)
-- [ ] Github CI action runner
 - [ ] Nextcloud
 - [ ] Samba share that can also see Nextcloud and has history viewable
-- [ ] Heimdall
+- [ ] Github CI action runner
+- [ ] NordVPN
+- [ ] Torrent app (needs to deal well with old stalled torrents)
+- [ ] Jackett
 - [ ] Jellyfin (if not liked fallback to Plex)
 - [ ] Sonarr
 - [ ] Radarr
@@ -38,12 +42,8 @@
 - [ ] Readarr?
 - [ ] lidarr?
 - [ ] Prowlarr?
-- [ ] Jackett
-- [ ] Torrent app (needs to deal well with old stalled torrents)
-- [ ] NZBGet???
-- [ ] Bitwarden?
 - [ ] Home Assistant?
-- [ ] Portainer (only for status, not snowflake containers)?
-- [ ] Graphana?
 - [ ] Some sort of youtube-dl?
 - [ ] Some sort of transcoder pipeline (handbrake)?
+- [ ] NZBGet???
+- [ ] Graphana???
