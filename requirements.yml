@@ -10,3 +10,9 @@
 
 - name: oefenweb.fail2ban
   version: v3.5.1
+
+- name: robertdebock.sysctl
+  version: 2.1.2
+
+- name: geerlingguy.ntp
+  version: 2.3.0

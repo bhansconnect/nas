@@ -1,34 +1,55 @@
 ---
 - hosts: nas
   roles:
+    - role: update
+      become: yes
+      keep_packages_updated: yes
     - role: weareinteractive.ufw
+      become: yes
+      ufw_rules:
+        - logging: on
+        - direction: incoming
+          default: deny
+        - direction: outgoing
+          default: allow
+        # SSH port for endlessh
+        - rule: limit
+          to_port: 22
+          proto: tcp
+        # Real SSH port
+        - rule: limit
+          to_port: "{{ ansible_port }}"
+          proto: tcp
+        # - rule: allow
+        #   to_port: 80
+        #   proto: tcp
+        # - rule: allow
+        #   to_port: 443
+        #   proto: tcp
+    - role: robertdebock.sysctl
+      sysctl_items:
+        - name: net.ipv4.conf.all.accept_redirects
+          value: 0
+        - name: net.ipv6.conf.all.accept_redirects
+          value: 0
+        - name: net.ipv4.conf.all.send_redirects
+          value: 0
+        - name: net.ipv4.conf.all.accept_source_route
+          value: 0
+        - name: net.ipv6.conf.all.accept_source_route
+          value: 0
+        - name: net.ipv4.conf.all.log_martians
+          value: 1
       become: yes
     - role: jnv.unattended-upgrades
       become: yes
+      unattended_automatic_reboot_time: 03:00
     - role: oefenweb.fail2ban
       become: yes
+    - role: geerlingguy.ntp
+      become: yes
+      ntp_timezone: America/Los_Angeles
     - role: geerlingguy.docker
       become: yes
-
-  vars:
-    ufw_rules:
-      - logging: on
-      - direction: incoming
-        default: deny
-      - direction: outgoing
-        default: allow
-      # SSH port for endlessh
-      - rule: limit
-        to_port: 22
-        proto: tcp
-      # Real SSH port
-      - rule: limit
-        to_port: "{{ ansible_port }}"
-        proto: tcp
-      # - rule: allow
-      #   to_port: 80
-      #   proto: tcp
-      # - rule: allow
-      #   to_port: 443
-      #   proto: tcp
-    unattended_automatic_reboot_time: 03:00
+      docker_users:
+        - "{{ ansible_user }}"
