@@ -1,0 +1,9 @@
+---
+- name: geerlingguy.docker
+  version: 4.1.1
+
+- name: weareinteractive.ufw
+  version: 2.0.1
+
+- name: jnv.unattended-upgrades
+  version: v1.12.1

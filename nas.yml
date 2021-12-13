@@ -1,0 +1,25 @@
+---
+- hosts: nas
+  become: yes
+  roles:
+    - weareinteractive.ufw
+    - jnv.unattended-upgrades
+    - geerlingguy.docker
+
+  vars:
+    ufw_rules:
+      - logging: on
+      - direction: incoming
+        default: deny
+      - direction: outgoing
+        default: allow
+      - rule: limit
+        to_port: 22
+        proto: tcp
+      # - rule: allow
+      #   to_port: 80
+      #   proto: tcp
+      # - rule: allow
+      #   to_port: 443
+      #   proto: tcp
+    unattended_automatic_reboot_time: 03:00
