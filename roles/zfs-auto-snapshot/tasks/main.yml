@@ -3,3 +3,102 @@
   apt:
     name: zfs-auto-snapshot
     state: present
+
+- name: Set monthly cron script when monthly_snapshots > 0
+  template:
+    src: cron-script.j2
+    dest: /etc/cron.monthly/zfs-auto-snapshot
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  vars:
+    label: monthly
+    keep: "{{ monthly_snapshots }}"
+  notify: restart cron
+  when: monthly_snapshots > 0
+
+- name: Remove monthly cron script when monthly_snapshots <= 0
+  ansible.builtin.file:
+    path: /etc/cron.monthly/zfs-auto-snapshot
+    state: absent
+  notify: restart cron
+  when: monthly_snapshots <= 0
+
+- name: Set weekly cron script when weekly_snapshots > 0
+  template:
+    src: cron-script.j2
+    dest: /etc/cron.weekly/zfs-auto-snapshot
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  vars:
+    label: weekly
+    keep: "{{ weekly_snapshots }}"
+  notify: restart cron
+  when: weekly_snapshots > 0
+
+- name: Remove weekly cron script when weekly_snapshots <= 0
+  ansible.builtin.file:
+    path: /etc/cron.weekly/zfs-auto-snapshot
+    state: absent
+  notify: restart cron
+  when: weekly_snapshots <= 0
+
+- name: Set daily cron script when daily_snapshots > 0
+  template:
+    src: cron-script.j2
+    dest: /etc/cron.daily/zfs-auto-snapshot
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  vars:
+    label: daily
+    keep: "{{ daily_snapshots }}"
+  notify: restart cron
+  when: daily_snapshots > 0
+
+- name: Remove daily cron script when daily_snapshots <= 0
+  ansible.builtin.file:
+    path: /etc/cron.daily/zfs-auto-snapshot
+    state: absent
+  notify: restart cron
+  when: daily_snapshots <= 0
+
+- name: Set hourly cron script when hourly_snapshots > 0
+  template:
+    src: cron-script.j2
+    dest: /etc/cron.hourly/zfs-auto-snapshot
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  vars:
+    label: hourly
+    keep: "{{ hourly_snapshots }}"
+  notify: restart cron
+  when: hourly_snapshots > 0
+
+- name: Remove hourly cron script when hourly_snapshots <= 0
+  ansible.builtin.file:
+    path: /etc/cron.hourly/zfs-auto-snapshot
+    state: absent
+  notify: restart cron
+  when: hourly_snapshots <= 0
+
+- name: Set frequent cron script when frequent_snapshots > 0
+  template:
+    src: cron-script-frequent.j2
+    dest: /etc/cron.d/zfs-auto-snapshot
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  vars:
+    keep: "{{ frequent_snapshots }}"
+  notify: restart cron
+  when: frequent_snapshots > 0
+
+- name: Remove frequent cron script when frequent_snapshots <= 0
+  ansible.builtin.file:
+    path: /etc/cron.d/zfs-auto-snapshot
+    state: absent
+  notify: restart cron
+  when: frequent_snapshots <= 0

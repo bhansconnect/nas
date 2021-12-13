@@ -1,0 +1,21 @@
+---
+# How many frequent snapshots to keep.
+# Set to zero to disable.
+# These happen every 15 minutes.
+frequent_snapshots: 4
+
+# How many hourly snapshots to keep.
+# Set to zero to disable.
+hourly_snapshots: 24
+
+# How many daily snapshots to keep.
+# Set to zero to disable.
+daily_snapshots: 31
+
+# How many weekly snapshots to keep.
+# Set to zero to disable.
+weekly_snapshots: 8
+
+# How many monthly snapshots to keep.
+# Set to zero to disable.
+monthly_snapshots: 12
