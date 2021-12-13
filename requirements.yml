@@ -7,3 +7,6 @@
 
 - name: jnv.unattended-upgrades
   version: v1.12.1
+
+- name: oefenweb.fail2ban
+  version: v3.5.1

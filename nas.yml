@@ -5,6 +5,8 @@
       become: yes
     - role: jnv.unattended-upgrades
       become: yes
+    - role: oefenweb.fail2ban
+      become: yes
     - role: geerlingguy.docker
       become: yes
 
