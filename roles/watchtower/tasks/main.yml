@@ -1,0 +1,14 @@
+---
+- name: watchtower
+  docker_container:
+    name: watchtower
+    image: containrrr/watchtower
+    pull: true
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    env:
+      TZ: "{{ nas_timezone }}"
+    # TODO: look into notifications
+    # Run at 5am everyday
+    command: '--schedule "0 0 5 * * *"'
+    restart_policy: unless-stopped

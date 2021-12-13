@@ -55,3 +55,4 @@
     - role: zfs-auto-snapshot
     - role: ddclient
     - role: endlessh
+    - role: watchtower
