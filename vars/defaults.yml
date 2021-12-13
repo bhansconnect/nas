@@ -1,0 +1,8 @@
+---
+nas_timezone: America/Los_Angeles
+dpool: dpool
+dpool_dir: "/mnt/{{ dpool }}"
+apps_dataset: "{{ dpool }}/apps"
+apps_dir: "{{ dpool_dir }}/apps"
+data_dataset: "{{ dpool }}/data"
+data_dir: "{{ dpool_dir }}/data"

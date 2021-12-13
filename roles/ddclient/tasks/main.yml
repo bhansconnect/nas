@@ -1,0 +1,24 @@
+---
+- name: "Ensure ddclient dataset exists"
+  community.general.zfs:
+    name: "{{ ddclient_dataset }}"
+    state: present
+
+- name: Set ddclinet config
+  template:
+    src: config.j2
+    dest: "{{ ddclient_dir }}/ddclient.conf"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw,g=r,o=r
+
+- name: ddclient
+  docker_container:
+    name: ddclinet
+    image: linuxserver/ddclient
+    pull: true
+    volumes:
+      - "{{ ddclient_dir }}:/config:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+    restart_policy: unless-stopped

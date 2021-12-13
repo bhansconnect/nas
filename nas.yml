@@ -1,6 +1,11 @@
 ---
 - hosts: nas
   become: yes
+  pre_tasks:
+    - name: Include vars
+      include_vars:
+        dir: vars
+    - import_tasks: tasks/zfs-dataset.yml
   roles:
     - role: update
       keep_packages_updated: yes
@@ -42,8 +47,10 @@
       unattended_automatic_reboot_time: 03:00
     - role: oefenweb.fail2ban
     - role: geerlingguy.ntp
-      ntp_timezone: America/Los_Angeles
+      ntp_timezone: "{{ nas_timezone }}"
     - role: geerlingguy.docker
       docker_users:
         - "{{ ansible_user }}"
+    - role: docker-python
     - role: zfs-auto-snapshot
+    - role: ddclient

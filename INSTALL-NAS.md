@@ -44,5 +44,5 @@ ansible-galaxy install -r requirements.yml
 ansible-playbook permission_data.yml -K
 
 # install nas
-ansible-playbook nas.yml -K
+ansible-playbook nas.yml -K --ask-vault-pass
 ```

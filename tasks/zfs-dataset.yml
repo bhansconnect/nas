@@ -1,0 +1,11 @@
+---
+# This is just used to create the dpool base datasets if not already around.
+- name: "Ensure {{ apps_dataset }} exists"
+  community.general.zfs:
+    name: "{{ apps_dataset }}"
+    state: present
+
+- name: "Ensure {{ data_dataset }} exists"
+  community.general.zfs:
+    name: "{{ data_dataset }}"
+    state: present

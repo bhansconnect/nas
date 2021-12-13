@@ -1,0 +1,3 @@
+---
+ddclient_dataset: "{{ apps_dataset }}/ddclient"
+ddclient_dir: "{{ apps_dir }}/ddclient"

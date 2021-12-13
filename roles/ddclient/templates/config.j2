@@ -1,0 +1,8 @@
+ssl=yes
+protocol=googledomains
+
+{% for config in ddclient_configs %}
+login={{ config.username }}
+password={{ config.password }}
+{{ config.domain }}
+{% endfor %}
