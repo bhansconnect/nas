@@ -1,0 +1,5 @@
+---
+- name: Ensure zfs-auto-snapshot is installed
+  apt:
+    name: zfs-auto-snapshots
+    state: present

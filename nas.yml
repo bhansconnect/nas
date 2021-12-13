@@ -1,11 +1,10 @@
 ---
 - hosts: nas
+  become: yes
   roles:
     - role: update
-      become: yes
       keep_packages_updated: yes
     - role: weareinteractive.ufw
-      become: yes
       ufw_rules:
         - logging: on
         - direction: incoming
@@ -38,16 +37,11 @@
           value: 0
         - name: net.ipv6.conf.all.accept_source_route
           value: 0
-      become: yes
     - role: jnv.unattended-upgrades
-      become: yes
       unattended_automatic_reboot_time: 03:00
     - role: oefenweb.fail2ban
-      become: yes
     - role: geerlingguy.ntp
-      become: yes
       ntp_timezone: America/Los_Angeles
     - role: geerlingguy.docker
-      become: yes
       docker_users:
         - "{{ ansible_user }}"
