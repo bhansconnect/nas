@@ -20,9 +20,10 @@ pip3 install ansible
 ```
 
 To [setup the inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html), create an `inventory` file with roughly these contents:
+> Note: ansible_port should be change to something besides 22. On port 22, we will end up running endlessh. This requires setting the port in `/etc/ssh/sshd_config` and restarting `sshd`
 ```
 [nas]
-192.168.1.2 ansible_connection=ssh ansible_user=myuser
+192.168.1.2 ansible_port=2222 ansible_connection=ssh ansible_user=myuser
 ```
 
 Verify ansible can connect:
@@ -30,3 +31,16 @@ Verify ansible can connect:
 ansible nas -m ping
 ```
 You should get a success, and it should discover python3.
+
+## Install the Nas
+
+```sh
+# install required roles
+ansible-galaxy install -r requirements.yml
+
+# permission data pool
+ansible-playbook permission_data.yml -K
+
+# install nas
+ansible-playbook nas.yml -K
+```

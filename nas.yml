@@ -1,10 +1,12 @@
 ---
 - hosts: nas
-  become: yes
   roles:
-    - weareinteractive.ufw
-    - jnv.unattended-upgrades
-    - geerlingguy.docker
+    - role: weareinteractive.ufw
+      become: yes
+    - role: jnv.unattended-upgrades
+      become: yes
+    - role: geerlingguy.docker
+      become: yes
 
   vars:
     ufw_rules:
@@ -13,8 +15,13 @@
         default: deny
       - direction: outgoing
         default: allow
+      # SSH port for endlessh
       - rule: limit
         to_port: 22
+        proto: tcp
+      # Real SSH port
+      - rule: limit
+        to_port: "{{ ansible_port }}"
         proto: tcp
       # - rule: allow
       #   to_port: 80
