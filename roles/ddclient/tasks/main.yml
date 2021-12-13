@@ -11,11 +11,6 @@
     group: "{{ ansible_user }}"
     mode: u=rwx
 
-- name: "Ensure ddclient dir is owned by user"
-  community.general.zfs:
-    name: "{{ ddclient_dataset }}"
-    state: present
-
 - name: Set ddclient config
   template:
     src: config.j2
