@@ -11,7 +11,7 @@
 - [x] Automatic snapshot creation and pruning
 - [x] At least manual rollback of boot drive to fix bad updates
 - [ ] Automatic backup (only essential data) to cloud or another device else (probably restic)
-- [ ] Docker containers for apps (maybe with limited memory/cpu)
+- [x] Docker containers for apps (maybe with limited memory/cpu)
 - [ ] Automatic updates for Docker containers (maybe this is a bad idea???)
 - [ ] VPN container that some other containers are piped through
 - [ ] Hosts web site with let's encrypt, DDNS, and good security
@@ -20,6 +20,8 @@
 
 ## Current likely app plan:
 
+- [x] DDClient of DDNS
+- [x] Endlessh for fake ssh
 - [ ] Traefik
 - [ ] OpenVPN
 - [ ] Gitea / Gitlab (mirror public repos on github)

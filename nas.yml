@@ -54,3 +54,4 @@
     - role: docker-python
     - role: zfs-auto-snapshot
     - role: ddclient
+    - role: endlessh

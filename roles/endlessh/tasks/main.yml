@@ -1,0 +1,14 @@
+---
+- name: endlessh
+  docker_container:
+    name: endlessh
+    image: linuxserver/endlessh
+    pull: true
+    ports:
+      - 22:2222
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+    restart_policy: unless-stopped
