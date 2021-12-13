@@ -46,3 +46,4 @@
     - role: geerlingguy.docker
       docker_users:
         - "{{ ansible_user }}"
+    - role: zfs-auto-snapshot
