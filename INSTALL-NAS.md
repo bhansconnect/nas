@@ -39,6 +39,8 @@ You should get a success, and it should discover python3.
 ansible-galaxy install -r requirements.yml
 
 # permission data pool
+# This should only ever need to be done once.
+# When updating the nas, just run nas.yml
 ansible-playbook permission_data.yml -K
 
 # install nas
