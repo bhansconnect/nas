@@ -16,13 +16,14 @@
 - [ ] VPN container that some other containers are piped through
 - [ ] Hosts web site with let's encrypt, DDNS, and good security
 - [x] Can be remotely ssh'd into (only with keyfile)
-- [ ] Sends email notifications if it notices any failures
+- [ ] Sends email notifications if it notices any failures (maybe use discord)
 
 ## Current likely app plan:
 
 - [x] DDClient for DDNS
 - [x] Endlessh for fake ssh
-- [ ] OpenVPN
+- [ ] Uptime Kuma looks nice for service monitor
+- [ ] NordVPN
 - [ ] Openspeedtest
 - [ ] Traefik
 - [ ] Gitea / Gitlab (mirror public repos on github)
