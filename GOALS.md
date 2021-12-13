@@ -8,7 +8,7 @@
 - [x] Can boot without password (load encryption key from file on boot drive) This means if you throw away a single data pool disk, you don't have to worry about the data. If someone steals the entire server, you will have issues.
 - [x] Encrypted Swap
 - [x] Automatic updates and reboots at least for security patches
-- [ ] Automatic snapshot creation and pruning
+- [x] Automatic snapshot creation and pruning
 - [x] At least manual rollback of boot drive to fix bad updates
 - [ ] Automatic backup (only essential data) to cloud or another device else (probably restic)
 - [ ] Docker containers for apps (maybe with limited memory/cpu)
