@@ -1,0 +1,56 @@
+---
+- name: "Ensure traefik dataset exists"
+  community.general.zfs:
+    name: "{{ traefik_dataset }}"
+    state: present
+
+- name: "Ensure traefik dir has correct permissions"
+  file:
+    path: "{{ traefik_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: "Ensure let's encrypt dir exists with correct permissions"
+  file:
+    path: "{{ traefik_dir }}/letsencrypt"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: directory
+    mode: u=rwx,g=rwx,o=rx
+
+- name: Set traefik config
+  template:
+    src: config.j2.yml
+    dest: "{{ traefik_dir }}/traefik.yml"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw,g=rw,o=r
+  notify: restart traefik
+
+- name: traefik
+  docker_container:
+    name: traefik
+    image: traefik:v2.5
+    pull: true
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - "{{ traefik_dir }}/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "{{ traefik_dir }}/letsencrypt:/letsencrypt:rw"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    env:
+      CF_DNS_API_TOKEN: "{{ cloudflare_dns_token }}"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.middlewares.ping_stripprefix.stripPrefix.prefixes: "/ping"
+      traefik.http.middlewares.ping_stripprefix.stripPrefix.forceSlash: "false"
+      traefik.http.routers.ping_router.rule: "Host(`health.{{ nas_domain }}`)"
+      traefik.http.routers.ping_router.entryPoints: "web,websecure"
+      traefik.http.routers.ping_router.middlewares: "ping_stripprefix"
+      traefik.http.routers.ping_router.priority: "2000"
+      traefik.http.routers.ping_router.service: "ping@internal"
+      traefik.http.routers.ping_router.tls: true
