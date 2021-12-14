@@ -1,0 +1,5 @@
+- name: restart authelia
+  docker_container:
+    name: authelia
+    state: started
+    restart: yes

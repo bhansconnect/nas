@@ -6,8 +6,13 @@
     ports:
       - 3000:3000
     pull: true
+    env:
+      TZ: "{{ nas_timezone }}"
+    networks:
+      - name: "traefik"
     restart_policy: unless-stopped
     labels:
       traefik.enable: "true"
       traefik.http.routers.openspeedtest.rule: "Host(`speed.{{ nas_domain }}`)"
+      traefik.http.routers.openspeedtest.middlewares: "authelia@docker"
       traefik.http.routers.openspeedtest.tls: "true"

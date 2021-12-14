@@ -1,0 +1,49 @@
+---
+- name: "Ensure authelia dataset exists"
+  community.general.zfs:
+    name: "{{ authelia_dataset }}"
+    state: present
+
+- name: "Ensure authelia dir has correct permissions"
+  file:
+    path: "{{ authelia_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: Set authelia config
+  template:
+    src: configuration.j2.yml
+    dest: "{{ authelia_dir }}/configuration.yml"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw,g=rw,o=r
+  notify: restart authelia
+
+- name: Set authelia user accounts
+  template:
+    src: users_database.j2.yml
+    dest: "{{ authelia_dir }}/users_database.yml"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw,g=rw,o=r
+  notify: restart authelia
+
+- name: authelia
+  docker_container:
+    name: authelia
+    image: authelia/authelia
+    pull: true
+    ports:
+      - 9091:9091
+    volumes:
+      - "{{ authelia_dir }}:/config:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.authelia.rule: "Host(`auth.{{ nas_domain }}`)"
+      traefik.http.routers.authelia.tls: "true"

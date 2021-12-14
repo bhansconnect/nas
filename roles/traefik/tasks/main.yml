@@ -28,6 +28,10 @@
     mode: u=rw,g=rw,o=r
   notify: restart traefik
 
+- name: Ensure traefik docker network exists
+  docker_network:
+    name: traefik
+
 - name: traefik
   docker_container:
     name: traefik
@@ -36,19 +40,28 @@
     ports:
       - 80:80
       - 443:443
-      - 8080:8080
     volumes:
       - "{{ traefik_dir }}/traefik.yml:/etc/traefik/traefik.yml:ro"
       - "{{ traefik_dir }}/letsencrypt:/letsencrypt:rw"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     env:
+      TZ: "{{ nas_timezone }}"
       CF_DNS_API_TOKEN: "{{ cloudflare_dns_token }}"
+    networks:
+      - name: "traefik"
     restart_policy: unless-stopped
     labels:
       traefik.enable: "true"
+      traefik.http.routers.dashboard.rule: "Host(`traefik.{{ nas_domain }}`)"
+      traefik.http.routers.dashboard.middlewares: "authelia@docker"
+      traefik.http.routers.dashboard.service: "api@internal"
+      traefik.http.routers.dashboard.tls: "true"
       traefik.http.middlewares.ping_stripprefix.stripPrefix.prefixes: "/ping"
       traefik.http.middlewares.ping_stripprefix.stripPrefix.forceSlash: "false"
       traefik.http.routers.ping.rule: "Host(`health.{{ nas_domain }}`)"
-      traefik.http.routers.ping.middlewares: "ping_stripprefix"
+      traefik.http.routers.ping.middlewares: "ping_stripprefix,authelia@docker"
       traefik.http.routers.ping.service: "ping@internal"
       traefik.http.routers.ping.tls: "true"
+      traefik.http.middlewares.authelia.forwardauth.address: "http://authelia:9091/api/verify?rd=https://auth.{{ nas_domain }}/"
+      traefik.http.middlewares.authelia.forwardauth.trustForwardHeader: "true"
+      traefik.http.middlewares.authelia.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups, Remote-Name, Remote-Email"

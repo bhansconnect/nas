@@ -14,7 +14,7 @@
 - [x] Docker containers for apps (maybe with limited memory/cpu)
 - [x] Automatic updates for Docker containers (maybe this is a bad idea???)
 - [ ] VPN container that some other containers are piped through
-- [ ] Hosts web site with let's encrypt, DDNS, and authentication
+- [x] Hosts web site with let's encrypt, DDNS, and authentication
 - [x] Can be remotely ssh'd into (only with keyfile)
 - [ ] Sends email notifications if it notices any failures (maybe use discord)
 
@@ -22,12 +22,12 @@
 
 - [x] DDClient for DDNS
 - [x] Endlessh for fake ssh
-- [ ] Traefik
-- [ ] Authelia
+- [x] Traefik
+- [x] Authelia
 - [ ] Heimdall or Homer
 - [ ] Uptime Kuma looks nice for service monitor
 - [ ] Portainer (only for status, not snowflake containers)?
-- [ ] Openspeedtest
+- [x] Openspeedtest
 - [ ] Gitea / Gitlab (mirror public repos on github)
 - [ ] Nextcloud
 - [ ] Samba share that can also see Nextcloud and has history viewable

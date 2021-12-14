@@ -61,5 +61,6 @@
     - role: ddclient
     - role: endlessh
     - role: watchtower
+    - role: authelia
     - role: traefik
     - role: openspeedtest

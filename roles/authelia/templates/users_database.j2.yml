@@ -1,0 +1,15 @@
+---
+users:
+{% for account in authelia_accounts %}
+  {{ account.username }}:
+    displayname: "{{ account.display_name }}"
+    password: "{{ account.password }}"
+    email: "{{ account.email }}"
+    groups:
+      - users
+{% if account.groups is defined %}
+{% for group in account.groups %}
+      - {{ group }}
+{% endfor %}
+{% endif %}
+{% endfor %}

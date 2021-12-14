@@ -15,15 +15,12 @@ entryPoints:
           main: "{{ nas_domain }}"
           sans:
             - "*.{{ nas_domain }}"
-  traefik:
-    address: ":8080"
 providers:
   providersThrottleDuration: 2s
   docker:
     exposedbydefault: false
     watch: true
 api:
-  insecure: true
   dashboard: true
 log:
   level: INFO
