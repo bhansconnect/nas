@@ -1,0 +1,13 @@
+---
+- name: openspeedtest
+  docker_container:
+    name: openspeedtest
+    image: openspeedtest/latest
+    ports:
+      - 3000:3000
+    pull: true
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.openspeedtest.rule: "Host(`speed.{{ nas_domain }}`)"
+      traefik.http.routers.openspeedtest.tls: "true"

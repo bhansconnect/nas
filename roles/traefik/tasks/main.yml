@@ -48,9 +48,7 @@
       traefik.enable: "true"
       traefik.http.middlewares.ping_stripprefix.stripPrefix.prefixes: "/ping"
       traefik.http.middlewares.ping_stripprefix.stripPrefix.forceSlash: "false"
-      traefik.http.routers.ping_router.rule: "Host(`health.{{ nas_domain }}`)"
-      traefik.http.routers.ping_router.entryPoints: "web,websecure"
-      traefik.http.routers.ping_router.middlewares: "ping_stripprefix"
-      traefik.http.routers.ping_router.priority: "2000"
-      traefik.http.routers.ping_router.service: "ping@internal"
-      traefik.http.routers.ping_router.tls: true
+      traefik.http.routers.ping.rule: "Host(`health.{{ nas_domain }}`)"
+      traefik.http.routers.ping.middlewares: "ping_stripprefix"
+      traefik.http.routers.ping.service: "ping@internal"
+      traefik.http.routers.ping.tls: "true"

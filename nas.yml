@@ -60,5 +60,6 @@
     - role: zfs-auto-snapshot
     - role: ddclient
     - role: endlessh
-    - role: traefik
     - role: watchtower
+    - role: traefik
+    - role: openspeedtest

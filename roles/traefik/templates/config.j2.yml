@@ -6,7 +6,6 @@ entryPoints:
         entryPoint:
           to: websecure
           scheme: https
-          priority: 1000
   websecure:
     address: ":443"
     http:
