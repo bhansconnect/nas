@@ -16,6 +16,8 @@
 - [ ] VPN container that some other containers are piped through
 - [x] Hosts web site with let's encrypt, DDNS, and authentication
 - [x] Can be remotely ssh'd into (only with keyfile)
+- [ ] ZFS scrub cron
+- [ ] ZFS status alerts (maybe via uptime kuma, maybe just cron)
 - [ ] Sends email notifications if it notices any failures (maybe use discord)
 
 ## Current likely app plan:
