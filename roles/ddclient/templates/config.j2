@@ -1,11 +1,8 @@
-protocol=dyndns2
-use=web
-server=domains.google.com
+protocol=cloudflare
 ssl=yes
+use=web
 
-{% for config in ddclient_configs %}
-login={{ config.username }}
-password={{ config.password }}
-{{ config.domain }}
-
-{% endfor %}
+zone={{ ddclient_config.zone }}
+login={{ ddclient_config.username }}
+password={{ ddclient_config.password }}
+{{ ddclient_config.domains|join(',') }}

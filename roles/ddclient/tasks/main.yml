@@ -11,15 +11,6 @@
     group: "{{ ansible_user }}"
     mode: u=rwx
 
-- name: Set ddclient config
-  template:
-    src: config.j2
-    dest: "{{ ddclient_dir }}/ddclient.conf"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: u=rw
-  notify: restart ddclient
-
 - name: ddclient
   docker_container:
     name: ddclient
@@ -33,3 +24,14 @@
       PUID: "1000"
       PGID: "1000"
     restart_policy: unless-stopped
+
+# Creating the container seems to generate a default config.
+# This way we overwrite it after it is generated.
+- name: Set ddclient config
+  template:
+    src: config.j2
+    dest: "{{ ddclient_dir }}/ddclient.conf"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw
+  notify: restart ddclient
