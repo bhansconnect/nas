@@ -44,11 +44,15 @@ access_control:
       policy: one_factor
 
     # High security
-    - domain: "traefik.{{ nas_domain }}"
+    - domain:
+        - "traefik.{{ nas_domain }}"
+        - "torrent.{{ nas_domain }}"
       networks: internal
       subject: "group:admin"
       policy: one_factor
-    - domain: "traefik.{{ nas_domain }}"
+    - domain:
+        - "traefik.{{ nas_domain }}"
+        - "torrent.{{ nas_domain }}"
       subject: "group:admin"
       policy: two_factor
 

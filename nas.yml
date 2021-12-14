@@ -54,9 +54,12 @@
         - "{{ ansible_user }}"
     - role: docker-python
     - role: zfs-auto-snapshot
+    # nordvpn is early so that it can be up before dependencies.
+    - role: nordvpn
     - role: ddclient
     - role: endlessh
     - role: watchtower
     - role: authelia
     - role: traefik
     - role: openspeedtest
+    - role: transmission

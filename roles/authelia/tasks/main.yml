@@ -18,7 +18,7 @@
     owner: "root"
     group: "root"
     mode: u=rw,g=r,o=r
-    notify: restart authelia
+  notify: restart authelia
 
 - name: Set authelia user accounts
   template:
@@ -27,7 +27,7 @@
     owner: "root"
     group: "root"
     mode: u=rw,g=r,o=r
-    notify: restart authelia
+  notify: restart authelia
 
 - name: authelia
   docker_container:

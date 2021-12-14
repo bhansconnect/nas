@@ -1,0 +1,20 @@
+---
+- name: nordvpn
+  docker_container:
+    name: nordvpn
+    # This may break eventual.
+    # Look at using bubuntux/nordlynx with the api key.
+    image: bubuntux/nordvpn:openvpn
+    pull: true
+    capabilities:
+      - NET_ADMIN
+    env:
+      TZ: "{{ nas_timezone }}"
+      USER: "{{ nordvpn_username|quote }}"
+      PASS: "{{ nordvpn_password|quote }}"
+      CONNECT: "{{ nordvpn_connect }}"
+      TECHNOLOGY: "NordLynx"
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: "1"
+      net.ipv4.conf.eth0.rp_filter: "2"
+    restart_policy: unless-stopped

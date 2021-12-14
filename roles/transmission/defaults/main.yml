@@ -1,0 +1,3 @@
+---
+transmission_dataset: "{{ apps_dataset }}/transmission"
+transmission_dir: "{{ apps_dir }}/transmission"

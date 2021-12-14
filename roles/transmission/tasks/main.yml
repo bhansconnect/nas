@@ -1,0 +1,71 @@
+---
+- name: "Ensure transmission dataset exists"
+  community.general.zfs:
+    name: "{{ transmission_dataset }}"
+    state: present
+
+- name: "Ensure transmission dir has correct permissions"
+  file:
+    path: "{{ transmission_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: "Ensure config dir exists with correct permissions"
+  file:
+    path: "{{ transmission_dir }}/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: directory
+    mode: u=rwx,g=rwx,o=rx
+
+- name: "Ensure downloads dir exists with correct permissions"
+  file:
+    path: "{{ transmission_dir }}/downloads"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: directory
+    mode: u=rwx,g=rwx,o=rx
+
+- name: "Ensure watch dir exists with correct permissions"
+  file:
+    path: "{{ transmission_dir }}/watch"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: directory
+    mode: u=rwx,g=rwx,o=rx
+
+# TODO: figure out wanted config and then set it this way.
+# - name: Set transmission config
+#   template:
+#     src: config.j2.yml
+#     dest: "{{ transmission_dir }}/transmission.yml"
+#     owner: "{{ ansible_user }}"
+#     group: "{{ ansible_user }}"
+#     mode: u=rw,g=rw,o=r
+#   notify: restart transmission
+
+- name: transmission
+  docker_container:
+    name: transmission
+    image: linuxserver/transmission
+    pull: true
+    volumes:
+      - "{{ transmission_dir }}/config:/config:rw"
+      - "{{ transmission_dir }}/downloads:/downloads:rw"
+      - "{{ transmission_dir }}/watch:/watch:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+    network_mode: "container:nordvpn"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.transmission.rule: "Host(`torrent.{{ nas_domain }}`)"
+      traefik.http.routers.openspeedtest.middlewares: "authelia@docker"
+      traefik.http.routers.transmission.tls: "true"
+      traefik.http.services.transmission.loadbalancer.server.port: "9091"
