@@ -31,10 +31,6 @@
         - rule: allow
           to_port: 443
           proto: tcp
-        # traefik dashboard
-        - rule: allow
-          to_port: 8080
-          proto: tcp
     - role: robertdebock.sysctl
       sysctl_items:
         - name: net.ipv4.conf.all.accept_redirects

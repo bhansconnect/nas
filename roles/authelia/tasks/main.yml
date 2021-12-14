@@ -7,35 +7,33 @@
 - name: "Ensure authelia dir has correct permissions"
   file:
     path: "{{ authelia_dir }}"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: u=rwx,g=rwx,o=rx
+    owner: "root"
+    group: "root"
+    mode: u=rwx,g=rx,o=rx
 
 - name: Set authelia config
   template:
     src: configuration.j2.yml
     dest: "{{ authelia_dir }}/configuration.yml"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: u=rw,g=rw,o=r
-  notify: restart authelia
+    owner: "root"
+    group: "root"
+    mode: u=rw,g=r,o=r
+    notify: restart authelia
 
 - name: Set authelia user accounts
   template:
     src: users_database.j2.yml
     dest: "{{ authelia_dir }}/users_database.yml"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: u=rw,g=rw,o=r
-  notify: restart authelia
+    owner: "root"
+    group: "root"
+    mode: u=rw,g=r,o=r
+    notify: restart authelia
 
 - name: authelia
   docker_container:
     name: authelia
     image: authelia/authelia
     pull: true
-    ports:
-      - 9091:9091
     volumes:
       - "{{ authelia_dir }}:/config:rw"
     env:
