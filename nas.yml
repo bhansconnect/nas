@@ -63,3 +63,4 @@
     - role: traefik
     - role: openspeedtest
     - role: transmission
+    - role: uptime-kuma

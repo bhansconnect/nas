@@ -29,7 +29,7 @@
 - [x] Openspeedtest
 - [x] NordVPN
 - [x] Torrent app (needs to deal well with old stalled torrents)
-- [ ] Uptime Kuma looks nice for service monitor
+- [x] Uptime Kuma looks nice for service monitor
 - [ ] Heimdall or Homer
 - [ ] Portainer (only for status, not snowflake containers)?
 - [ ] Gitea / Gitlab (mirror public repos on github)

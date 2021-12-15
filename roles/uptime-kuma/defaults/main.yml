@@ -1,0 +1,3 @@
+---
+uptime_kuma_dataset: "{{ apps_dataset }}/uptime_kuma"
+uptime_kuma_dir: "{{ apps_dir }}/uptime_kuma"

@@ -23,7 +23,7 @@ providers:
 api:
   dashboard: true
 log:
-  level: INFO
+  level: DEBUG
 ping:
   manualRouting: true
 certificatesResolvers:

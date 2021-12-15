@@ -1,0 +1,36 @@
+---
+- name: "Ensure uptime-kuma dataset exists"
+  community.general.zfs:
+    name: "{{ uptime_kuma_dataset }}"
+    state: present
+
+- name: "Ensure uptime-kuma dir has correct permissions"
+  file:
+    path: "{{ uptime_kuma_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+# TODO: look into directly specifying config here
+
+- name: uptime-kuma
+  docker_container:
+    name: uptime-kuma
+    image: louislam/uptime-kuma
+    pull: true
+    volumes:
+      - "{{ uptime_kuma_dir }}:/app/data:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.uptime_kuma.rule: "Host(`uptime.{{ nas_domain }}`)"
+      traefik.http.routers.uptime_kuma.middlewares: "authelia@docker"
+      traefik.http.routers.uptime_kuma.tls: "true"
+      traefik.http.services.uptime_kuma.loadbalancer.server.port: "3001"
