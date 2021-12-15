@@ -29,7 +29,9 @@ access_control:
   networks:
     - name: internal
       networks:
-        - 192.168.1.0/24
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/18
 
   rules:
     # No security
@@ -55,6 +57,12 @@ access_control:
         - "torrent.{{ nas_domain }}"
       subject: "group:admin"
       policy: two_factor
+
+    # Api key bypass might be needed for some service
+    # - domain: "torrent.{{ nas_domain }}"
+    #   policy: bypass
+    #   resources:
+    #     - "^/api/.*$"
 
 session:
   domain: "{{ nas_domain }}"

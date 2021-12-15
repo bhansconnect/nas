@@ -2,19 +2,18 @@
 - name: nordvpn
   docker_container:
     name: nordvpn
-    # This may break eventual.
-    # Look at using bubuntux/nordlynx with the api key.
-    image: bubuntux/nordvpn:openvpn
+    image: bubuntux/nordlynx
     pull: true
     capabilities:
       - NET_ADMIN
     env:
       TZ: "{{ nas_timezone }}"
-      USER: "{{ nordvpn_username|quote }}"
-      PASS: "{{ nordvpn_password|quote }}"
-      CONNECT: "{{ nordvpn_connect }}"
-      TECHNOLOGY: "NordLynx"
+      PRIVATE_KEY: "{{ nordvpn_private_key|quote }}"
+      QUERY: "{{ nordvpn_query }}"
+      NET_LOCAL: "172.17.0.0/16,192.168.1.0/24"
+    networks:
+      - name: "traefik"
     sysctls:
+      net.ipv4.conf.all.src_valid_mark: "1"
       net.ipv6.conf.all.disable_ipv6: "1"
-      net.ipv4.conf.eth0.rp_filter: "2"
     restart_policy: unless-stopped

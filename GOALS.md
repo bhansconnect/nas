@@ -14,7 +14,7 @@
 - [x] Automatic updates for Docker containers (maybe this is a bad idea???)
 - [x] Hosts web site with let's encrypt, DDNS, and authentication
 - [x] Can be remotely ssh'd into (only with keyfile)
-- [ ] VPN container that some other containers are piped through
+- [x] VPN container that some other containers are piped through
 - [ ] ZFS scrub cron
 - [ ] ZFS status alerts (maybe via uptime kuma, maybe just cron)
 - [ ] Automatic backup (only essential data) to cloud or another device else (probably restic)
@@ -27,8 +27,8 @@
 - [x] Traefik
 - [x] Authelia
 - [x] Openspeedtest
-- [ ] NordVPN
-- [ ] Torrent app (needs to deal well with old stalled torrents)
+- [x] NordVPN
+- [x] Torrent app (needs to deal well with old stalled torrents)
 - [ ] Uptime Kuma looks nice for service monitor
 - [ ] Heimdall or Homer
 - [ ] Portainer (only for status, not snowflake containers)?
