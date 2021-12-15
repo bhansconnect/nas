@@ -12,6 +12,7 @@
     mode: u=rwx,g=rwx,o=rx
 
 # TODO: look into directly specifying config here
+# Not sure it can be automated, but the config can be exported.
 
 - name: uptime-kuma
   docker_container:

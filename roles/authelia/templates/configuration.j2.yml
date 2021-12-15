@@ -40,28 +40,27 @@ access_control:
       policy: bypass
 
     # Light security
-    # uptime-kuma has it's own password,
-    # but I want most external services to be behind authelia.
     - domain:
         - "speed.{{ nas_domain }}"
-        - "uptime.{{ nas_domain }}"
       networks: internal
       policy: bypass
     - domain:
         - "speed.{{ nas_domain }}"
-        - "uptime.{{ nas_domain }}"
       policy: one_factor
 
     # High security
     - domain:
         - "traefik.{{ nas_domain }}"
         - "torrent.{{ nas_domain }}"
+        # Note: I disable kuma auth and use authelia.
+        - "uptime.{{ nas_domain }}"
       networks: internal
       subject: "group:admin"
       policy: one_factor
     - domain:
         - "traefik.{{ nas_domain }}"
         - "torrent.{{ nas_domain }}"
+        - "uptime.{{ nas_domain }}"
       subject: "group:admin"
       policy: two_factor
 
