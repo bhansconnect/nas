@@ -9,7 +9,7 @@
     path: "{{ ddclient_dir }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: u=rwx
+    mode: u=rwx,g=,o=
 
 - name: ddclient
   docker_container:
@@ -33,5 +33,5 @@
     dest: "{{ ddclient_dir }}/ddclient.conf"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: u=rw
+    mode: u=rw,g=,o=
   notify: restart ddclient

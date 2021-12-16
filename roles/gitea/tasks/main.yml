@@ -9,7 +9,7 @@
     path: "{{ gitea_dir }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: u=rwx
+    mode: u=rwx,g=,o=
 
 - name: gitea
   docker_container:
