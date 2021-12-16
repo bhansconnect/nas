@@ -1,0 +1,3 @@
+---
+gitea_dataset: "{{ apps_dataset }}/gitea"
+gitea_dir: "{{ apps_dir }}/gitea"

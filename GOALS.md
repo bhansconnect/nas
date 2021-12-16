@@ -32,7 +32,7 @@
 - [x] Uptime Kuma looks nice for service monitor
 - [ ] Heimdall or Homer
 - [ ] Portainer (only for status, not snowflake containers)?
-- [ ] Gitea / Gitlab (mirror public repos on github)
+- [x] Gitea / Gitlab (mirror public repos on github)
 - [ ] Nextcloud
 - [ ] Samba share that can also see Nextcloud and has history viewable
 - [ ] Github CI action runner

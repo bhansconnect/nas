@@ -76,4 +76,5 @@
       traefik.http.routers.transmission.rule: "Host(`torrent.{{ nas_domain }}`)"
       traefik.http.routers.transmission.middlewares: "authelia@docker"
       traefik.http.routers.transmission.tls: "true"
+      traefik.http.routers.transmission.tls.certresolver: "letsencrypt"
       traefik.http.services.transmission.loadbalancer.server.port: "9091"

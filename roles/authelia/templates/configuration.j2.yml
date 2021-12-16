@@ -43,10 +43,12 @@ access_control:
     # Light security
     - domain:
         - "speed.{{ nas_domain }}"
+        - "git.{{ nas_domain }}"
       networks: internal
       policy: bypass
     - domain:
         - "speed.{{ nas_domain }}"
+        - "git.{{ nas_domain }}"
       policy: one_factor
 
     # High security

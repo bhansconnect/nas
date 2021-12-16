@@ -34,4 +34,5 @@
       traefik.http.routers.uptime_kuma.rule: "Host(`uptime.{{ nas_domain }}`)"
       traefik.http.routers.uptime_kuma.middlewares: "authelia@docker"
       traefik.http.routers.uptime_kuma.tls: "true"
+      traefik.http.routers.uptime_kuma.tls.certresolver: "letsencrypt"
       traefik.http.services.uptime_kuma.loadbalancer.server.port: "3001"
