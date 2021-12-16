@@ -27,7 +27,7 @@
 - [x] Traefik
 - [x] Authelia
 - [x] Openspeedtest
-- [x] NordVPN
+- [x] VPN
 - [x] Torrent app (needs to deal well with old stalled torrents)
 - [x] Uptime Kuma looks nice for service monitor
 - [ ] Heimdall or Homer

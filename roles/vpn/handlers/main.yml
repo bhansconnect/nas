@@ -1,0 +1,6 @@
+- name: restart vpn
+  docker_container:
+    name: vpn
+    state: started
+    restart: yes
+  notify: restart transmission

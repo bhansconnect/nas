@@ -1,0 +1,42 @@
+---
+- name: "Ensure vpn dataset exists"
+  community.general.zfs:
+    name: "{{ vpn_dataset }}"
+    state: present
+
+- name: "Ensure vpn dir has correct permissions"
+  file:
+    path: "{{ vpn_dir }}"
+    owner: "root"
+    group: "root"
+    mode: u=rwx,g=,o=
+
+- name: Set vpn configs
+  template:
+    src: wg.j2.conf
+    dest: "{{ vpn_dir }}/wg0.conf"
+    owner: "root"
+    group: "root"
+    mode: u=rw,g=,o=
+  vars:
+    server: "{{ vpn_servers[0] }}"
+  notify: restart vpn
+
+- name: vpn
+  docker_container:
+    name: vpn
+    image: linuxserver/wireguard
+    pull: true
+    volumes:
+      - "{{ vpn_dir }}/wg0.conf:/config/wg0.conf:ro"
+    capabilities:
+      - NET_ADMIN
+      - SYS_MODULE
+    env:
+      TZ: "{{ nas_timezone }}"
+    networks:
+      - name: "traefik"
+    sysctls:
+      net.ipv4.conf.all.src_valid_mark: "1"
+      net.ipv6.conf.all.disable_ipv6: "1"
+    restart_policy: unless-stopped
