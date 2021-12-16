@@ -1,0 +1,2 @@
+---
+zpool_status_file: "/var/log/zpool_status"

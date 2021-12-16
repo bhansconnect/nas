@@ -1,0 +1,4 @@
+
+PATH="/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+
+*/10 * * * * root zpool status -x > {{ zpool_status_file }} 2>&1

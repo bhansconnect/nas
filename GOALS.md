@@ -15,10 +15,10 @@
 - [x] Hosts web site with let's encrypt, DDNS, and authentication
 - [x] Can be remotely ssh'd into (only with keyfile)
 - [x] VPN container that some other containers are piped through
-- [ ] ZFS scrub cron
-- [ ] ZFS status alerts (maybe via uptime kuma, maybe just cron)
+- [x] ZFS scrub timer
+- [x] ZFS status alerts (maybe via uptime kuma, maybe just cron)
 - [ ] Automatic backup (only essential data) to cloud or another device else (probably restic)
-- [ ] Sends email notifications if it notices any failures (maybe use discord)
+- [x] Sends email notifications if it notices any failures (done via uptime kuma)
 
 ## Current likely app plan:
 

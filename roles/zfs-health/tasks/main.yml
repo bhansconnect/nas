@@ -1,0 +1,76 @@
+---
+- name: Copy zpool-scrub service
+  copy:
+    src: zpool-scrub@.service
+    dest: "/etc/systemd/system/zpool-scrub@.service"
+    owner: "root"
+    group: "root"
+    mode: u=rw,g=rw,o=r
+  notify: reload systemctl
+
+- name: Copy zpool-scrub timer
+  copy:
+    src: zpool-scrub@.timer
+    dest: "/etc/systemd/system/zpool-scrub@.timer"
+    owner: "root"
+    group: "root"
+    mode: u=rw,g=rw,o=r
+  notify: reload systemctl
+
+- name: Enable zfs bpool scrub timer
+  service:
+    name: zpool-scrub@bpool.timer
+    enabled: yes
+    state: started
+
+- name: Enable zfs rpool scrub timer
+  service:
+    name: zpool-scrub@rpool.timer
+    enabled: yes
+    state: started
+
+- name: Enable zfs dpool scrub timer
+  service:
+    name: zpool-scrub@dpool.timer
+    enabled: yes
+    state: started
+
+- name: Ensure zpool status log file exists
+  copy:
+    content: ""
+    dest: "{{ zpool_status_file }}"
+    force: no
+    owner: "root"
+    group: "root"
+    mode: u=rw,g=rw,o=r
+
+- name: Set zpool status cron
+  template:
+    src: zpool_status
+    dest: /etc/cron.d/zpool_status
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify: restart cron
+
+- name: Serve zpool status
+  docker_container:
+    name: zpool-status
+    image: halverneus/static-file-server
+    pull: true
+    volumes:
+      - "{{ zpool_status_file }}:/web/index.html:ro"
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.zpool_status.rule: "Host(`zpool.{{ nas_domain }}`)"
+      traefik.http.routers.zpool_status.middlewares: "authelia@docker"
+      traefik.http.routers.zpool_status.tls: "true"
+      traefik.http.services.zpool_status.loadbalancer.server.port: "8080"

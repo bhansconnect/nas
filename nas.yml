@@ -64,3 +64,4 @@
     - role: openspeedtest
     - role: transmission
     - role: uptime-kuma
+    - role: zfs-health

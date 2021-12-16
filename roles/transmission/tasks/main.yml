@@ -19,7 +19,14 @@
     state: directory
     mode: u=rwx,g=rwx,o=rx
 
-- name: "Ensure downloads dir exists with correct permissions"
+- name: "Ensure downloads dataset exists (no snapshots)"
+  community.general.zfs:
+    name: "{{ transmission_dataset }}/downloads"
+    state: present
+    extra_zfs_properties:
+      com.sun:auto-snapshot: "false"
+
+- name: "Ensure downloads dir has correct permissions"
   file:
     path: "{{ transmission_dir }}/downloads"
     owner: "{{ ansible_user }}"

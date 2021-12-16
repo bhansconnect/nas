@@ -37,6 +37,7 @@ access_control:
     # No security
     - domain:
         - "health.{{ nas_domain }}"
+        - "zpool.{{ nas_domain }}"
       policy: bypass
 
     # Light security
