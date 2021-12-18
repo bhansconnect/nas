@@ -1,0 +1,5 @@
+---
+- name: Install feedparser
+  pip:
+    name: feedparser>6.0,<7.0
+    executable: pip3

@@ -66,3 +66,4 @@
     - role: uptime-kuma
     - role: zfs-health
     - role: gitea
+    - role: nix-auto-seeder
