@@ -31,6 +31,13 @@
         - rule: allow
           to_port: 443
           proto: tcp
+        # Private
+        - rule: allow
+          to_port: "{{ private_port_1 }}"
+          proto: tcp
+        - rule: allow
+          to_port: "{{ private_port_2 }}"
+          proto: tcp
     - role: robertdebock.sysctl
       sysctl_items:
         - name: net.ipv4.conf.all.accept_redirects
@@ -56,6 +63,7 @@
     - role: zfs-auto-snapshot
     # vpn is early so that it can be up before dependencies.
     - role: vpn
+    - role: private
     - role: ddclient
     - role: endlessh
     - role: watchtower
