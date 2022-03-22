@@ -28,7 +28,7 @@
 - name: jellyfin
   docker_container:
     name: jellyfin
-    image: jellyfin/jellyfin
+    image: linuxserver/jellyfin
     pull: true
     volumes:
       - "{{ jellyfin_dir }}:/config:rw"
@@ -36,18 +36,19 @@
       - "{{ tvshows_dir }}:/tvshows:rw"
       - "{{ movies_dir }}:/movies:rw"
     ports:
-      - 8096:8096
+      - 8097:8096
     env:
       TZ: "{{ nas_timezone }}"
       # TODO fix this. I want the ids of the ansible_user
       PUID: "1000"
       PGID: "1000"
       JELLYFIN_PublishedServerUrl: "https://jellyfin.{{ nas_domain }}"
+      NVIDIA_VISIBLE_DEVICES: "all"
     device_requests:
       - driver: nvidia
         count: -1
         capabilities:
-          - - gpu
+          - - video
             - compute
             - utility
     networks:
@@ -55,6 +56,7 @@
     restart_policy: unless-stopped
     labels:
       traefik.enable: "true"
+      traefik.docker.network: "traefik"
       traefik.http.routers.jellyfin.rule: "Host(`jellyfin.{{ nas_domain }}`)"
       traefik.http.routers.jellyfin.middlewares: "authelia@docker"
       traefik.http.routers.jellyfin.tls: "true"
