@@ -38,7 +38,7 @@
 - [ ] Github CI action runner
 - [x] Prowlarr
 - [x] Jellyfin (if not liked fallback to Plex)
-- [ ] Sonarr
+- [x] Sonarr
 - [x] Radarr
 - [ ] Bazarr?
 - [ ] Readarr?

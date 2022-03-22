@@ -69,6 +69,7 @@ access_control:
         - "torrent.{{ nas_domain }}"
         - "prowlarr.{{ nas_domain }}"
         - "radarr.{{ nas_domain }}"
+        - "sonarr.{{ nas_domain }}"
         # Note: I disable kuma auth and use authelia.
         - "uptime.{{ nas_domain }}"
       networks: internal
@@ -79,6 +80,7 @@ access_control:
         - "torrent.{{ nas_domain }}"
         - "prowlarr.{{ nas_domain }}"
         - "radarr.{{ nas_domain }}"
+        - "sonarr.{{ nas_domain }}"
         # Note: I disable kuma auth and use authelia.
         - "uptime.{{ nas_domain }}"
       subject: "group:admin"

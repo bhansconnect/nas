@@ -1,0 +1,3 @@
+---
+sonarr_dataset: "{{ apps_dataset }}/sonarr"
+sonarr_dir: "{{ apps_dir }}/sonarr"
