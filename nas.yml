@@ -60,6 +60,7 @@
       docker_users:
         - "{{ ansible_user }}"
     - role: docker-python
+    - role: nvidia
     - role: zfs-auto-snapshot
     # vpn is early so that it can be up before dependencies.
     - role: vpn

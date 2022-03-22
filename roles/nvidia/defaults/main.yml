@@ -1,0 +1,8 @@
+---
+docker_daemon_json:
+  # Set default runtime (required for kubernetes)
+  runtimes:
+    nvidia:
+      path: /usr/bin/nvidia-container-runtime
+      runtimeArgs: []
+  default-runtime: nvidia

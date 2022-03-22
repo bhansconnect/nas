@@ -1,0 +1,64 @@
+---
+- name: Install apt dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg2
+
+- name: Ensure nvidia-driver is installed
+  apt:
+    name:
+      - nvidia-driver
+      - libnvidia-encode1
+      - libnvcuvid1
+    state: present
+  register: install_driver
+
+- name: Add NVIDIA apt key
+  apt_key:
+    url: https://nvidia.github.io/nvidia-docker/gpgkey
+    state: present
+
+- name: Fetch NVIDIA apt repository list
+  get_url:
+    url: https://nvidia.github.io/nvidia-docker/{{ distribution }}/nvidia-docker.list
+    dest: /etc/apt/sources.list.d/nvidia-docker.list
+
+- name: Update apt caches and install nvidia-container-toolkit
+  apt:
+    name: nvidia-container-toolkit
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  register: install_toolkit
+
+- name: create /etc/docker
+  file:
+    path: /etc/docker
+    state: directory
+    mode: "0755"
+
+- name: set docker daemon configuration
+  copy:
+    content: "{{ docker_daemon_json | to_nice_json }}"
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart docker
+
+# We could use the "nvidia-docker2" package to install this wrapper for us.
+# Instead, we grab the wrapper directly to avoid packaging issues stemming from
+#   docker version pinning in the nvidia-docker2 package.
+- name: grab nvidia-docker wrapper
+  get_url:
+    url: "https://raw.githubusercontent.com/NVIDIA/nvidia-docker/master/nvidia-docker"
+    dest: /usr/local/bin/nvidia-docker
+    mode: 0755
+    owner: root
+    group: root
+
+- name: reboot after driver install
+  reboot:
+  when: install_driver.changed or install_toolkit.changed
