@@ -36,14 +36,13 @@
 - [ ] Nextcloud
 - [ ] Samba share that can also see Nextcloud and has history viewable
 - [ ] Github CI action runner
-- [ ] Jackett
-- [ ] Jellyfin (if not liked fallback to Plex)
+- [x] Prowlarr
+- [x] Jellyfin (if not liked fallback to Plex)
 - [ ] Sonarr
-- [ ] Radarr
+- [x] Radarr
 - [ ] Bazarr?
 - [ ] Readarr?
 - [ ] lidarr?
-- [ ] Prowlarr?
 - [ ] Home Assistant?
 - [ ] Some sort of youtube-dl?
 - [ ] Some sort of transcoder pipeline (handbrake)?
