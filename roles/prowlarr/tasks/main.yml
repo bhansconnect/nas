@@ -1,0 +1,36 @@
+---
+- name: "Ensure prowlarr dataset exists"
+  community.general.zfs:
+    name: "{{ prowlarr_dataset }}"
+    state: present
+
+- name: "Ensure prowlarr dir has correct permissions"
+  file:
+    path: "{{ prowlarr_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: prowlarr
+  docker_container:
+    name: prowlarr
+    image: linuxserver/prowlarr:develop
+    pull: true
+    volumes:
+      - "{{ prowlarr_dir }}:/config:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+    network_mode: "container:vpn"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.prowlarr.rule: "Host(`prowlarr.{{ nas_domain }}`)"
+      traefik.http.routers.prowlarr.middlewares: "authelia@docker"
+      traefik.http.routers.prowlarr.tls: "true"
+      traefik.http.routers.prowlarr.tls.certresolver: "letsencrypt"
+      traefik.http.services.prowlarr.loadbalancer.server.port: "9696"

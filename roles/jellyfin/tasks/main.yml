@@ -1,0 +1,36 @@
+---
+- name: "Ensure jellyfin dataset exists"
+  community.general.zfs:
+    name: "{{ jellyfin_dataset }}"
+    state: present
+
+- name: "Ensure jellyfin dir has correct permissions"
+  file:
+    path: "{{ jellyfin_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: jellyfin
+  docker_container:
+    name: jellyfin
+    image: linuxserver/jellyfin
+    pull: true
+    volumes:
+      - "{{ jellyfin_dir }}:/config:rw"
+      - "{{ tvshows_dir }}:/tvshows:rw"
+      - "{{ movies_dir }}:/movies:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+      JELLYFIN_PublishedServerUrl: "jellyfin.{{ nas_domain }}"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.jellyfin.rule: "Host(`jellyfin.{{ nas_domain }}`)"
+      traefik.http.routers.jellyfin.middlewares: "authelia@docker"
+      traefik.http.routers.jellyfin.tls: "true"
+      traefik.http.routers.jellyfin.tls.certresolver: "letsencrypt"
+      traefik.http.services.jellyfin.loadbalancer.server.port: "8096"

@@ -19,21 +19,6 @@
     state: directory
     mode: u=rwx,g=rwx,o=rx
 
-- name: "Ensure downloads dataset exists (no snapshots)"
-  community.general.zfs:
-    name: "{{ transmission_dataset }}/downloads"
-    state: present
-    extra_zfs_properties:
-      com.sun:auto-snapshot: "false"
-
-- name: "Ensure downloads dir has correct permissions"
-  file:
-    path: "{{ transmission_dir }}/downloads"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    state: directory
-    mode: u=rwx,g=rwx,o=rx
-
 - name: "Ensure watch dir exists with correct permissions"
   file:
     path: "{{ transmission_dir }}/watch"
@@ -59,7 +44,7 @@
     pull: true
     volumes:
       - "{{ transmission_dir }}/config:/config:rw"
-      - "{{ transmission_dir }}/downloads:/downloads:rw"
+      - "{{ downloads_dir }}:/downloads:rw"
       - "{{ transmission_dir }}/watch:/watch:rw"
     env:
       TZ: "{{ nas_timezone }}"

@@ -1,0 +1,38 @@
+---
+- name: "Ensure radarr dataset exists"
+  community.general.zfs:
+    name: "{{ radarr_dataset }}"
+    state: present
+
+- name: "Ensure radarr dir has correct permissions"
+  file:
+    path: "{{ radarr_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: radarr
+  docker_container:
+    name: radarr
+    image: linuxserver/radarr
+    pull: true
+    volumes:
+      - "{{ radarr_dir }}:/config:rw"
+      - "{{ downloads_dir }}:/downloads:rw"
+      - "{{ movies_dir }}:/movies:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+    network_mode: "container:vpn"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.radarr.rule: "Host(`radarr.{{ nas_domain }}`)"
+      traefik.http.routers.radarr.middlewares: "authelia@docker"
+      traefik.http.routers.radarr.tls: "true"
+      traefik.http.routers.radarr.tls.certresolver: "letsencrypt"
+      traefik.http.services.radarr.loadbalancer.server.port: "7878"

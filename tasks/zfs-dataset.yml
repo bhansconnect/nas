@@ -23,3 +23,46 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "u=rwx,g=rwx,o=rx"
+
+# Ensure the various media datasets exist.
+- name: "Ensure {{ downloads_dataset }} exists"
+  community.general.zfs:
+    name: "{{ downloads_dataset }}"
+    state: present
+    extra_zfs_properties:
+      com.sun:auto-snapshot: "false"
+
+- name: "Ensure {{ downloads_dir }} has correct permissions"
+  file:
+    path: "{{ downloads_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "u=rwx,g=rwx,o=rx"
+
+- name: "Ensure {{ movies_dataset }} exists"
+  community.general.zfs:
+    name: "{{ movies_dataset }}"
+    state: present
+    extra_zfs_properties:
+      com.sun:auto-snapshot: "false"
+
+- name: "Ensure {{ movies_dir }} has correct permissions"
+  file:
+    path: "{{ movies_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "u=rwx,g=rwx,o=rx"
+
+- name: "Ensure {{ tvshows_dataset }} exists"
+  community.general.zfs:
+    name: "{{ tvshows_dataset }}"
+    state: present
+    extra_zfs_properties:
+      com.sun:auto-snapshot: "false"
+
+- name: "Ensure {{ tvshows_dir }} has correct permissions"
+  file:
+    path: "{{ tvshows_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "u=rwx,g=rwx,o=rx"

@@ -40,21 +40,35 @@ access_control:
         - "zpool.{{ nas_domain }}"
       policy: bypass
 
+    # API Bypass
+    # Api key bypass might be needed for some service
+    # - domain:
+    #     - "prowlarr.{{ nas_domain }}"
+    #     - "radarr.{{ nas_domain }}"
+    #     - "torrent.{{ nas_domain }}"
+    #   policy: bypass
+    #   resources:
+    #     - "^/api([/?].*)?$"
+
     # Light security
     - domain:
         - "speed.{{ nas_domain }}"
         - "git.{{ nas_domain }}"
+        - "jellyfin.{{ nas_domain }}"
       networks: internal
       policy: bypass
     - domain:
         - "speed.{{ nas_domain }}"
         - "git.{{ nas_domain }}"
+        - "jellyfin.{{ nas_domain }}"
       policy: one_factor
 
     # High security
     - domain:
         - "traefik.{{ nas_domain }}"
         - "torrent.{{ nas_domain }}"
+        - "prowlarr.{{ nas_domain }}"
+        - "radarr.{{ nas_domain }}"
         # Note: I disable kuma auth and use authelia.
         - "uptime.{{ nas_domain }}"
       networks: internal
@@ -63,15 +77,12 @@ access_control:
     - domain:
         - "traefik.{{ nas_domain }}"
         - "torrent.{{ nas_domain }}"
+        - "prowlarr.{{ nas_domain }}"
+        - "radarr.{{ nas_domain }}"
+        # Note: I disable kuma auth and use authelia.
         - "uptime.{{ nas_domain }}"
       subject: "group:admin"
       policy: two_factor
-
-    # Api key bypass might be needed for some service
-    # - domain: "torrent.{{ nas_domain }}"
-    #   policy: bypass
-    #   resources:
-    #     - "^/api/.*$"
 
 session:
   domain: "{{ nas_domain }}"

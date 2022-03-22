@@ -1,0 +1,3 @@
+---
+radarr_dataset: "{{ apps_dataset }}/radarr"
+radarr_dir: "{{ apps_dir }}/radarr"

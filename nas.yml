@@ -71,6 +71,9 @@
     - role: traefik
     - role: openspeedtest
     - role: transmission
+    - role: prowlarr
+    - role: radarr
+    - role: jellyfin
     - role: uptime-kuma
     - role: zfs-health
     - role: gitea
