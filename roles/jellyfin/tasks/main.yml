@@ -44,13 +44,7 @@
       PGID: "1000"
       JELLYFIN_PublishedServerUrl: "https://jellyfin.{{ nas_domain }}"
       NVIDIA_VISIBLE_DEVICES: "all"
-    device_requests:
-      - driver: nvidia
-        count: -1
-        capabilities:
-          - - video
-            - compute
-            - utility
+      NVIDIA_DRIVER_CAPABILITIES: "compute,video,utility"
     networks:
       - name: "traefik"
     restart_policy: unless-stopped
