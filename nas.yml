@@ -76,7 +76,7 @@
     - role: radarr
     - role: sonarr
     - role: jellyfin
-    - role: uptime-kuma
     - role: zfs-health
     - role: gitea
+    - role: uptime-kuma
     - role: nix-auto-seeder
