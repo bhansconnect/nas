@@ -31,6 +31,9 @@
         - rule: allow
           to_port: 443
           proto: tcp
+        - rule: allow
+          to_port: 8097
+          proto: tcp
         # Private
         - rule: allow
           to_port: "{{ private_port_1 }}"
