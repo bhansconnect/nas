@@ -78,6 +78,7 @@
     - role: prowlarr
     - role: radarr
     - role: sonarr
+    - role: bazarr
     - role: jellyfin
     - role: zfs-health
     - role: gitea

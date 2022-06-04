@@ -1,0 +1,3 @@
+---
+bazarr_dataset: "{{ apps_dataset }}/bazarr"
+bazarr_dir: "{{ apps_dir }}/bazarr"

@@ -1,0 +1,5 @@
+- name: restart bazarr
+  docker_container:
+    name: bazarr
+    state: started
+    restart: yes

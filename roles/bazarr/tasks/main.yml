@@ -1,0 +1,39 @@
+---
+- name: "Ensure bazarr dataset exists"
+  community.general.zfs:
+    name: "{{ bazarr_dataset }}"
+    state: present
+
+- name: "Ensure bazarr dir has correct permissions"
+  file:
+    path: "{{ bazarr_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: bazarr
+  docker_container:
+    name: bazarr
+    image: linuxserver/bazarr
+    pull: true
+    volumes:
+      - "{{ bazarr_dir }}:/config:rw"
+      - "{{ downloads_dir }}:/downloads:rw"
+      - "{{ movies_dir }}:/movies:rw"
+      - "{{ tvshows_dir }}:/tv:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+    network_mode: "container:vpn"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.bazarr.rule: "Host(`bazarr.{{ nas_domain }}`)"
+      traefik.http.routers.bazarr.middlewares: "authelia@docker"
+      traefik.http.routers.bazarr.tls: "true"
+      traefik.http.routers.bazarr.tls.certresolver: "letsencrypt"
+      traefik.http.services.bazarr.loadbalancer.server.port: "6767"
