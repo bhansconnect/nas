@@ -16,7 +16,7 @@
     labels:
       traefik.enable: "true"
       traefik.http.routers.todo_backend.rule: "Host(`todo-backend.{{ nas_domain }}`)"
-      traefik.http.routers.todo_backend.middlewares: "authelia@docker"
+      # traefik.http.routers.todo_backend.middlewares: "authelia@docker"
       traefik.http.routers.todo_backend.tls: "true"
       traefik.http.routers.todo_backend.tls.certresolver: "letsencrypt"
       traefik.http.services.todo_backend.loadbalancer.server.port: "4567"
