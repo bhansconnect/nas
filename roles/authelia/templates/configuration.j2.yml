@@ -40,7 +40,6 @@ access_control:
         - "zpool.{{ nas_domain }}"
         - "speed.{{ nas_domain }}"
         - "roc-todos.{{ nas_domain }}"
-        - "todo-backend.{{ nas_domain }}"
       policy: bypass
 
     # API Bypass
