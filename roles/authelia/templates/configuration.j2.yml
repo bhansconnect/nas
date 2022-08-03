@@ -38,6 +38,9 @@ access_control:
     - domain:
         - "health.{{ nas_domain }}"
         - "zpool.{{ nas_domain }}"
+        - "speed.{{ nas_domain }}"
+        - "roc-todos.{{ nas_domain }}"
+        - "todo-backend.{{ nas_domain }}"
       policy: bypass
 
     # API Bypass
@@ -52,13 +55,13 @@ access_control:
 
     # Light security
     - domain:
-        - "speed.{{ nas_domain }}"
+        # - "speed.{{ nas_domain }}"
         - "git.{{ nas_domain }}"
         - "jellyfin.{{ nas_domain }}"
       networks: internal
       policy: bypass
     - domain:
-        - "speed.{{ nas_domain }}"
+        # - "speed.{{ nas_domain }}"
         - "git.{{ nas_domain }}"
         - "jellyfin.{{ nas_domain }}"
       policy: one_factor
