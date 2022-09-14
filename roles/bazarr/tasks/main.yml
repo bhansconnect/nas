@@ -27,8 +27,8 @@
       PUID: "1000"
       PGID: "1000"
     network_mode: "container:vpn"
-    networks:
-      - name: "traefik"
+    # networks:
+    #   - name: "traefik"
     restart_policy: unless-stopped
     labels:
       traefik.enable: "true"
