@@ -28,7 +28,7 @@
     image: linuxserver/wireguard
     pull: true
     volumes:
-      - "{{ vpn_dir }}/wg0.conf:/config/wg0.conf:ro"
+      - "{{ vpn_dir }}/wg0.conf:/config/wg0.conf"
     capabilities:
       - NET_ADMIN
       - SYS_MODULE

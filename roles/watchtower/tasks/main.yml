@@ -12,3 +12,6 @@
     # Run at 5am everyday
     command: '--schedule "0 0 5 * * *"'
     restart_policy: unless-stopped
+
+    # Disable watchtower for now. It keeps breaking other containers
+    state: absent
