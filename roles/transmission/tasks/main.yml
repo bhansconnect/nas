@@ -48,7 +48,7 @@
       - "{{ transmission_dir }}/watch:/watch:rw"
     env:
       TZ: "{{ nas_timezone }}"
-      TRANSMISSION_WEB_HOME: "/transmission-web-control/"
+      # TRANSMISSION_WEB_HOME: "/transmission-web-control/"
       # TODO fix this. I want the ids of the ansible_user
       PUID: "1000"
       PGID: "1000"
