@@ -1,0 +1,3 @@
+---
+jmusicbot_dataset: "{{ apps_dataset }}/jmusicbot"
+jmusicbot_dir: "{{ apps_dir }}/jmusicbot"

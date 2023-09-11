@@ -84,4 +84,5 @@
     - role: gitea
     - role: uptime-kuma
     - role: nix-auto-seeder
+    - role: jmusicbot
     - role: roc-todos

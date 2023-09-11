@@ -1,0 +1,35 @@
+---
+- name: "Ensure jmusicbot dataset exists"
+  community.general.zfs:
+    name: "{{ jmusicbot_dataset }}"
+    state: present
+
+- name: "Ensure jmusicbot dir has correct permissions"
+  file:
+    path: "{{ jmusicbot_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=,o=
+
+- name: Set jmusicbot config
+  template:
+    src: config.j2
+    dest: "{{ jmusicbot_dir }}/config.txt"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw,g=,o=
+  notify: restart jmusicbot
+
+- name: jmusicbot
+  docker_container:
+    name: jmusicbot
+    image: yojoshb/jmusicbot
+    pull: false # Want manual control of updates due to less trusted source
+    volumes:
+      - "{{ jmusicbot_dir }}:/config:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+    restart_policy: unless-stopped
