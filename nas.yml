@@ -35,12 +35,12 @@
           to_port: 8097
           proto: tcp
         # Private
-        - rule: allow
-          to_port: "{{ private_port_1 }}"
-          proto: tcp
-        - rule: allow
-          to_port: "{{ private_port_2 }}"
-          proto: tcp
+        # - rule: allow
+        #   to_port: "{{ private_port_1 }}"
+        #   proto: tcp
+        # - rule: allow
+        #   to_port: "{{ private_port_2 }}"
+        #   proto: tcp
     - role: robertdebock.sysctl
       sysctl_items:
         - name: net.ipv4.conf.all.accept_redirects

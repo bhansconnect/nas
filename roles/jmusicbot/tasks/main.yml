@@ -26,7 +26,7 @@
     image: yojoshb/jmusicbot
     pull: false # Want manual control of updates due to less trusted source
     volumes:
-      - "{{ jmusicbot_dir }}:/config:rw"
+      - "{{ jmusicbot_dir }}:/config:ro"
     env:
       TZ: "{{ nas_timezone }}"
       # TODO fix this. I want the ids of the ansible_user
