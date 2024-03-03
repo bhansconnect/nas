@@ -53,13 +53,4 @@
       PUID: "1000"
       PGID: "1000"
     network_mode: "container:vpn"
-    # networks:
-    #   - name: "traefik"
     restart_policy: unless-stopped
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.transmission.rule: "Host(`torrent.{{ nas_domain }}`)"
-      traefik.http.routers.transmission.middlewares: "authelia@docker"
-      traefik.http.routers.transmission.tls: "true"
-      traefik.http.routers.transmission.tls.certresolver: "letsencrypt"
-      traefik.http.services.transmission.loadbalancer.server.port: "9091"

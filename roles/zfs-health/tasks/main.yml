@@ -72,6 +72,6 @@
       traefik.enable: "true"
       traefik.http.routers.zpool_status.rule: "Host(`zpool.{{ nas_domain }}`)"
       traefik.http.routers.zpool_status.middlewares: "authelia@docker"
-      traefik.http.routers.zpool_status.tls: "true"
+      traefik.http.routers.zpool_status.entrypoints: "websecure"
       traefik.http.routers.zpool_status.tls.certresolver: "letsencrypt"
       traefik.http.services.zpool_status.loadbalancer.server.port: "80"

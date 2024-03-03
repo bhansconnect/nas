@@ -24,13 +24,4 @@
       PUID: "1000"
       PGID: "1000"
     network_mode: "container:vpn"
-    # networks:
-    #   - name: "traefik"
     restart_policy: unless-stopped
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.prowlarr.rule: "Host(`prowlarr.{{ nas_domain }}`)"
-      traefik.http.routers.prowlarr.middlewares: "authelia@docker"
-      traefik.http.routers.prowlarr.tls: "true"
-      traefik.http.routers.prowlarr.tls.certresolver: "letsencrypt"
-      traefik.http.services.prowlarr.loadbalancer.server.port: "9696"

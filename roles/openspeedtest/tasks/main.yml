@@ -13,6 +13,6 @@
       traefik.enable: "true"
       traefik.http.routers.openspeedtest.rule: "Host(`speed.{{ nas_domain }}`)"
       traefik.http.routers.openspeedtest.middlewares: "authelia@docker"
-      traefik.http.routers.openspeedtest.tls: "true"
+      traefik.http.routers.openspeedtest.entrypoints: "websecure"
       traefik.http.routers.openspeedtest.tls.certresolver: "letsencrypt"
       traefik.http.services.openspeedtest.loadbalancer.server.port: "3000"

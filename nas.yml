@@ -65,14 +65,14 @@
     - role: docker-python
     - role: nvidia
     - role: zfs-auto-snapshot
+    - role: authelia
+    - role: traefik
     # vpn is early so that it can be up before dependencies.
     - role: vpn
     - role: private
     - role: ddclient
     - role: endlessh
     - role: watchtower
-    - role: authelia
-    - role: traefik
     - role: openspeedtest
     - role: transmission
     - role: prowlarr

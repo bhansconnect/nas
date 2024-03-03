@@ -21,6 +21,6 @@
       traefik.enable: "true"
       traefik.http.routers.roc_todos.rule: "Host(`roc-todos.{{ nas_domain }}`)"
       # traefik.http.routers.roc_todos.middlewares: "authelia@docker"
-      traefik.http.routers.roc_todos.tls: "true"
+      traefik.http.routers.roc_todos.entrypoints: "websecure"
       traefik.http.routers.roc_todos.tls.certresolver: "letsencrypt"
       traefik.http.services.roc_todos.loadbalancer.server.port: "3000"

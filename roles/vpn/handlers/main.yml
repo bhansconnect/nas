@@ -4,3 +4,7 @@
     state: started
     restart: yes
   notify: restart transmission
+  notify: restart prowlarr
+  notify: restart sonarr
+  notify: restart radarr
+  notify: restart bazarr

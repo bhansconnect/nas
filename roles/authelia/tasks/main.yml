@@ -44,5 +44,5 @@
     labels:
       traefik.enable: "true"
       traefik.http.routers.authelia.rule: "Host(`auth.{{ nas_domain }}`)"
-      traefik.http.routers.authelia.tls: "true"
+      traefik.http.routers.authelia.entrypoints: "websecure"
       traefik.http.routers.authelia.tls.certresolver: "letsencrypt"
