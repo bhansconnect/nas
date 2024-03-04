@@ -1,3 +1,0 @@
----
-vpn_dataset: "{{ apps_dataset }}/vpn"
-vpn_dir: "{{ apps_dir }}/vpn"
