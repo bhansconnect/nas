@@ -1,7 +1,9 @@
-protocol=cloudflare
 ssl=yes
 use=web
+web='https://cloudflare.com/cdn-cgi/trace'
+web-skip='ip=' # IP address above is after 'ip='
 
+protocol=cloudflare
 zone={{ ddclient_config.zone }}
 login={{ ddclient_config.username }}
 password={{ ddclient_config.password }}
