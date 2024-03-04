@@ -56,8 +56,9 @@
       traefik.http.routers.transmission.tls.certresolver: "letsencrypt"
       traefik.http.routers.transmission.service: "transmission"
       traefik.http.services.transmission.loadbalancer.server.port: "9091"
-  notify: restart transmission
-  notify: restart prowlarr
-  notify: restart sonarr
-  notify: restart radarr
-  notify: restart bazarr
+  notify:
+    - restart transmission
+    - restart prowlarr
+    - restart sonarr
+    - restart radarr
+    - restart bazarr

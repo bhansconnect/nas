@@ -12,9 +12,9 @@ entryPoints:
       tls:
         certResolver: letsencrypt
         domains:
-          main: "{{ nas_domain }}"
-          sans:
-            - "*.{{ nas_domain }}"
+          - main: "{{ nas_domain }}"
+            sans:
+              - "*.{{ nas_domain }}"
 providers:
   providersThrottleDuration: 2s
   docker:
