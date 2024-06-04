@@ -66,3 +66,17 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "u=rwx,g=rwx,o=rx"
+
+- name: "Ensure {{ sync_dataset }} exists"
+  community.general.zfs:
+    name: "{{ sync_dataset }}"
+    state: present
+    extra_zfs_properties:
+      com.sun:auto-snapshot: "false"
+
+- name: "Ensure {{ sync_dir }} has correct permissions"
+  file:
+    path: "{{ sync_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "u=rwx,g=rwx,o=rx"

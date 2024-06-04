@@ -18,7 +18,7 @@
     pull: true
     volumes:
       - "{{ syncthing_dir }}:/config:rw"
-      - "{{ syncthing_dir }}:/sync:rw"
+      - "{{ sync_dir }}:/sync:rw"
     env:
       TZ: "{{ nas_timezone }}"
       # TODO fix this. I want the ids of the ansible_user
