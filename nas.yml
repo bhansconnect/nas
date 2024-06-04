@@ -34,6 +34,19 @@
         - rule: allow
           to_port: 8097
           proto: tcp
+        # Syncthing
+        - rule: allow
+          to_port: 8384
+          proto: tcp
+        - rule: allow
+          to_port: 22000
+          proto: tcp
+        - rule: allow
+          to_port: 22000
+          proto: udp
+        - rule: allow
+          to_port: 21027
+          proto: udp
         # Private
         # - rule: allow
         #   to_port: "{{ private_port_1 }}"
@@ -86,3 +99,4 @@
     - role: nix-auto-seeder
     - role: jmusicbot
     - role: roc-todos
+    - role: syncthing

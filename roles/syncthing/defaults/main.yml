@@ -1,0 +1,3 @@
+---
+syncthing_dataset: "{{ apps_dataset }}/syncthing"
+syncthing_dir: "{{ apps_dir }}/syncthing"
