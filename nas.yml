@@ -100,3 +100,4 @@
     - role: jmusicbot
     - role: roc-todos
     - role: syncthing
+    - role: photoprism

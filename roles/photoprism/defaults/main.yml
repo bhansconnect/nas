@@ -1,0 +1,3 @@
+---
+photoprism_dataset: "{{ apps_dataset }}/photoprism"
+photoprism_dir: "{{ apps_dir }}/photoprism"

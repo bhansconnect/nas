@@ -1,0 +1,5 @@
+- name: restart photoprism
+  docker_container:
+    name: photoprism
+    state: started
+    restart: yes
