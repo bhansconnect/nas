@@ -47,6 +47,19 @@
         - rule: allow
           to_port: 21027
           proto: udp
+        # Samba
+        - rule: allow
+          to_port: 137
+          proto: udp
+        - rule: allow
+          to_port: 138
+          proto: udp
+        - rule: allow
+          to_port: 139
+          proto: tcp
+        - rule: allow
+          to_port: 445
+          proto: tcp
         # Private
         # - rule: allow
         #   to_port: "{{ private_port_1 }}"
@@ -101,3 +114,4 @@
     - role: roc-todos
     - role: syncthing
     - role: photoprism
+    - role: samba

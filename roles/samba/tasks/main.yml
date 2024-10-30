@@ -1,0 +1,23 @@
+---
+- name: Install samba
+  apt:
+    name:
+    - samba
+    - samba-vfs-modules
+    state: present
+
+- name: Set samba config
+  template:
+    src: smb.conf.j2
+    dest: "/etc/samba/smb.conf"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  notify: restart smbd
+
+# TODO: This should setup samba users, but I am just doing it manually for now.
+
+- name: Start samba
+  service:
+    name: smbd
+    state: started
