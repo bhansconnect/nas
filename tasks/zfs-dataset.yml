@@ -22,7 +22,7 @@
     path: "{{ data_dir }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: "u=rwx,g=rwx,o=rx"
+    mode: "u=rwx,g=rwx,o=rwx"
 
 # Ensure the various media datasets exist.
 - name: "Ensure {{ downloads_dataset }} exists"
@@ -37,7 +37,7 @@
     path: "{{ downloads_dir }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: "u=rwx,g=rwx,o=rx"
+    mode: "u=rwx,g=rwx,o=rwx"
 
 - name: "Ensure {{ movies_dataset }} exists"
   community.general.zfs:
@@ -51,7 +51,7 @@
     path: "{{ movies_dir }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: "u=rwx,g=rwx,o=rx"
+    mode: "u=rwx,g=rwx,o=rwx"
 
 - name: "Ensure {{ tvshows_dataset }} exists"
   community.general.zfs:
@@ -65,7 +65,7 @@
     path: "{{ tvshows_dir }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: "u=rwx,g=rwx,o=rx"
+    mode: "u=rwx,g=rwx,o=rwx"
 
 - name: "Ensure {{ pictures_dataset }} exists"
   community.general.zfs:
@@ -79,7 +79,7 @@
     path: "{{ pictures_dir }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: "u=rwx,g=rwx,o=rx"
+    mode: "u=rwx,g=rwx,o=rwx"
 
 - name: "Ensure {{ sync_dataset }} exists"
   community.general.zfs:
@@ -93,4 +93,4 @@
     path: "{{ sync_dir }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: "u=rwx,g=rwx,o=rx"
+    mode: "u=rwx,g=rwx,o=rwx"
