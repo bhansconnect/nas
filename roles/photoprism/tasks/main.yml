@@ -39,6 +39,7 @@
   docker_container:
     name: photoprism-mariadb
     image: mariadb:11
+    restart_policy: unless-stopped
     security_opts: # see https://github.com/MariaDB/mariadb-docker/issues/434#issuecomment-1136151239
       - seccomp:unconfined
       - apparmor:unconfined
