@@ -11,7 +11,7 @@
     group: "{{ ansible_user }}"
     mode: u=rwx,g=rwx,o=rx
 
-- name: Set traefik config
+- name: Set frigate config
   template:
     src: config.j2.yaml
     dest: "{{ frigate_dir }}/config.yaml"
@@ -35,8 +35,9 @@
         tmpfs:
           size: 1000000000
     ports:
-      - 8971:8971
-      # TODO: Will need to expose these for camera feeds.
+      # - 8971:8971 # Authenticated port not needed.
+      - 5000:5000 # Authelia protects this. So use unauthenticated port.
+      # TODO: Will need to expose these for camera feeds?
       # - 8554:8554 # RTSP feeds
       # - 8555:8555/tcp # WebRTC over tcp
       # - 8555:8555/udp # WebRTC over udp
@@ -59,7 +60,7 @@
       traefik.http.routers.frigate.entrypoints: "websecure"
       traefik.http.routers.frigate.tls.certresolver: "letsencrypt"
       traefik.http.routers.frigate.service: "frigate"
-      traefik.http.services.frigate.loadbalancer.server.port: "8971"
+      traefik.http.services.frigate.loadbalancer.server.port: "5000"
       traefik.http.services.frigate.loadbalancer.passHostHeader: "true"
       # Redirect from main url
       traefik.http.routers.gotofrigate.rule: "Host(`{{ nas_domain }}`)"
