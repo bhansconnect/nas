@@ -1,0 +1,72 @@
+---
+- name: "Ensure frigate dataset exists"
+  community.general.zfs:
+    name: "{{ frigate_dataset }}"
+    state: present
+
+- name: "Ensure frigate dir has correct permissions"
+  file:
+    path: "{{ frigate_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: Set traefik config
+  template:
+    src: config.j2.yaml
+    dest: "{{ frigate_dir }}/config.yaml"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rw,g=rw,o=r
+  notify: restart frigate
+
+- name: frigate
+  docker_container:
+    name: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable-tensorrt
+    pull: true
+    shm_size: "64MB"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - "{{ frigate_dir }}:/config:rw"
+      - "{{ nvr_dir }}:/media/frigate:rw"
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - 8971:8971
+      # TODO: Will need to expose these for camera feeds.
+      # - 8554:8554 # RTSP feeds
+      # - 8555:8555/tcp # WebRTC over tcp
+      # - 8555:8555/udp # WebRTC over udp
+    env:
+      TZ: "{{ nas_timezone }}"
+      # TODO fix this. I want the ids of the ansible_user
+      PUID: "1000"
+      PGID: "1000"
+      FRIGATE_PublishedServerUrl: "https://frigate.{{ nas_domain }}"
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "all"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.frigate.rule: "Host(`frigate.{{ nas_domain }}`)"
+      traefik.http.routers.frigate.middlewares: "authelia@docker"
+      traefik.http.routers.frigate.entrypoints: "websecure"
+      traefik.http.routers.frigate.tls.certresolver: "letsencrypt"
+      traefik.http.routers.frigate.service: "frigate"
+      traefik.http.services.frigate.loadbalancer.server.port: "8971"
+      traefik.http.services.frigate.loadbalancer.passHostHeader: "true"
+      # Redirect from main url
+      traefik.http.routers.gotofrigate.rule: "Host(`{{ nas_domain }}`)"
+      traefik.http.routers.gotofrigate.middlewares: "gotofrigate"
+      traefik.http.routers.gotofrigate.entrypoints: "websecure"
+      traefik.http.routers.gotofrigate.service: "noop@internal"
+      traefik.http.routers.gotofrigate.tls.certresolver: "letsencrypt"
+      traefik.http.middlewares.gotofrigate.redirectregex.regex: "^https://(.*){{ nas_domain }}/(.*)"
+      traefik.http.middlewares.gotofrigate.redirectregex.replacement: "https://frigate.{{ nas_domain }}/${2}"
+      traefik.http.middlewares.gotofrigate.redirectregex.permanent: "true"

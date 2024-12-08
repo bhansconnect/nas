@@ -1,0 +1,5 @@
+- name: restart frigate
+  docker_container:
+    name: frigate
+    state: started
+    restart: yes
