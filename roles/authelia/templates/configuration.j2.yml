@@ -74,6 +74,7 @@ access_control:
         - "radarr.{{ nas_domain }}"
         - "sonarr.{{ nas_domain }}"
         - "bazarr.{{ nas_domain }}"
+        - "frigate.{{ nas_domain }}"
         # Note: I disable kuma auth and use authelia.
         - "uptime.{{ nas_domain }}"
       networks: internal
@@ -86,6 +87,7 @@ access_control:
         - "radarr.{{ nas_domain }}"
         - "sonarr.{{ nas_domain }}"
         - "bazarr.{{ nas_domain }}"
+        - "frigate.{{ nas_domain }}"
         # Note: I disable kuma auth and use authelia.
         - "uptime.{{ nas_domain }}"
       subject: "group:admin"
