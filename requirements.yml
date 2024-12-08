@@ -6,7 +6,7 @@ roles:
 
   - name: weareinteractive.ufw
 
-  - name: jnv.unattended-upgrades
+  - name: hifis.unattended-upgrades
 
   - name: oefenweb.fail2ban
 

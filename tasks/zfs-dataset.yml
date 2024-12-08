@@ -94,3 +94,17 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "u=rwx,g=rwx,o=rwx"
+
+- name: "Ensure {{ nvr_dataset }} exists"
+  community.general.zfs:
+    name: "{{ nvr_dataset }}"
+    state: present
+    extra_zfs_properties:
+      com.sun:auto-snapshot: "false"
+
+- name: "Ensure {{ nvr_dir }} has correct permissions"
+  file:
+    path: "{{ nvr_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "u=rwx,g=rwx,o=rwx"

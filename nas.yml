@@ -79,7 +79,7 @@
           value: 0
         - name: net.ipv6.conf.all.accept_source_route
           value: 0
-    - role: jnv.unattended-upgrades
+    - role: hifis.unattended-upgrades
       unattended_automatic_reboot: yes
       unattended_automatic_reboot_time: 03:00
     - role: oefenweb.fail2ban
@@ -116,3 +116,4 @@
     - role: syncthing
     - role: photoprism
     - role: samba
+    - role: frigate
