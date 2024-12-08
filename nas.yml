@@ -85,6 +85,7 @@
     - role: oefenweb.fail2ban
     - role: geerlingguy.ntp
       ntp_timezone: "{{ nas_timezone }}"
+    - role: geerlingguy.pip
     - role: geerlingguy.docker
       docker_users:
         - "{{ ansible_user }}"

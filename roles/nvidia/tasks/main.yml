@@ -22,7 +22,9 @@
 
 - name: Fetch NVIDIA apt repository list
   get_url:
-    url: https://nvidia.github.io/nvidia-docker/{{ distribution }}/nvidia-docker.list
+    # TODO: change back to distribution when debian12 explicitly supported
+    # url: https://nvidia.github.io/nvidia-docker/{{ distribution }}/nvidia-docker.list
+    url: https://nvidia.github.io/nvidia-docker/debian11/nvidia-docker.list
     dest: /etc/apt/sources.list.d/nvidia-docker.list
 
 - name: Update apt caches and install nvidia-container-toolkit
