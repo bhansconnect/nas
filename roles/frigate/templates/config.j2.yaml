@@ -28,11 +28,11 @@ cameras:
           roles:
             - record
             - detect
-    onvif:
-      host: {{ frigate_config.ip }}
-      port: 80
-      user: {{ frigate_config.username }}
-      password: {{ frigate_config.password }}
+    # onvif:
+    #   host: {{ frigate_config.ip }}
+    #   port: 80
+    #   user: {{ frigate_config.username }}
+    #   password: {{ frigate_config.password }}
     record:
       enabled: true
       retain:
