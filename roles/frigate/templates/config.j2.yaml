@@ -10,6 +10,7 @@ auth:
 detectors:
   tensorrt:
     type: tensorrt
+    device: 0
 
 model:
   path: /config/model_cache/tensorrt/yolov7-320.trt
@@ -27,6 +28,8 @@ cameras:
         - path: rtsp://{{ frigate_config.username }}:{{ frigate_config.password }}@{{ frigate_config.ip }}:554/cam/realmonitor?channel=1&subtype=0
           roles:
             - record
+        - path: rtsp://{{ frigate_config.username }}:{{ frigate_config.password }}@{{ frigate_config.ip }}:554/cam/realmonitor?channel=1&subtype=1
+          roles:
             - detect
     # onvif:
     #   host: {{ frigate_config.ip }}
@@ -43,7 +46,7 @@ cameras:
           default: 30
           mode: motion
     detect:
-      enabled: false
+      enabled: true
       width: 640
       height: 480
       fps: 5
