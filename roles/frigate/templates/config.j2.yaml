@@ -60,7 +60,7 @@ cameras:
 
     # No need for silly people alerts
     review:
-      detections:
+      alerts:
         labels: []
 
 version: 0.14
