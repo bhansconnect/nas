@@ -12,6 +12,9 @@ detectors:
     type: tensorrt
     device: 0
 
+birdseye:
+  mode: continuous
+
 model:
   path: /config/model_cache/tensorrt/yolov7-320.trt
   input_tensor: nchw
@@ -29,6 +32,7 @@ cameras:
           roles:
             - record
             - detect
+    # TODO: load with onvif tool and create new acount. Theoretically will fix.
     # onvif:
     #   host: {{ frigate_config.ip }}
     #   port: 80
@@ -37,7 +41,7 @@ cameras:
     record:
       enabled: true
       retain:
-        days: 3
+        days: 10
         mode: all
       events:
         retain:
@@ -48,7 +52,13 @@ cameras:
       width: 1920
       height: 1080
       fps: 5
+
     motion:
       enabled: true
+
+    # No need for silly people alerts
+    review:
+      detections:
+        labels: []
 
 version: 0.14
