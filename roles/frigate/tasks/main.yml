@@ -25,15 +25,10 @@
     name: frigate
     image: ghcr.io/blakeblackshear/frigate:stable-tensorrt
     pull: true
-    shm_size: "64MB"
+    shm_size: "128MB"
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - "{{ frigate_dir }}:/config:rw"
       - "{{ nvr_dir }}:/media/frigate:rw"
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
-        target: /tmp/cache
-        tmpfs:
-          size: 1000000000
     ports:
       # - 8971:8971 # Authenticated port not needed.
       - 5000:5000 # Authelia protects this. So use unauthenticated port.

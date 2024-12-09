@@ -5,19 +5,49 @@ tls:
   enabled: false
 
 auth:
-  enabled: False
+  enabled: false
+
+detectors:
+  tensorrt:
+    type: tensorrt
+
+model:
+  path: /config/model_cache/tensorrt/yolov7-320.trt
+  input_tensor: nchw
+  input_pixel_format: rgb
+  width: 320
+  height: 320
 
 cameras:
   rhea_cam:
-    enabled: false
+    enabled: true
     ffmpeg:
+      hwaccel_args: preset-nvidia-h264
       inputs:
-        - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
+        - path: rtsp://{{ frigate_config.username }}:{{ frigate_config.password }}@{{ frigate_config.ip }}:554/cam/realmonitor?channel=1&subtype=0
           roles:
+            - record
             - detect
+    onvif:
+      host: {{ frigate_config.ip }}
+      port: 80
+      user: {{ frigate_config.username }}
+      password: {{ frigate_config.password }}
+    record:
+      enabled: false
+      retain:
+        days: 3
+        mode: all
+      events:
+        retain:
+          default: 30
+          mode: motion
     detect:
-      enabled: false # <---- disable detection until you have a working camera feed
-      width: 1280
-      height: 720
+      enabled: false
+      width: 640
+      height: 480
+      fps: 5
+    motion:
+      enabled: true
 
 version: 0.14
