@@ -35,7 +35,7 @@
 - name: traefik
   docker_container:
     name: traefik
-    image: traefik:v3.2
+    image: traefik:v3.3
     pull: true
     ports:
       - 80:80
