@@ -1,0 +1,5 @@
+- name: restart uptime-kuma
+  docker_container:
+    name: uptime-kuma
+    state: started
+    restart: yes
