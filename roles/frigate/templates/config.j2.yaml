@@ -7,10 +7,10 @@ tls:
 auth:
   enabled: false
 
-# detectors:
-#   tensorrt:
-#     type: tensorrt
-#     device: 0
+detectors:
+  tensorrt:
+    type: tensorrt
+    device: 0
 
 birdseye:
   mode: continuous
