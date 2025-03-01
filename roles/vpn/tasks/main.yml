@@ -58,9 +58,17 @@
       traefik.http.routers.transmission.tls.certresolver: "letsencrypt"
       traefik.http.routers.transmission.service: "transmission"
       traefik.http.services.transmission.loadbalancer.server.port: "9091"
+      # Uptime
+      traefik.http.routers.uptime-kuma.rule: "Host(`uptime.{{ nas_domain }}`)"
+      traefik.http.routers.uptime-kuma.middlewares: "authelia@docker"
+      traefik.http.routers.uptime-kuma.entrypoints: "websecure"
+      traefik.http.routers.uptime-kuma.tls.certresolver: "letsencrypt"
+      traefik.http.routers.uptime-kuma.service: "uptime-kuma"
+      traefik.http.services.uptime-kuma.loadbalancer.server.port: "3001"
   notify:
     - restart transmission
     - restart prowlarr
     - restart sonarr
     - restart radarr
     - restart bazarr
+    - restart uptime-kuma

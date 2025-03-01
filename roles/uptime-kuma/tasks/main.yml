@@ -26,13 +26,6 @@
       # TODO fix this. I want the ids of the ansible_user
       PUID: "1000"
       PGID: "1000"
-    networks:
-      - name: "traefik"
+    # Use vpn to check if website is running from outside.
+    network_mode: "container:vpn"
     restart_policy: unless-stopped
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.uptime_kuma.rule: "Host(`uptime.{{ nas_domain }}`)"
-      traefik.http.routers.uptime_kuma.middlewares: "authelia@docker"
-      traefik.http.routers.uptime_kuma.entrypoints: "websecure"
-      traefik.http.routers.uptime_kuma.tls.certresolver: "letsencrypt"
-      traefik.http.services.uptime_kuma.loadbalancer.server.port: "3001"
