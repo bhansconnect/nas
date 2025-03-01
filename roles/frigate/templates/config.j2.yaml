@@ -7,31 +7,30 @@ tls:
 auth:
   enabled: false
 
-detectors:
-  tensorrt:
-    type: tensorrt
-    device: 0
+# detectors:
+#   tensorrt:
+#     type: tensorrt
+#     device: 0
 
 birdseye:
   mode: continuous
 
-model:
-  path: /config/model_cache/tensorrt/yolov7-320.trt
-  input_tensor: nchw
-  input_pixel_format: rgb
-  width: 320
-  height: 320
+# model:
+#   path: /config/model_cache/tensorrt/yolov7-320.trt
+#   input_tensor: nchw
+#   input_pixel_format: rgb
+#   width: 320
+#   height: 320
 
 cameras:
   rhea_cam:
     enabled: true
     ffmpeg:
-      hwaccel_args: preset-nvidia-h264
+      # hwaccel_args: preset-nvidia-h264
       inputs:
         - path: rtsp://{{ frigate_config.username }}:{{ frigate_config.password }}@{{ frigate_config.ip }}:554/cam/realmonitor?channel=1&subtype=0
           roles:
             - record
-            - detect
     # TODO: load with onvif tool and create new acount. Theoretically will fix.
     # onvif:
     #   host: {{ frigate_config.ip }}
@@ -41,17 +40,8 @@ cameras:
     record:
       enabled: true
       retain:
-        days: 10
+        days: 30
         mode: all
-      events:
-        retain:
-          default: 30
-          mode: motion
-    detect:
-      enabled: false
-      width: 2560
-      height: 1440
-      fps: 5
 
     motion:
       enabled: true

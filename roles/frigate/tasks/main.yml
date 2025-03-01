@@ -23,7 +23,7 @@
 - name: frigate
   docker_container:
     name: frigate
-    image: ghcr.io/blakeblackshear/frigate:stable-tensorrt
+    image: ghcr.io/blakeblackshear/frigate:stable
     pull: true
     shm_size: "128MB"
     volumes:
@@ -42,8 +42,8 @@
       PUID: "1000"
       PGID: "1000"
       FRIGATE_PublishedServerUrl: "https://frigate.{{ nas_domain }}"
-      NVIDIA_VISIBLE_DEVICES: "all"
-      NVIDIA_DRIVER_CAPABILITIES: "all"
+      # NVIDIA_VISIBLE_DEVICES: "all"
+      # NVIDIA_DRIVER_CAPABILITIES: "all"
     networks:
       - name: "traefik"
     restart_policy: unless-stopped
