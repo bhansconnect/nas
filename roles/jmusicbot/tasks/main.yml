@@ -18,13 +18,14 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: u=rw,g=,o=
-  notify: restart jmusicbot
+  register: jmusicbot_config
 
 - name: jmusicbot
   docker_container:
     name: jmusicbot
     image: yojoshb/jmusicbot
     pull: false # Want manual control of updates due to less trusted source
+    restart: "{{ jmusicbot_config.changed }}"
     volumes:
       - "{{ jmusicbot_dir }}:/config:ro"
     env:

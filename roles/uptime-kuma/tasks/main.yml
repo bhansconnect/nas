@@ -19,6 +19,7 @@
     name: uptime-kuma
     image: louislam/uptime-kuma
     pull: true
+    restart: "{{ vpn_container.changed }}"
     volumes:
       - "{{ uptime_kuma_dir }}:/app/data:rw"
     env:

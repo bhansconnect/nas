@@ -1,5 +1,0 @@
-- name: restart radarr
-  docker_container:
-    name: radarr
-    state: started
-    restart: yes

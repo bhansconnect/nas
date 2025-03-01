@@ -26,7 +26,7 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: u=rw,g=rw,o=r
-  notify: restart traefik
+  register: traefik_config
 
 - name: Ensure traefik docker network exists
   docker_network:
@@ -37,6 +37,7 @@
     name: traefik
     image: traefik:v3.3
     pull: true
+    restart: "{{ traefik_config.changed }}"
     ports:
       - 80:80
       - 443:443

@@ -1,5 +1,0 @@
-- name: restart traefik
-  docker_container:
-    name: traefik
-    state: started
-    restart: yes

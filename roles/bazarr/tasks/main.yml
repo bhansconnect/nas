@@ -16,6 +16,7 @@
     name: bazarr
     image: linuxserver/bazarr
     pull: true
+    restart: "{{ vpn_container.changed }}"
     volumes:
       - "{{ bazarr_dir }}:/config:rw"
       - "{{ downloads_dir }}:/downloads:rw"

@@ -16,6 +16,7 @@
     name: prowlarr
     image: linuxserver/prowlarr:develop
     pull: true
+    restart: "{{ vpn_container.changed }}"
     volumes:
       - "{{ prowlarr_dir }}:/config:rw"
     env:

@@ -16,6 +16,7 @@
     name: sonarr
     image: linuxserver/sonarr
     pull: true
+    restart: "{{ vpn_container.changed }}"
     volumes:
       - "{{ sonarr_dir }}:/config:rw"
       - "{{ downloads_dir }}:/downloads:rw"

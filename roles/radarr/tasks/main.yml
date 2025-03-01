@@ -16,6 +16,7 @@
     name: radarr
     image: linuxserver/radarr
     pull: true
+    restart: "{{ vpn_container.changed }}"
     volumes:
       - "{{ radarr_dir }}:/config:rw"
       - "{{ downloads_dir }}:/downloads:rw"

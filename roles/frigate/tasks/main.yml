@@ -18,13 +18,14 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: u=rw,g=rw,o=r
-  notify: restart frigate
+  register: frigate_config
 
 - name: frigate
   docker_container:
     name: frigate
     image: ghcr.io/blakeblackshear/frigate:stable-tensorrt
     pull: true
+    restart: "{{ frigate_config.changed }}"
     shm_size: "128MB"
     volumes:
       - "{{ frigate_dir }}:/config:rw"

@@ -35,13 +35,15 @@
 #     owner: "{{ ansible_user }}"
 #     group: "{{ ansible_user }}"
 #     mode: u=rw,g=rw,o=r
-#   notify: restart transmission
+#   register: transmission_config
 
 - name: transmission
   docker_container:
     name: transmission
     image: linuxserver/transmission
     pull: true
+    # restart: "{{ vpn_container.changed or transmission_config.changed }}"
+    restart: "{{ vpn_container.changed }}"
     volumes:
       - "{{ transmission_dir }}/config:/config:rw"
       - "{{ downloads_dir }}:/downloads:rw"

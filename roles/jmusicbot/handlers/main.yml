@@ -1,5 +1,0 @@
-- name: restart jmusicbot
-  docker_container:
-    name: jmusicbot
-    state: started
-    restart: yes

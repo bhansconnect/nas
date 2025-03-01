@@ -65,10 +65,4 @@
       traefik.http.routers.uptime-kuma.tls.certresolver: "letsencrypt"
       traefik.http.routers.uptime-kuma.service: "uptime-kuma"
       traefik.http.services.uptime-kuma.loadbalancer.server.port: "3001"
-  notify:
-    - restart transmission
-    - restart prowlarr
-    - restart sonarr
-    - restart radarr
-    - restart bazarr
-    - restart uptime-kuma
+  register: vpn_container

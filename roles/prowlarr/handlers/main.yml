@@ -1,5 +1,0 @@
-- name: restart prowlarr
-  docker_container:
-    name: prowlarr
-    state: started
-    restart: yes

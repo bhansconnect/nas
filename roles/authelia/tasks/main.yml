@@ -18,7 +18,7 @@
     owner: "root"
     group: "root"
     mode: u=rw,g=r,o=r
-  notify: restart authelia
+  register: authelia_config
 
 - name: Set authelia user accounts
   template:
@@ -27,13 +27,14 @@
     owner: "root"
     group: "root"
     mode: u=rw,g=r,o=r
-  notify: restart authelia
+  register: authelia_accounts
 
 - name: authelia
   docker_container:
     name: authelia
     image: authelia/authelia
     pull: true
+    restart: "{{ authelia_config.changed or authelia_accounts.changed }}"
     volumes:
       - "{{ authelia_dir }}:/config:rw"
     env:
