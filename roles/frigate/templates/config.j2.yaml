@@ -15,18 +15,18 @@ detectors:
 birdseye:
   mode: continuous
 
-# model:
-#   path: /config/model_cache/tensorrt/yolov7-320.trt
-#   input_tensor: nchw
-#   input_pixel_format: rgb
-#   width: 320
-#   height: 320
+model:
+  path: /config/model_cache/tensorrt/yolov7-320.trt
+  input_tensor: nchw
+  input_pixel_format: rgb
+  width: 320
+  height: 320
 
 cameras:
   rhea_cam:
     enabled: true
     ffmpeg:
-      # hwaccel_args: preset-nvidia-h264
+      hwaccel_args: preset-nvidia-h264
       inputs:
         - path: rtsp://{{ frigate_config.username }}:{{ frigate_config.password }}@{{ frigate_config.ip }}:554/cam/realmonitor?channel=1&subtype=0
           roles:
