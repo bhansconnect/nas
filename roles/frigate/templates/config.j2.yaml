@@ -31,12 +31,14 @@ cameras:
         - path: rtsp://{{ frigate_config.username }}:{{ frigate_config.password }}@{{ frigate_config.ip }}:554/cam/realmonitor?channel=1&subtype=0
           roles:
             - record
+    
     # TODO: load with onvif tool and create new acount. Theoretically will fix.
     # onvif:
     #   host: {{ frigate_config.ip }}
     #   port: 80
     #   user: {{ frigate_config.username }}
     #   password: {{ frigate_config.password }}
+    
     record:
       enabled: true
       retain:
