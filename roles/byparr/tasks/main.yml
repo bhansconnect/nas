@@ -1,0 +1,25 @@
+---
+- name: "Ensure byparr dataset exists"
+  community.general.zfs:
+    name: "{{ byparr_dataset }}"
+    state: present
+
+- name: "Ensure byparr dir has correct permissions"
+  file:
+    path: "{{ byparr_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: u=rwx,g=rwx,o=rx
+
+- name: byparr
+  docker_container:
+    name: byparr
+    image: ghcr.io/thephaseless/byparr:latest
+    pull: true
+    restart: "{{ vpn_container.changed }}"
+    volumes:
+      - "{{ byparr_dir }}:/app/data:rw"
+    env:
+      TZ: "{{ nas_timezone }}"
+    network_mode: "container:vpn"
+    restart_policy: unless-stopped

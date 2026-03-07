@@ -65,4 +65,11 @@
       traefik.http.routers.uptime-kuma.tls.certresolver: "letsencrypt"
       traefik.http.routers.uptime-kuma.service: "uptime-kuma"
       traefik.http.services.uptime-kuma.loadbalancer.server.port: "3001"
+      # Byparr
+      traefik.http.routers.byparr.rule: "Host(`byparr.{{ nas_domain }}`)"
+      traefik.http.routers.byparr.middlewares: "authelia@docker"
+      traefik.http.routers.byparr.entrypoints: "websecure"
+      traefik.http.routers.byparr.tls.certresolver: "letsencrypt"
+      traefik.http.routers.byparr.service: "byparr"
+      traefik.http.services.byparr.loadbalancer.server.port: "8191"
   register: vpn_container

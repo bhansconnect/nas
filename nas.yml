@@ -102,6 +102,7 @@
     - role: watchtower
     - role: openspeedtest
     - role: transmission
+    - role: byparr
     - role: prowlarr
     - role: radarr
     - role: sonarr
