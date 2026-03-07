@@ -35,7 +35,7 @@
 - name: traefik
   docker_container:
     name: traefik
-    image: traefik:v3.3
+    image: traefik:v3.6
     pull: true
     restart: "{{ traefik_config.changed }}"
     ports:
