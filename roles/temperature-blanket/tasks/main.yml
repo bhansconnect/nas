@@ -1,0 +1,34 @@
+---
+- name: Create temperature-blanket directory
+  file:
+    path: "{{ docker_dir }}/temperature-blanket"
+    state: directory
+
+- name: Copy temperature-blanket files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ docker_dir }}/temperature-blanket/{{ item }}"
+  loop:
+    - index.html
+    - styles.css
+    - app.js
+
+- name: temperature-blanket
+  docker_container:
+    name: temperature-blanket
+    image: nginx:alpine
+    pull: true
+    env:
+      TZ: "{{ nas_timezone }}"
+    volumes:
+      - "{{ docker_dir }}/temperature-blanket:/usr/share/nginx/html:ro"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.temperature-blanket.rule: "Host(`temp.{{ nas_domain }}`)"
+      traefik.http.routers.temperature-blanket.middlewares: "authelia@docker"
+      traefik.http.routers.temperature-blanket.entrypoints: "websecure"
+      traefik.http.routers.temperature-blanket.tls.certresolver: "letsencrypt"
+      traefik.http.services.temperature-blanket.loadbalancer.server.port: "80"

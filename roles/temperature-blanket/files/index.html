@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temperature Blanket — Visualize Any City's Year in Color</title>
+  <meta name="description" content="Turn any city's temperature data into a beautiful knitting blanket pattern. Explore seasonal variation across cities worldwide." />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <svg class="logo-icon" viewBox="0 0 32 32" fill="none" aria-label="Temperature Blanket logo">
+        <rect x="2" y="6" width="28" height="3" rx="1.5" fill="#7ec8e3"/>
+        <rect x="2" y="11" width="28" height="3" rx="1.5" fill="#a8d8a8"/>
+        <rect x="2" y="16" width="28" height="3" rx="1.5" fill="#f9f06e"/>
+        <rect x="2" y="21" width="28" height="3" rx="1.5" fill="#ff9f43"/>
+        <rect x="2" y="26" width="28" height="3" rx="1.5" fill="#e84545"/>
+      </svg>
+      <span class="logo-text">TempBlanket</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-icon" id="btn-theme" title="Toggle theme" data-testid="button-theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-download" data-testid="button-download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-left"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export PNG
+      </button>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <div class="app-layout">
+
+    <!-- Sidebar controls -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-scroll">
+
+        <!-- Cities section -->
+        <section class="control-section">
+          <h2 class="section-title">Cities <span class="section-hint">auto-updates on change</span></h2>
+          <div class="city-search-wrap">
+            <div class="search-input-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="city-search" class="input" placeholder="Search any city…" autocomplete="off" data-testid="input-city-search" />
+              <button class="search-clear hidden" id="search-clear" aria-label="Clear search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="search-results hidden" id="search-results"></div>
+          </div>
+          <div class="city-chips" id="city-chips"></div>
+          <p class="hint-text" id="city-hint">Search any city — blanket updates automatically</p>
+        </section>
+
+        <!-- Date range -->
+        <section class="control-section">
+          <h2 class="section-title">Blanket Year</h2>
+          <div class="preset-pills" id="year-pills">
+            <!-- populated by JS -->
+          </div>
+          <div class="date-inputs hidden" id="custom-range-inputs">
+            <div class="form-row">
+              <label class="form-label">Start</label>
+              <input type="date" id="date-start" class="input" data-testid="input-date-start" />
+            </div>
+            <div class="form-row">
+              <label class="form-label">End</label>
+              <input type="date" id="date-end" class="input" data-testid="input-date-end" />
+            </div>
+          </div>
+          <span class="date-range-text" id="date-range-text"></span>
+        </section>
+
+        <!-- Baseline -->
+        <section class="control-section">
+          <h2 class="section-title">Baseline (for scale)</h2>
+          <div class="preset-pills" id="baseline-pills">
+            <!-- populated by JS -->
+          </div>
+          <div class="date-inputs hidden" id="baseline-custom-inputs">
+            <div class="form-row">
+              <label class="form-label">Start</label>
+              <input type="date" id="baseline-start" class="input" />
+            </div>
+            <div class="form-row">
+              <label class="form-label">End</label>
+              <input type="date" id="baseline-end" class="input" />
+            </div>
+          </div>
+          <p class="hint-text">Percentile boundaries are computed from this period, not the blanket year.</p>
+        </section>
+
+        <!-- Scale mode -->
+        <section class="control-section">
+          <h2 class="section-title">Scale Mode</h2>
+          <div class="radio-group">
+            <label class="radio-option" data-testid="scale-pooled">
+              <input type="radio" name="scale" value="pooled" checked />
+              <span class="radio-label">
+                <span class="radio-title">Pooled</span>
+                <span class="radio-desc">All cities share one scale</span>
+              </span>
+            </label>
+            <label class="radio-option" data-testid="scale-anchor">
+              <input type="radio" name="scale" value="anchor" />
+              <span class="radio-label">
+                <span class="radio-title">Anchor city</span>
+                <span class="radio-desc">One city sets the scale</span>
+              </span>
+            </label>
+          </div>
+          <div class="hidden" id="anchor-selector">
+            <select class="input" id="anchor-city" data-testid="select-anchor-city">
+              <option value="">Select anchor city…</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Bucket mode -->
+        <section class="control-section">
+          <h2 class="section-title">Color Zones</h2>
+          <div class="radio-group">
+            <label class="radio-option" data-testid="bucket-dense12">
+              <input type="radio" name="bucket" value="dense12" checked />
+              <span class="radio-label">
+                <span class="radio-title">Dense middle · 12 zones</span>
+                <span class="radio-desc">Narrow IQR bands + extreme tails</span>
+              </span>
+            </label>
+            <label class="radio-option" data-testid="bucket-dense10">
+              <input type="radio" name="bucket" value="dense10" />
+              <span class="radio-label">
+                <span class="radio-title">Dense middle · 10 zones</span>
+                <span class="radio-desc">No super-extreme tail colors</span>
+              </span>
+            </label>
+            <label class="radio-option" data-testid="bucket-uniform-pct">
+              <input type="radio" name="bucket" value="uniform-pct" />
+              <span class="radio-label">
+                <span class="radio-title">Uniform percentile</span>
+                <span class="radio-desc">Equal deciles (p0–10, 10–20…)</span>
+              </span>
+            </label>
+            <label class="radio-option" data-testid="bucket-uniform-temp">
+              <input type="radio" name="bucket" value="uniform-temp" />
+              <span class="radio-label">
+                <span class="radio-title">Uniform temperature</span>
+                <span class="radio-desc">Equal °F width across range</span>
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Color palette -->
+        <section class="control-section">
+          <h2 class="section-title">Color Palette</h2>
+          <div class="palette-grid" id="palette-grid">
+            <!-- populated by JS -->
+          </div>
+          <div class="custom-colors hidden" id="custom-colors">
+            <p class="hint-text">Click a swatch to edit</p>
+            <div class="swatch-row" id="swatch-row"></div>
+          </div>
+          <div class="gradient-pickers hidden" id="gradient-pickers">
+            <div class="gradient-picker-row">
+              <label class="gradient-label">Cold end</label>
+              <input type="color" id="gradient-start" value="#003a6d" class="color-picker" />
+              <div class="gradient-preview" id="gradient-preview"></div>
+              <input type="color" id="gradient-end" value="#750e13" class="color-picker" />
+              <label class="gradient-label">Hot end</label>
+            </div>
+            <p class="hint-text">Colors are linearly interpolated across all zones</p>
+          </div>
+        </section>
+
+        <!-- Options -->
+        <section class="control-section">
+          <h2 class="section-title">Options</h2>
+          <label class="toggle-row" data-testid="toggle-sh-shift">
+            <span class="toggle-label">
+              <span>Shift southern hemisphere</span>
+              <span class="toggle-desc">+6 months for seasonal alignment</span>
+            </span>
+            <div class="toggle-switch">
+              <input type="checkbox" id="toggle-sh" checked />
+              <span class="toggle-knob"></span>
+            </div>
+          </label>
+          <label class="toggle-row" data-testid="toggle-fahrenheit">
+            <span class="toggle-label">
+              <span>Display in Fahrenheit</span>
+              <span class="toggle-desc">Off = Celsius</span>
+            </span>
+            <div class="toggle-switch">
+              <input type="checkbox" id="toggle-fahrenheit" checked />
+              <span class="toggle-knob"></span>
+            </div>
+          </label>
+        </section>
+
+        <!-- spacer -->
+
+      </div>
+    </aside>
+
+    <!-- Main canvas area -->
+    <main class="canvas-area" id="canvas-area">
+      <!-- Loading state -->
+      <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p class="loading-text" id="loading-text">Fetching weather data…</p>
+          <div class="loading-progress">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-illustration">
+          <svg viewBox="0 0 120 80" fill="none" class="empty-svg">
+            <rect x="10" y="10" width="100" height="8" rx="4" fill="#7ec8e3" opacity="0.4"/>
+            <rect x="10" y="22" width="100" height="8" rx="4" fill="#a8d8a8" opacity="0.4"/>
+            <rect x="10" y="34" width="100" height="8" rx="4" fill="#f9f06e" opacity="0.5"/>
+            <rect x="10" y="46" width="100" height="8" rx="4" fill="#ff9f43" opacity="0.5"/>
+            <rect x="10" y="58" width="100" height="8" rx="4" fill="#e84545" opacity="0.4"/>
+          </svg>
+        </div>
+        <h2 class="empty-title">Add cities to begin</h2>
+        <p class="empty-desc">Search for any city worldwide — each day of the year becomes a colored row based on the high temperature. The blanket updates automatically as you make selections.</p>
+      </div>
+
+      <!-- Error state -->
+      <div class="error-state hidden" id="error-state">
+        <p class="error-text" id="error-text"></p>
+        <button class="btn btn-ghost btn-sm" id="btn-retry">Retry</button>
+      </div>
+
+      <!-- Blanket canvas container -->
+      <div class="blanket-container hidden" id="blanket-container">
+        <!-- Zoom controls -->
+        <div class="zoom-controls">
+          <button class="btn btn-ghost btn-icon btn-sm" id="btn-zoom-in" title="Zoom in" data-testid="button-zoom-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <span class="zoom-level" id="zoom-level">100%</span>
+          <button class="btn btn-ghost btn-icon btn-sm" id="btn-zoom-out" title="Zoom out" data-testid="button-zoom-out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <button class="btn btn-ghost btn-icon btn-sm" id="btn-zoom-reset" title="Reset zoom" data-testid="button-zoom-reset">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+        </div>
+
+        <!-- Canvas wrapper (pan/zoom target) -->
+        <div class="canvas-scroll-wrap" id="canvas-scroll-wrap">
+          <div class="canvas-transform-wrap" id="canvas-transform-wrap">
+            <div class="blanket-columns" id="blanket-columns">
+              <!-- columns injected by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tooltip -->
+      <div class="tooltip hidden" id="tooltip">
+        <div class="tooltip-city" id="tooltip-city"></div>
+        <div class="tooltip-date" id="tooltip-date"></div>
+        <div class="tooltip-temp" id="tooltip-temp"></div>
+        <div class="tooltip-zone" id="tooltip-zone"></div>
+      </div>
+    </main>
+
+    <!-- Legend panel -->
+    <aside class="legend-panel" id="legend-panel">
+      <h2 class="section-title">Legend</h2>
+      <div class="legend-items" id="legend-items">
+        <!-- populated by JS -->
+      </div>
+      <div class="legend-stats hidden" id="legend-stats">
+        <h3 class="stats-title">Selected City Stats</h3>
+        <div class="stats-grid" id="stats-grid"></div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Per-city override popover (shared, single instance) -->
+  <div class="col-popover hidden" id="col-popover">
+    <div class="popover-section">
+      <div class="popover-label">City</div>
+      <div class="city-search-wrap" style="position:relative">
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="popover-city-search" class="input" placeholder="Change city…" autocomplete="off" />
+        </div>
+        <div class="search-results hidden" id="popover-city-results"></div>
+      </div>
+    </div>
+    <div class="popover-section">
+      <div class="popover-label">Year</div>
+      <div class="popover-year-pills" id="popover-year-pills"></div>
+      <div class="popover-custom-dates hidden" id="popover-custom-dates">
+        <div class="popover-date-row">
+          <input type="date" id="popover-date-start" class="input input-sm" />
+          <span class="popover-date-sep">→</span>
+          <input type="date" id="popover-date-end" class="input input-sm" />
+        </div>
+      </div>
+    </div>
+    <div class="popover-section">
+      <div class="popover-label">Color Palette</div>
+      <div class="popover-palette-grid" id="popover-palette-grid"></div>
+    </div>
+    <div class="popover-section">
+      <div class="popover-label">Zone Scheme</div>
+      <div class="popover-zones" id="popover-zones"></div>
+    </div>
+    <button class="btn btn-ghost btn-sm btn-full" id="popover-reset">Reset to global defaults</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -101,6 +101,7 @@
     - role: endlessh
     - role: watchtower
     - role: openspeedtest
+    - role: temperature-blanket
     - role: transmission
     - role: byparr
     - role: prowlarr
