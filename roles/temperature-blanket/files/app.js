@@ -555,7 +555,7 @@ function addCity(city) {
   state.cities.push({ ...city, id, isSH, overrides: {} });
   renderCityChips();
   updateAnchorSelector();
-  $('city-hint').classList.add('hidden');
+  const hint = $('city-hint'); if (hint) hint.classList.add('hidden');
   scheduleGenerate();
 }
 
@@ -584,24 +584,8 @@ function duplicateCity(id) {
   scheduleGenerate();
 }
 
-const CHIP_COLORS = ['#7ec8e3','#a8d8a8','#ffc857','#ff9f43','#e84545','#ce93d8','#80cbc4','#ffb74d','#f48fb1','#b0bec5'];
-
 function renderCityChips() {
-  const container = $('city-chips');
-  container.innerHTML = state.cities.map((c, i) => `
-    <div class="city-chip" data-id="${c.id}">
-      <div class="chip-dot" style="background:${CHIP_COLORS[i % CHIP_COLORS.length]}"></div>
-      <div class="chip-info">
-        <div class="chip-name">${escHtml(c.name)}${c.isSH ? ' <span class="chip-badge">SH</span>' : ''}</div>
-        <div class="chip-meta">${escHtml(c.country)}${c.admin ? ' · '+escHtml(c.admin) : ''}</div>
-      </div>
-      <div class="chip-actions">
-        <button class="chip-btn remove" title="Remove" onclick="removeCity('${c.id}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-    </div>
-  `).join('');
+  // No-op: city chips removed from sidebar; cities shown as column headers in canvas
 }
 
 function updateAnchorSelector() {
@@ -997,7 +981,7 @@ function computeColWidth() {
   const nCities    = state.rendered.length;
   const availW     = canvasArea.clientWidth - padding - monthColW;
   const colW       = Math.floor((availW - gap * (nCities - 1)) / nCities);
-  return Math.min(200, Math.max(40, colW));
+  return Math.min(600, Math.max(40, colW));
 }
 
 function buildColHeader(rd, cityIdx) {
@@ -1541,33 +1525,143 @@ function initDownload() {
 
 function downloadPNG() {
   if (!state.rendered.length) return;
-  const colors  = getCurrentColors();
-  const nZones  = colors.length;
-  const rowH    = +document.querySelector('.city-canvas')?.dataset.rowH || ROW_H;
-  const colW    = document.querySelector('.city-canvas')?.width || 50;
-  const nDays   = state.rendered[0].dates.length;
-  const margin  = 8, labelH = 28;
-  const totalW  = state.rendered.length * (colW + margin) + margin;
-  const totalH  = nDays * rowH + labelH + margin * 2;
+
+  const rowH   = +document.querySelector('.city-canvas')?.dataset.rowH || ROW_H;
+  const nDays  = state.rendered[0].dates.length;
+  const nCities = state.rendered.length;
+
+  // Layout constants
+  const pad        = 20;
+  const headerH    = 60;   // city name + chip labels
+  const monthColW  = 50;   // month labels on left
+  const legendW    = 180;  // legend panel on right
+  const colW       = 120;  // per-city column width
+  const colGap     = 12;
+
+  const blanketW   = nCities * colW + (nCities - 1) * colGap;
+  const blanketH   = nDays * rowH;
+  const totalW     = pad + monthColW + blanketW + pad + legendW + pad;
+  const totalH     = pad + headerH + blanketH + pad;
 
   const off = document.createElement('canvas');
   off.width = totalW; off.height = totalH;
   const ctx = off.getContext('2d');
+
+  // Background
   ctx.fillStyle = '#0d0f14';
   ctx.fillRect(0, 0, totalW, totalH);
 
+  const blanketTop = pad + headerH;
+  const blanketLeft = pad + monthColW;
+
+  // ── Column headers + blanket data ──
   state.rendered.forEach((rd, i) => {
-    const x = margin + i * (colW + margin);
-    ctx.fillStyle = '#9aa0b8'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(rd.city.name, x + colW/2, margin + 10);
+    const city   = rd.city;
+    const eff    = getCityEffective(city);
+    const colors = getCityColors(city);
+    const nZones = colors.length;
+    const x      = blanketLeft + i * (colW + colGap);
+
+    // City name
+    ctx.fillStyle = '#e8eaf0';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${city.name}, ${city.country}`, x + colW / 2, pad + 16);
+
+    // Metadata chips: year, palette, zone
+    const ov = city.overrides || {};
+    let yearLabel;
+    if (ov.dateMode === 'custom-range') {
+      yearLabel = 'Custom';
+    } else {
+      const yr = ov.year != null ? ov.year : (state.customYear || lastYear());
+      yearLabel = String(yr);
+    }
+    const palLabel  = PALETTES[eff.palette]?.name || eff.palette;
+    const zoneLabel = (BUCKET_MODES[eff.bucketMode]?.name || eff.bucketMode)
+      .replace('Dense Middle · ', 'Dense·')
+      .replace('Uniform Percentile', 'Uni-Pct')
+      .replace('Uniform Temp', 'Uni-°');
+
+    ctx.fillStyle = '#9aa0b8';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(`${yearLabel}  ·  ${palLabel}  ·  ${zoneLabel}`, x + colW / 2, pad + 34);
+
+    // Blanket rows
     rd.zones.forEach((zone, dayIdx) => {
-      ctx.fillStyle = zone >= 0 ? colors[Math.min(zone, nZones-1)] : '#2a2a2a';
-      ctx.fillRect(x, labelH + margin + dayIdx * rowH, colW, rowH);
+      ctx.fillStyle = zone >= 0 ? colors[Math.min(zone, nZones - 1)] : '#2a2a2a';
+      ctx.fillRect(x, blanketTop + dayIdx * rowH, colW, rowH);
     });
   });
 
+  // ── Month labels (left side) ──
+  const refDates = state.rendered[0]?.dates || [];
+  let lastMonth = null;
+  ctx.fillStyle = '#9aa0b8';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'right';
+  refDates.forEach((d, i) => {
+    const dt = new Date(d + 'T12:00:00');
+    const m  = dt.getMonth();
+    if (m !== lastMonth) {
+      let label = dt.toLocaleDateString('en-US', { month: 'short' });
+      if (m === 0) label += ` '${String(dt.getFullYear()).slice(2)}`;
+      const y = blanketTop + i * rowH + rowH * 0.5 + 4;
+      ctx.fillText(label, pad + monthColW - 8, y);
+      lastMonth = m;
+    }
+  });
+
+  // ── Legend panel (right side) ──
+  const legendX = pad + monthColW + blanketW + pad;
+  const legendTop = blanketTop;
+
+  // Use first city's bounds as representative
+  const bounds = state.rendered[0]?.bounds;
+  const colors = getCurrentColors();
+  const nZones = colors.length;
+  const names  = nZones === 12
+    ? ZONE_NAMES_12
+    : (state.bucketMode === 'uniform-pct' ? ZONE_NAMES_UNIFORM : ZONE_NAMES_10);
+  const mode = BUCKET_MODES[state.bucketMode];
+
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillStyle = '#9aa0b8';
+  ctx.textAlign = 'left';
+  ctx.fillText('Legend', legendX, legendTop + 14);
+
+  const swatchSize = 16;
+  const lineH = 36;
+  const startY = legendTop + 30;
+
+  for (let i = 0; i < nZones; i++) {
+    const y = startY + i * lineH;
+
+    // Swatch
+    ctx.fillStyle = colors[i];
+    ctx.beginPath();
+    ctx.roundRect(legendX, y, swatchSize, swatchSize, 3);
+    ctx.fill();
+
+    // Range label
+    const pLo = mode.bounds ? mode.bounds[i] : i * 10;
+    const pHi = mode.bounds ? mode.bounds[i + 1] : (i + 1) * 10;
+    const rangeLabel = bounds
+      ? `${tempFmt(bounds[i])}–${tempFmt(bounds[i + 1])}`
+      : `p${pLo}–${pHi}`;
+
+    ctx.fillStyle = '#e8eaf0';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(rangeLabel, legendX + swatchSize + 8, y + 8);
+
+    // Zone name
+    ctx.fillStyle = '#9aa0b8';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(names[i] || `zone ${i + 1}`, legendX + swatchSize + 8, y + 22);
+  }
+
   const link = document.createElement('a');
-  link.download = `blanket-${getDateRange().start?.slice(0,4) || 'custom'}.png`;
+  link.download = `blanket-${getDateRange().start?.slice(0, 4) || 'custom'}.png`;
   link.href = off.toDataURL('image/png');
   link.click();
 }

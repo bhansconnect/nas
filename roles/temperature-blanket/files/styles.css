@@ -706,8 +706,8 @@ select.input { cursor: pointer; }
   flex-shrink: 0;
 }
 .month-label-item {
-  font-size: 9px;
-  color: var(--color-text-3);
+  font-size: 12px;
+  color: var(--color-text-2);
   line-height: 1;
   white-space: nowrap;
 }
@@ -765,14 +765,16 @@ select.input { cursor: pointer; }
 .legend-item.highlighted { background: var(--color-surface-2); border-color: var(--color-border-2); }
 .legend-item.dimmed { opacity: 0.35; }
 .legend-swatch {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 3px;
   flex-shrink: 0;
 }
 .legend-info { flex: 1; min-width: 0; }
-.legend-range { font-size: 10px; font-weight: 600; color: var(--color-text); display: block; }
-.legend-name { font-size: 9px; color: var(--color-text-3); display: block; }
+.legend-range { font-size: 13px; font-weight: 600; color: var(--color-text); display: block; }
+.legend-name { font-size: 12px; color: var(--color-text-2); display: block; }
+
+.legend-panel .section-title { font-size: var(--text-sm); color: var(--color-text-2); }
 
 /* ── Stats ───────────────────────────────────────────────── */
 .stats-title {
