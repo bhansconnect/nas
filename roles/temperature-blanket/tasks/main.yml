@@ -1,13 +1,13 @@
 ---
-- name: Create temperature-blanket directory
-  file:
-    path: "{{ docker_dir }}/temperature-blanket"
-    state: directory
+- name: "Ensure temperature-blanket dataset exists"
+  community.general.zfs:
+    name: "{{ temperature_blanket_dataset }}"
+    state: present
 
 - name: Copy temperature-blanket files
   copy:
     src: "{{ item }}"
-    dest: "{{ docker_dir }}/temperature-blanket/{{ item }}"
+    dest: "{{ temperature_blanket_dir }}/{{ item }}"
   loop:
     - index.html
     - styles.css
@@ -21,7 +21,7 @@
     env:
       TZ: "{{ nas_timezone }}"
     volumes:
-      - "{{ docker_dir }}/temperature-blanket:/usr/share/nginx/html:ro"
+      - "{{ temperature_blanket_dir }}:/usr/share/nginx/html:ro"
     networks:
       - name: "traefik"
     restart_policy: unless-stopped
