@@ -531,6 +531,17 @@ document.addEventListener('DOMContentLoaded', () => {
   initShareButton();
   $('btn-reset').addEventListener('click', resetAllState);
 
+  // Reload state when URL hash changes (e.g. pasting a share link in same tab)
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash.startsWith('#state=')) {
+      const saved = loadSavedState();
+      if (saved && applySavedState(saved)) {
+        restoreUIFromState();
+        if (state.cities.length > 0) scheduleGenerate();
+      }
+    }
+  });
+
   // Try to restore saved state (URL hash > localStorage > defaults)
   const saved = loadSavedState();
   if (saved && applySavedState(saved)) {
@@ -734,6 +745,19 @@ function removeCity(id) {
   updateAnchorSelector();
   if (state.cities.length === 0) { showEmpty(); return; }
   scheduleGenerate();
+}
+
+function reorderCity(fromIdx, toIdx) {
+  if (fromIdx === toIdx) return;
+  const [moved] = state.cities.splice(fromIdx, 1);
+  state.cities.splice(toIdx, 0, moved);
+  // Reorder rendered data to match without re-fetching
+  if (state.rendered.length > 0) {
+    const [movedRd] = state.rendered.splice(fromIdx, 1);
+    state.rendered.splice(toIdx, 0, movedRd);
+  }
+  renderBlankets();
+  saveToLocalStorage();
 }
 
 function duplicateCity(id) {
@@ -1210,6 +1234,7 @@ function buildColHeader(rd, cityIdx) {
 
   const header = document.createElement('div');
   header.className = 'col-header';
+  header.draggable = true;
   header.dataset.cityId = city.id;
 
   header.innerHTML = `
@@ -1228,6 +1253,20 @@ function buildColHeader(rd, cityIdx) {
       </div>
     </div>
   `;
+
+  // Drag-to-reorder
+  header.addEventListener('dragstart', e => {
+    if (e.target.closest('.col-btn')) { e.preventDefault(); return; }
+    const col = header.closest('.blanket-city-col');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', cityIdx);
+    requestAnimationFrame(() => col.classList.add('is-dragging'));
+  });
+  header.addEventListener('dragend', () => {
+    const col = header.closest('.blanket-city-col');
+    col.classList.remove('is-dragging');
+    document.querySelectorAll('.blanket-city-col.drag-over').forEach(el => el.classList.remove('drag-over'));
+  });
 
   // Open popover on click (not on button clicks)
   header.addEventListener('click', e => {
@@ -1292,6 +1331,23 @@ function renderBlankets() {
     // Rich column header
     const header = buildColHeader(rd, cityIdx);
     col.appendChild(header);
+
+    // Drop-target events for drag-to-reorder
+    col.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave', e => {
+      if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+    });
+    col.addEventListener('drop', e => {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      const toIdx = cityIdx;
+      if (!isNaN(fromIdx)) reorderCity(fromIdx, toIdx);
+    });
 
     const canvasWrap = document.createElement('div');
     canvasWrap.className = 'blanket-canvas-wrap';
