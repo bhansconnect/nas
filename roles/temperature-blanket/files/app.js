@@ -22,24 +22,12 @@ const ZONE_NAMES_10 = ['extreme cold','cold','cool','mild-low','mid-low','mid-hi
 const ZONE_NAMES_UNIFORM = ['zone 1','zone 2','zone 3','zone 4','zone 5','zone 6','zone 7','zone 8','zone 9','zone 10'];
 
 const PALETTES = {
-  // ── Thermal: deep navy → cyan → green-yellow → amber → deep crimson
-  // Rich, symmetric diverging scale. Cold end goes to true navy, hot end to
-  // near-black red. Midpoint is a warm neutral yellow-green.
+  // ── Thermal: classic diverging blue → yellow → red
   thermal: {
     name: 'Thermal',
     colors12: [
-      '#003a6d', // deep navy          — super extreme cold
-      '#0072c3', // strong blue         — extreme cold
-      '#33b1ff', // sky blue            — cold
-      '#82cfff', // light blue          — cool
-      '#bae6ff', // pale blue           — mild-low
-      '#f6f2c0', // warm cream          — mid-low
-      '#ffe57a', // golden yellow       — mid-high
-      '#ff9f43', // amber               — mild-high
-      '#ff6b35', // orange-red          — warm
-      '#da1e28', // true red            — hot
-      '#750e13', // deep crimson        — extreme hot
-      '#2a0000', // near-black red      — super extreme hot
+      '#003a6d', '#0072c3', '#33b1ff', '#82cfff', '#bae6ff', '#f6f2c0',
+      '#ffe57a', '#ff9f43', '#ff6b35', '#da1e28', '#750e13', '#2a0000',
     ],
     colors10: [
       '#0072c3', '#33b1ff', '#82cfff', '#bae6ff',
@@ -47,126 +35,133 @@ const PALETTES = {
     ],
   },
 
-  // ── Earthy: true earth tones — slate → clay → wheat → terracotta → umber
-  // Inspired by landscape: blue-grey winter soil, sage spring, dry wheat summer,
-  // terracotta fall, deep umber heat.
-  earthy: {
-    name: 'Earthy',
+  // ── Rainbow: classic weather-map rainbow, maximum contrast
+  rainbow: {
+    name: 'Rainbow',
     colors12: [
-      '#2d3a4a', // dark slate           — super extreme cold
-      '#4a6378', // steel blue-grey      — extreme cold
-      '#6b8fa3', // weathered blue       — cold
-      '#8aab8c', // sage green           — cool
-      '#b5c99a', // light sage           — mild-low
-      '#d9c88a', // dry wheat            — mid-low
-      '#c9a84c', // golden straw         — mid-high
-      '#b8763a', // warm clay            — mild-high
-      '#964028', // terracotta           — warm
-      '#6e2318', // burnt sienna         — hot
-      '#4a1208', // deep umber           — extreme hot
-      '#1e0500', // charred              — super extreme hot
+      '#4B0082', '#7B2D8E', '#2851A4', '#4682B4', '#2E8B8B', '#2E8B57',
+      '#7CCD7C', '#FFD700', '#FFAA00', '#FF6B00', '#E23D28', '#990000',
     ],
     colors10: [
-      '#4a6378', '#6b8fa3', '#8aab8c', '#b5c99a',
-      '#d9c88a', '#c9a84c', '#b8763a', '#964028', '#6e2318', '#4a1208',
+      '#7B2D8E', '#2851A4', '#4682B4', '#2E8B8B',
+      '#2E8B57', '#FFD700', '#FFAA00', '#FF6B00', '#E23D28', '#990000',
     ],
   },
 
-  // ── Pastel: soft washed tones — lavender fog → mint → butter → peach → rose
-  // Like a watercolor painting of seasons. Gentle enough for cozy knitting.
-  pastel: {
-    name: 'Pastel',
+  // ── Jewel Tones: rich saturated gemstone colors
+  jewel: {
+    name: 'Jewel Tones',
     colors12: [
-      '#4a5080', // deep periwinkle      — super extreme cold (darkest cold)
-      '#7080c0', // medium periwinkle    — extreme cold
-      '#9daee0', // soft cornflower      — cold
-      '#a8d4e8', // powder blue          — cool
-      '#b8e8d0', // seafoam mint         — mild-low
-      '#e8f0b0', // pale green-yellow    — mid-low
-      '#f5e898', // soft butter          — mid-high
-      '#f5cc88', // warm peach           — mild-high
-      '#f0a890', // coral                — warm
-      '#e87890', // rose                 — hot
-      '#c04870', // deep rose            — extreme hot
-      '#802050', // plum (darkest hot)   — super extreme hot
+      '#2D1B69', '#0F52BA', '#0D7377', '#046307', '#6B8E23', '#E4A010',
+      '#D49B3A', '#CC5500', '#9B111E', '#733635', '#913067', '#6C3082',
     ],
     colors10: [
-      '#7080c0', '#9daee0', '#a8d4e8', '#b8e8d0',
-      '#e8f0b0', '#f5e898', '#f5cc88', '#f0a890', '#e87890', '#c04870',
+      '#0F52BA', '#0D7377', '#046307', '#6B8E23',
+      '#E4A010', '#CC5500', '#9B111E', '#733635', '#913067', '#6C3082',
     ],
   },
 
-  // ── Sunset: indigo night → purple dusk → magenta → gold → ivory noon
-  // Reversed: cool is deep indigo/night, warm is blazing gold/ivory.
-  // Dramatic and beautiful for a single-city blanket.
-  sunset: {
-    name: 'Sunset',
-    colors12: [
-      '#0d0221', // midnight indigo      — super extreme cold
-      '#2d1b69', // deep violet          — extreme cold
-      '#5e30a0', // purple               — cold
-      '#9b4dca', // amethyst             — cool
-      '#d466cc', // orchid               — mild-low
-      '#f07fb0', // hot pink             — mid-low
-      '#f5a05a', // amber orange         — mid-high
-      '#f5c842', // golden yellow        — mild-high
-      '#f5e87a', // pale gold            — warm
-      '#fff5c0', // ivory                — hot
-      '#fffae8', // near white           — extreme hot
-      '#ffffff', // white hot            — super extreme hot
-    ],
-    colors10: [
-      '#2d1b69', '#5e30a0', '#9b4dca', '#d466cc',
-      '#f07fb0', '#f5a05a', '#f5c842', '#f5e87a', '#fff5c0', '#fffae8',
-    ],
-  },
-
-  // ── Ocean: abyssal trench → deep sea → reef → tropics → bleached
-  // Deep ocean bottom (near-black) rises through deep navy, teal, turquoise,
-  // to the bleached white of shallow tropical water in heat.
+  // ── Ocean: deep abyss → teal → seafoam → warm sand → coral
   ocean: {
     name: 'Ocean',
     colors12: [
-      '#000d1a', // abyssal black        — super extreme cold
-      '#001f3f', // midnight navy        — extreme cold
-      '#003d7a', // deep ocean           — cold
-      '#0066a8', // ocean blue           — cool
-      '#0090c0', // mid-ocean            — mild-low
-      '#00b8c8', // teal                 — mid-low
-      '#00c8a0', // deep reef            — mid-high
-      '#40d890', // reef green           — mild-high
-      '#88e8a0', // tropical shallow     — warm
-      '#d0f5c0', // sandy lagoon         — hot
-      '#f5f0c0', // sun-bleached sand    — extreme hot
-      '#fff8e8', // bleached coral       — super extreme hot
+      '#0A1128', '#1A3E5D', '#1B4F72', '#2874A6', '#3A8D8D', '#48B5A0',
+      '#7ECFC0', '#A8E6CF', '#D4EFE6', '#EDD9B4', '#F08080', '#E05555',
     ],
     colors10: [
-      '#001f3f', '#003d7a', '#0066a8', '#0090c0',
-      '#00b8c8', '#00c8a0', '#40d890', '#88e8a0', '#d0f5c0', '#f5f0c0',
+      '#1A3E5D', '#1B4F72', '#2874A6', '#3A8D8D',
+      '#48B5A0', '#A8E6CF', '#D4EFE6', '#EDD9B4', '#F08080', '#E05555',
     ],
   },
 
-  // ── Desert: dark umber night → dusty brown → sand → ochre → bleached bone
-  // Pure desert palette, zero blue. Cold = dark desert night, warm = blazing noon.
-  desert: {
-    name: 'Desert',
+  // ── Sunset: twilight indigo → dusty rose → peach → amber → deep crimson
+  sunset: {
+    name: 'Sunset',
     colors12: [
-      '#1a0f08', // near-black umber     — super extreme cold
-      '#3d2010', // dark umber           — extreme cold
-      '#6b3a1f', // deep brown           — cold
-      '#8c5230', // warm chestnut        — cool
-      '#b07240', // clay brown           — mild-low
-      '#c99060', // dusty tan            — mid-low
-      '#d4aa78', // dry sand             — mid-high
-      '#e0c08a', // warm sand            — mild-high
-      '#eacf9a', // pale sand            — warm
-      '#f2dfa8', // bleached sand        — hot
-      '#f8eece', // bone                 — extreme hot
-      '#fffbf0', // sun-bleached white   — super extreme hot
+      '#2C2449', '#5B3A6E', '#8E5B7E', '#C27C8E', '#E29B9B', '#F5C1A8',
+      '#FDDCB5', '#F5B870', '#E89B3A', '#D1603D', '#C93C20', '#8B1A1A',
     ],
     colors10: [
-      '#3d2010', '#6b3a1f', '#8c5230', '#b07240',
-      '#c99060', '#d4aa78', '#e0c08a', '#eacf9a', '#f2dfa8', '#f8eece',
+      '#5B3A6E', '#8E5B7E', '#C27C8E', '#E29B9B',
+      '#F5C1A8', '#F5B870', '#E89B3A', '#D1603D', '#C93C20', '#8B1A1A',
+    ],
+  },
+
+  // ── Forest: frost → lichen → moss → bark → autumn red
+  forest: {
+    name: 'Forest',
+    colors12: [
+      '#E8E8E0', '#C5C5B8', '#8A9A7E', '#7A8B6E', '#5A7247', '#2E6F40',
+      '#1E4D2B', '#6B4226', '#8B5A2B', '#B87333', '#B7410E', '#8B2500',
+    ],
+    colors10: [
+      '#C5C5B8', '#8A9A7E', '#7A8B6E', '#5A7247',
+      '#2E6F40', '#6B4226', '#8B5A2B', '#B87333', '#B7410E', '#8B2500',
+    ],
+  },
+
+  // ── Pastel: soft watercolor tones, gentle progression
+  pastel: {
+    name: 'Pastel',
+    colors12: [
+      '#D6D0E8', '#B8B8DC', '#A8C8E8', '#B5D8E8', '#B5E8D5', '#C5E8D0',
+      '#D8E8B5', '#F0E8B5', '#F5D5B8', '#F0C0C0', '#E0A8A8', '#D08888',
+    ],
+    colors10: [
+      '#B8B8DC', '#A8C8E8', '#B5D8E8', '#B5E8D5',
+      '#C5E8D0', '#F0E8B5', '#F5D5B8', '#F0C0C0', '#E0A8A8', '#D08888',
+    ],
+  },
+
+  // ── Nordic: minimalist gray-toned Scandinavian palette
+  nordic: {
+    name: 'Nordic',
+    colors12: [
+      '#F2F3F6', '#D7E0E8', '#A9B9C7', '#6F7E8A', '#5A6670', '#8E8680',
+      '#C4B7A6', '#C4A0A0', '#B87D6E', '#9C5656', '#7A3B4A', '#2F3B45',
+    ],
+    colors10: [
+      '#D7E0E8', '#A9B9C7', '#6F7E8A', '#5A6670',
+      '#8E8680', '#C4A0A0', '#B87D6E', '#9C5656', '#7A3B4A', '#2F3B45',
+    ],
+  },
+
+  // ── Berry: monochromatic pink-purple ombre
+  berry: {
+    name: 'Berry',
+    colors12: [
+      '#E8D5E8', '#D4B0CC', '#C090B8', '#A870A0', '#8E4585', '#7B3070',
+      '#722F37', '#9C1C3E', '#B5334B', '#D2355A', '#E04070', '#C82065',
+    ],
+    colors10: [
+      '#D4B0CC', '#C090B8', '#A870A0', '#8E4585',
+      '#7B3070', '#9C1C3E', '#B5334B', '#D2355A', '#E04070', '#C82065',
+    ],
+  },
+
+  // ── Desert Southwest: warm earth + turquoise accent
+  desert: {
+    name: 'Desert SW',
+    colors12: [
+      '#F4E8D4', '#EDD9B4', '#DEC3A2', '#C4A882', '#8A9A6C', '#3AAFA9',
+      '#5B7553', '#8B6F47', '#D08B5B', '#C95F3C', '#A0422A', '#7B2D26',
+    ],
+    colors10: [
+      '#EDD9B4', '#DEC3A2', '#C4A882', '#8A9A6C',
+      '#3AAFA9', '#8B6F47', '#D08B5B', '#C95F3C', '#A0422A', '#7B2D26',
+    ],
+  },
+
+  // ── Autumn Harvest: gold → orange → burgundy → chocolate
+  autumn: {
+    name: 'Autumn',
+    colors12: [
+      '#F5F0E0', '#D4C088', '#6B6E23', '#556B2F', '#C5972C', '#DAA520',
+      '#E87A24', '#CC5500', '#B7410E', '#8B1A2B', '#6B1525', '#3E1C14',
+    ],
+    colors10: [
+      '#D4C088', '#6B6E23', '#556B2F', '#C5972C',
+      '#DAA520', '#CC5500', '#B7410E', '#8B1A2B', '#6B1525', '#3E1C14',
     ],
   },
 
@@ -295,19 +290,19 @@ function getCityDateRange(city) {
 
 function getCityNZones(city) {
   const eff = getCityEffective(city);
-  const b = BUCKET_MODES[eff.bucketMode];
+  const b = BUCKET_MODES[eff.bucketMode] || BUCKET_MODES.dense12;
   return b.bounds ? b.bounds.length - 1 : 10;
 }
 
 function getCityColors(city) {
   const eff = getCityEffective(city);
   const n   = getCityNZones(city);
-  const pal = PALETTES[eff.palette];
+  const pal = PALETTES[eff.palette] || PALETTES.thermal;
   return n === 12 ? pal.colors12 : pal.colors10;
 }
 
 function computeBoundsForMode(baselineHighs, bucketMode) {
-  const mode  = BUCKET_MODES[bucketMode];
+  const mode  = BUCKET_MODES[bucketMode] || BUCKET_MODES.dense12;
   const valid = baselineHighs.filter(h => h != null);
   if (bucketMode === 'uniform-temp') {
     const mn = Math.min(...valid), mx = Math.max(...valid);
@@ -381,14 +376,23 @@ function loadSavedState() {
   return null;
 }
 
+function resetAllState() {
+  localStorage.removeItem(PERSIST_KEY);
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  window.location.reload();
+}
+
 function applySavedState(saved) {
   if (!saved) return false;
   for (const k of PERSIST_FIELDS) {
     if (k in saved && saved[k] !== undefined) state[k] = saved[k];
   }
+  // Validate palette and bucket mode against current definitions
+  if (!PALETTES[state.palette]) state.palette = 'thermal';
+  if (!BUCKET_MODES[state.bucketMode]) state.bucketMode = 'dense12';
   // Ensure cities have required fields
   state.cities = (state.cities || []).filter(c => c.name && c.lat != null && c.lon != null);
-  return state.cities.length > 0 || state.palette !== 'thermal' || state.bucketMode !== 'dense12';
+  return true;
 }
 
 function restoreUIFromState() {
@@ -525,12 +529,17 @@ document.addEventListener('DOMContentLoaded', () => {
   initDownload();
   initPopover();
   initShareButton();
+  $('btn-reset').addEventListener('click', resetAllState);
 
   // Try to restore saved state (URL hash > localStorage > defaults)
   const saved = loadSavedState();
   if (saved && applySavedState(saved)) {
     restoreUIFromState();
-    scheduleGenerate();
+    if (state.cities.length > 0) {
+      scheduleGenerate();
+    } else {
+      detectUserCity();
+    }
   } else {
     renderLegend();
     updateDateDisplay();
@@ -872,40 +881,81 @@ function renderSwatchRow() {
 }
 
 function getCurrentNZones() {
-  const b = BUCKET_MODES[state.bucketMode];
+  const b = BUCKET_MODES[state.bucketMode] || BUCKET_MODES.dense12;
   return b.bounds ? b.bounds.length - 1 : 10;
 }
 
 function getCurrentColors() {
   const n   = getCurrentNZones();
-  const pal = PALETTES[state.palette];
+  const pal = PALETTES[state.palette] || PALETTES.thermal;
   return n === 12 ? pal.colors12 : pal.colors10;
 }
 
 // ── Legend ────────────────────────────────────────────────────
-function renderLegend(bounds) {
-  const colors = getCurrentColors();
-  const mode   = BUCKET_MODES[state.bucketMode];
-  const n      = colors.length;
-  const names  = n === 12 ? ZONE_NAMES_12 : (state.bucketMode === 'uniform-pct' ? ZONE_NAMES_UNIFORM : ZONE_NAMES_10);
-
-  let items = '';
-  for (let i = 0; i < n; i++) {
-    const pLo  = mode.bounds ? mode.bounds[i]   : i * 10;
-    const pHi  = mode.bounds ? mode.bounds[i+1] : (i+1) * 10;
-    const label = bounds
-      ? `${tempFmt(bounds[i])}–${tempFmt(bounds[i+1])}`
-      : `p${pLo}–${pHi}`;
-    items += `
-      <div class="legend-item" data-zone="${i}" onclick="toggleHighlight(${i})">
-        <div class="legend-swatch" style="background:${colors[i]}"></div>
-        <div class="legend-info">
-          <span class="legend-range">${label}</span>
-          <span class="legend-name">${names[i] || `zone ${i+1}`}</span>
-        </div>
-      </div>`;
+function renderLegend(fallbackBounds) {
+  // Build legend groups from rendered cities (same logic as PNG export)
+  let legendGroups = [];
+  if (state.rendered.length) {
+    const seen = new Map();
+    state.rendered.forEach(rd => {
+      const eff = getCityEffective(rd.city);
+      const key = `${eff.palette}|${eff.bucketMode}`;
+      if (!seen.has(key)) {
+        seen.set(key, legendGroups.length);
+        legendGroups.push({
+          palette: eff.palette,
+          bucketMode: eff.bucketMode,
+          colors: getCityColors(rd.city),
+          bounds: rd.bounds,
+          cityNames: [rd.city.name],
+        });
+      } else {
+        legendGroups[seen.get(key)].cityNames.push(rd.city.name);
+      }
+    });
+  } else {
+    // Fallback: use global state (before any cities are rendered)
+    const colors = getCurrentColors();
+    legendGroups = [{
+      palette: state.palette,
+      bucketMode: state.bucketMode,
+      colors,
+      bounds: fallbackBounds,
+      cityNames: [],
+    }];
   }
-  $('legend-items').innerHTML = items;
+
+  let html = '';
+  const multiGroup = legendGroups.length > 1;
+  legendGroups.forEach(g => {
+    const mode  = BUCKET_MODES[g.bucketMode];
+    const n     = g.colors.length;
+    const names = n === 12 ? ZONE_NAMES_12
+      : (g.bucketMode === 'uniform-pct' ? ZONE_NAMES_UNIFORM : ZONE_NAMES_10);
+
+    if (multiGroup) {
+      const palName = PALETTES[g.palette]?.name || g.palette;
+      const modeName = BUCKET_MODES[g.bucketMode]?.name || g.bucketMode;
+      html += `<div class="legend-group-header">${palName} · ${modeName}</div>`;
+    }
+
+    for (let i = 0; i < n; i++) {
+      const pLo  = mode.bounds ? mode.bounds[i]   : i * 10;
+      const pHi  = mode.bounds ? mode.bounds[i+1] : (i+1) * 10;
+      const label = g.bounds
+        ? `${tempFmt(g.bounds[i])}–${tempFmt(g.bounds[i+1])}`
+        : `p${pLo}–${pHi}`;
+      html += `
+        <div class="legend-item" data-zone="${i}">
+          <div class="legend-swatch" style="background:${g.colors[i]}"></div>
+          <div class="legend-info">
+            <span class="legend-range">${label}</span>
+            <span class="legend-name">${names[i] || `zone ${i+1}`}</span>
+          </div>
+        </div>`;
+    }
+  });
+  $('legend-items').innerHTML = html;
 }
 
 function toggleHighlight(zone) {
@@ -1406,6 +1456,10 @@ function reRenderCity(cityId) {
     const newHeader = buildColHeader(rd, rdIdx);
     header.replaceWith(newHeader);
   }
+
+  // Update legend (per-city overrides can change legend groups)
+  renderLegend(rd.bounds);
+  saveToLocalStorage();
 }
 
 // ── City Popover ────────────────────────────────────────────────
@@ -1690,8 +1744,38 @@ function downloadPNG() {
 
   const blanketW   = nCities * colW + (nCities - 1) * colGap;
   const blanketH   = nDays * rowH;
+
+  // Build legend groups: unique (palette, bucketMode) combos
+  const legendGroups = [];
+  const seenLegend = new Map();
+  state.rendered.forEach(rd => {
+    const eff = getCityEffective(rd.city);
+    const key = `${eff.palette}|${eff.bucketMode}`;
+    if (!seenLegend.has(key)) {
+      seenLegend.set(key, legendGroups.length);
+      legendGroups.push({
+        palette: eff.palette,
+        bucketMode: eff.bucketMode,
+        colors: getCityColors(rd.city),
+        bounds: rd.bounds,
+        cityNames: [rd.city.name],
+      });
+    } else {
+      legendGroups[seenLegend.get(key)].cityNames.push(rd.city.name);
+    }
+  });
+
+  // Compute legend height
+  const lineH = 36;
+  const groupGap = 20;
+  const groupHeaderH = 20;
+  let legendContentH = 0;
+  legendGroups.forEach(g => {
+    legendContentH += groupHeaderH + g.colors.length * lineH + groupGap;
+  });
+
   const totalW     = pad + monthColW + blanketW + pad + legendW + pad;
-  const totalH     = pad + headerH + blanketH + pad;
+  const totalH     = pad + headerH + Math.max(blanketH, legendContentH) + pad;
 
   const off = document.createElement('canvas');
   off.width = totalW; off.height = totalH;
@@ -1764,51 +1848,55 @@ function downloadPNG() {
 
   // ── Legend panel (right side) ──
   const legendX = pad + monthColW + blanketW + pad;
-  const legendTop = blanketTop;
-
-  // Use first city's bounds as representative
-  const bounds = state.rendered[0]?.bounds;
-  const colors = getCurrentColors();
-  const nZones = colors.length;
-  const names  = nZones === 12
-    ? ZONE_NAMES_12
-    : (state.bucketMode === 'uniform-pct' ? ZONE_NAMES_UNIFORM : ZONE_NAMES_10);
-  const mode = BUCKET_MODES[state.bucketMode];
-
-  ctx.font = 'bold 13px sans-serif';
-  ctx.fillStyle = '#9aa0b8';
-  ctx.textAlign = 'left';
-  ctx.fillText('Legend', legendX, legendTop + 14);
-
+  let legendY = blanketTop;
   const swatchSize = 16;
-  const lineH = 36;
-  const startY = legendTop + 30;
 
-  for (let i = 0; i < nZones; i++) {
-    const y = startY + i * lineH;
+  legendGroups.forEach((g, gi) => {
+    const gColors = g.colors;
+    const nZones  = gColors.length;
+    const mode    = BUCKET_MODES[g.bucketMode];
+    const names   = nZones === 12
+      ? ZONE_NAMES_12
+      : (g.bucketMode === 'uniform-pct' ? ZONE_NAMES_UNIFORM : ZONE_NAMES_10);
 
-    // Swatch
-    ctx.fillStyle = colors[i];
-    ctx.beginPath();
-    ctx.roundRect(legendX, y, swatchSize, swatchSize, 3);
-    ctx.fill();
-
-    // Range label
-    const pLo = mode.bounds ? mode.bounds[i] : i * 10;
-    const pHi = mode.bounds ? mode.bounds[i + 1] : (i + 1) * 10;
-    const rangeLabel = bounds
-      ? `${tempFmt(bounds[i])}–${tempFmt(bounds[i + 1])}`
-      : `p${pLo}–${pHi}`;
-
-    ctx.fillStyle = '#e8eaf0';
-    ctx.font = '11px sans-serif';
-    ctx.fillText(rangeLabel, legendX + swatchSize + 8, y + 8);
-
-    // Zone name
+    // Group header
+    ctx.font = 'bold 13px sans-serif';
     ctx.fillStyle = '#9aa0b8';
-    ctx.font = '11px sans-serif';
-    ctx.fillText(names[i] || `zone ${i + 1}`, legendX + swatchSize + 8, y + 22);
-  }
+    ctx.textAlign = 'left';
+    const header = legendGroups.length === 1
+      ? 'Legend'
+      : g.cityNames.join(', ');
+    ctx.fillText(header, legendX, legendY + 14);
+    legendY += groupHeaderH;
+
+    for (let i = 0; i < nZones; i++) {
+      const y = legendY + i * lineH;
+
+      // Swatch
+      ctx.fillStyle = gColors[i];
+      ctx.beginPath();
+      ctx.roundRect(legendX, y, swatchSize, swatchSize, 3);
+      ctx.fill();
+
+      // Range label
+      const pLo = mode.bounds ? mode.bounds[i] : i * 10;
+      const pHi = mode.bounds ? mode.bounds[i + 1] : (i + 1) * 10;
+      const rangeLabel = g.bounds
+        ? `${tempFmt(g.bounds[i])}–${tempFmt(g.bounds[i + 1])}`
+        : `p${pLo}–${pHi}`;
+
+      ctx.fillStyle = '#e8eaf0';
+      ctx.font = '11px sans-serif';
+      ctx.fillText(rangeLabel, legendX + swatchSize + 8, y + 8);
+
+      // Zone name
+      ctx.fillStyle = '#9aa0b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText(names[i] || `zone ${i + 1}`, legendX + swatchSize + 8, y + 22);
+    }
+
+    legendY += nZones * lineH + groupGap;
+  });
 
   const link = document.createElement('a');
   link.download = `blanket-${getDateRange().start?.slice(0, 4) || 'custom'}.png`;

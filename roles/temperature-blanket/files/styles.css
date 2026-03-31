@@ -517,6 +517,8 @@ select.input { cursor: pointer; }
 .btn-icon svg { width: 16px; height: 16px; }
 .btn-icon-left { width: 14px; height: 14px; }
 .btn-full { width: 100%; }
+.btn-danger { color: var(--color-text-3); }
+.btn-danger:hover { color: #e05555; border-color: #e05555; background: rgba(224,85,85,0.08); }
 
 /* ── Generate button ─────────────────────────────────────── */
 .generate-wrap { padding: var(--space-4) 0 var(--space-2); }
@@ -751,6 +753,15 @@ select.input { cursor: pointer; }
 
 .legend-items { display: flex; flex-direction: column; gap: var(--space-1); }
 
+.legend-group-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  padding: var(--space-2) var(--space-2) var(--space-1);
+  margin-top: var(--space-2);
+}
+.legend-group-header:first-child { margin-top: 0; }
+
 .legend-item {
   display: flex;
   align-items: center;
@@ -928,10 +939,10 @@ select.input { cursor: pointer; }
   border: none;
   color: var(--color-text-3);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 22px;
   line-height: 1;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
