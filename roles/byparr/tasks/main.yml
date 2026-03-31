@@ -11,14 +11,29 @@
     group: "{{ ansible_user }}"
     mode: u=rwx,g=rwx,o=rx
 
+# Using flaresolverr instead of byparr due to response format bug
+# that causes Prowlarr to report "blocked by CloudFlare" even when
+# the challenge is solved. See: https://github.com/ThePhaseless/Byparr/issues/303
+# - name: byparr
+#   docker_container:
+#     name: byparr
+#     image: ghcr.io/thephaseless/byparr:latest
+#     pull: true
+#     restart: "{{ vpn_container.changed }}"
+#     volumes:
+#       - "{{ byparr_dir }}:/app/data:rw"
+#     env:
+#       TZ: "{{ nas_timezone }}"
+#     init: true
+#     network_mode: "container:vpn"
+#     restart_policy: unless-stopped
+
 - name: byparr
   docker_container:
     name: byparr
-    image: ghcr.io/thephaseless/byparr:latest
+    image: ghcr.io/flaresolverr/flaresolverr:latest
     pull: true
     restart: "{{ vpn_container.changed }}"
-    volumes:
-      - "{{ byparr_dir }}:/app/data:rw"
     env:
       TZ: "{{ nas_timezone }}"
     network_mode: "container:vpn"
