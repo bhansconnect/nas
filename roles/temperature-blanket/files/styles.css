@@ -720,6 +720,7 @@ select.input { cursor: pointer; }
 
 .city-canvas {
   display: block;
+  width: 100%;
   cursor: crosshair;
   border-radius: var(--radius-sm);
 }
@@ -868,6 +869,7 @@ select.input { cursor: pointer; }
   transition: border-color var(--transition), background var(--transition);
   margin-bottom: 0;
   min-width: 0;
+  overflow: hidden;
 }
 .col-header:hover {
   border-color: var(--color-border-2);

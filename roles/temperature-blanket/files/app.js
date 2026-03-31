@@ -1327,6 +1327,7 @@ function renderBlankets() {
     col.className = 'blanket-city-col';
     col.dataset.cityIdx = cityIdx;
     col.dataset.cityId  = rd.city.id;
+    col.style.width     = colW + 'px';
 
     // Rich column header
     const header = buildColHeader(rd, cityIdx);
