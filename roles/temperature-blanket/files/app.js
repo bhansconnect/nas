@@ -7,7 +7,6 @@
 // ── Constants ──────────────────────────────────────────────
 const ARCHIVE_URL = 'https://archive-api.open-meteo.com/v1/archive';
 const GEO_URL     = 'https://geocoding-api.open-meteo.com/v1/search';
-const IP_GEO_URL  = 'https://ipwho.is/'; // CORS-friendly, returns city+lat+lon+timezone
 const ROW_H       = 5; // px per day row (before auto-scaling)
 
 const BUCKET_MODES = {
@@ -326,12 +325,163 @@ function updateDateDisplay() {
   $('date-range-text').textContent = `${s} → ${e}`;
 }
 
+// ── State Persistence ────────────────────────────────────────
+const PERSIST_KEY = 'temp-blanket-state';
+const PERSIST_FIELDS = [
+  'cities','yearPreset','customYear','dateMode','dateStart','dateEnd',
+  'baselineStart','baselineEnd','baselineMode',
+  'scaleMode','anchorCityId','bucketMode',
+  'palette','customColors12','customColors10','gradientStart','gradientEnd',
+  'shiftSH','fahrenheit',
+];
+
+function serializeState() {
+  const obj = {};
+  for (const k of PERSIST_FIELDS) obj[k] = state[k];
+  // Strip transient city fields
+  obj.cities = state.cities.map(c => ({
+    name: c.name, country: c.country, admin: c.admin,
+    lat: c.lat, lon: c.lon, tz: c.tz,
+    id: c.id, isSH: c.isSH,
+    overrides: c.overrides || {},
+  }));
+  return obj;
+}
+
+let _saveDebounce = null;
+function saveToLocalStorage() {
+  clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => {
+    try { localStorage.setItem(PERSIST_KEY, JSON.stringify(serializeState())); } catch(e) {}
+  }, 500);
+}
+
+function encodeState(obj) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function decodeState(str) {
+  return JSON.parse(decodeURIComponent(escape(atob(str))));
+}
+
+function loadSavedState() {
+  // Priority 1: URL hash
+  if (window.location.hash.startsWith('#state=')) {
+    try {
+      const encoded = window.location.hash.slice(7);
+      const obj = decodeState(encoded);
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      return obj;
+    } catch(e) {}
+  }
+  // Priority 2: localStorage
+  try {
+    const raw = localStorage.getItem(PERSIST_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+
+function applySavedState(saved) {
+  if (!saved) return false;
+  for (const k of PERSIST_FIELDS) {
+    if (k in saved && saved[k] !== undefined) state[k] = saved[k];
+  }
+  // Ensure cities have required fields
+  state.cities = (state.cities || []).filter(c => c.name && c.lat != null && c.lon != null);
+  return state.cities.length > 0 || state.palette !== 'thermal' || state.bucketMode !== 'dense12';
+}
+
+function restoreUIFromState() {
+  // Year pills
+  const yearPills = document.querySelectorAll('#year-pills [data-year]');
+  yearPills.forEach(b => b.classList.remove('active'));
+  if (state.dateMode === 'custom-range') {
+    const customBtn = document.querySelector('#year-pills [data-year="custom-range"]');
+    if (customBtn) customBtn.classList.add('active');
+    $('custom-range-inputs').classList.remove('hidden');
+    if (state.dateStart) $('date-start').value = state.dateStart;
+    if (state.dateEnd)   $('date-end').value   = state.dateEnd;
+  } else {
+    const yearVal = state.customYear ? String(state.customYear) : state.yearPreset;
+    const btn = document.querySelector(`#year-pills [data-year="${yearVal}"]`);
+    if (btn) btn.classList.add('active');
+    $('custom-range-inputs').classList.add('hidden');
+  }
+
+  // Baseline pills
+  const blPills = document.querySelectorAll('#baseline-pills [data-baseline]');
+  blPills.forEach(b => b.classList.remove('active'));
+  const blBtn = document.querySelector(`#baseline-pills [data-baseline="${state.baselineMode}"]`);
+  if (blBtn) blBtn.classList.add('active');
+  $('baseline-custom-inputs').classList.toggle('hidden', state.baselineMode !== 'custom');
+  if (state.baselineStart) $('baseline-start').value = state.baselineStart;
+  if (state.baselineEnd)   $('baseline-end').value   = state.baselineEnd;
+
+  // Scale mode
+  const scaleRadio = document.querySelector(`input[name="scale"][value="${state.scaleMode}"]`);
+  if (scaleRadio) scaleRadio.checked = true;
+  $('anchor-selector').classList.toggle('hidden', state.scaleMode !== 'anchor');
+
+  // Bucket mode
+  const bucketRadio = document.querySelector(`input[name="bucket"][value="${state.bucketMode}"]`);
+  if (bucketRadio) bucketRadio.checked = true;
+
+  // Palette
+  document.querySelectorAll('#palette-grid .palette-option').forEach(b => {
+    b.classList.toggle('active', b.dataset.palette === state.palette);
+  });
+  $('custom-colors').classList.toggle('hidden', state.palette !== 'custom');
+  $('gradient-pickers').classList.toggle('hidden', state.palette !== 'gradient');
+
+  // Custom palette colors
+  if (state.customColors12) {
+    PALETTES.custom.colors12 = [...state.customColors12];
+    PALETTES.custom.colors10 = [...(state.customColors10 || state.customColors12.slice(0, 10))];
+  }
+  if (state.palette === 'custom' || state.palette === 'gradient') renderSwatchRow();
+
+  // Gradient
+  if (state.gradientStart) $('gradient-start').value = state.gradientStart;
+  if (state.gradientEnd)   $('gradient-end').value   = state.gradientEnd;
+  rebuildGradient();
+
+  // Toggles
+  $('toggle-sh').checked = state.shiftSH;
+  $('toggle-fahrenheit').checked = state.fahrenheit;
+
+  // Anchor selector
+  updateAnchorSelector();
+
+  // Legend + date display
+  renderLegend();
+  updateDateDisplay();
+
+  // Hide empty state hint since we have cities
+  const hint = $('city-hint');
+  if (hint && state.cities.length > 0) hint.classList.add('hidden');
+}
+
+function initShareButton() {
+  $('btn-share').addEventListener('click', () => {
+    const encoded = encodeState(serializeState());
+    const url = `${window.location.origin}${window.location.pathname}#state=${encoded}`;
+    navigator.clipboard.writeText(url).then(() => {
+      const label = $('share-label');
+      label.textContent = 'Copied!';
+      setTimeout(() => { label.textContent = 'Share'; }, 2000);
+    }).catch(() => {
+      window.location.hash = `state=${encoded}`;
+    });
+  });
+}
+
 // ── Auto-trigger ─────────────────────────────────────────────
 function scheduleGenerate(delay = 0) {
   clearTimeout(state.generateDebounce);
   state.generateDebounce = setTimeout(() => {
     if (state.cities.length > 0) generate();
   }, delay);
+  saveToLocalStorage();
 }
 
 // ── Gradient interpolation ───────────────────────────────────
@@ -374,9 +524,18 @@ document.addEventListener('DOMContentLoaded', () => {
   initZoomControls();
   initDownload();
   initPopover();
-  renderLegend();
-  updateDateDisplay();
-  detectUserCity(); // will auto-generate once a city is added
+  initShareButton();
+
+  // Try to restore saved state (URL hash > localStorage > defaults)
+  const saved = loadSavedState();
+  if (saved && applySavedState(saved)) {
+    restoreUIFromState();
+    scheduleGenerate();
+  } else {
+    renderLegend();
+    updateDateDisplay();
+    detectUserCity();
+  }
 });
 
 // ── Theme ────────────────────────────────────────────────────
@@ -629,6 +788,7 @@ function initOptions() {
     state.fahrenheit = e.target.checked;
     // Redraw tooltips/legend only — no new fetch needed
     if (state.rendered.length) renderLegend(state.rendered[0]?.bounds);
+    saveToLocalStorage();
   });
 }
 
@@ -652,6 +812,7 @@ function initPaletteGrid() {
       renderSwatchRow();
       renderLegend(state.rendered[0]?.bounds);
       if (state.rendered.length) drawAllCanvases();
+      saveToLocalStorage();
     });
   });
 
@@ -672,6 +833,7 @@ function initPaletteGrid() {
       updateGradientPreview();
       renderLegend(state.rendered[0]?.bounds);
       if (state.rendered.length) drawAllCanvases();
+      saveToLocalStorage();
     };
     gStart.addEventListener('input', onGradientChange);
     gEnd.addEventListener('input', onGradientChange);
@@ -704,6 +866,7 @@ function renderSwatchRow() {
       e.target.parentElement.style.background = e.target.value;
       renderLegend(state.rendered[0]?.bounds);
       if (state.rendered.length) drawAllCanvases();
+      saveToLocalStorage();
     });
   });
 }
@@ -757,19 +920,6 @@ function toggleHighlight(zone) {
 // ── Geolocation ───────────────────────────────────────────────
 async function detectUserCity() {
   setLocationHint('Detecting your location…');
-  // Try ipwho.is first (CORS-friendly, works in iframes, no key needed)
-  // Returns city, lat, lon and timezone.id directly
-  try {
-    const res  = await fetch(IP_GEO_URL);
-    const data = await res.json();
-    if (data.success !== false && data.city && data.latitude && data.longitude) {
-      const tz = data.timezone?.id || data.timezone || 'UTC';
-      await resolveCity(data.latitude, data.longitude, data.city, tz);
-      return;
-    }
-  } catch(e) { /* fall through */ }
-
-  // Fallback: browser GPS (may be blocked in sandboxed iframes)
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       pos => resolveCity(pos.coords.latitude, pos.coords.longitude),
