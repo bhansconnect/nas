@@ -35,12 +35,14 @@ function fishCatchable(fish, season, luck) {
  *   5. Solo raw (Koi — no pair defined)
  *   6. Remaining → leftover
  *
- * @param {Array}  inventory  - [{fishId, qty, form: 'raw'|'cooked'}]
- *                              fishId may be a fish id OR a specialItem id
- * @param {object} fishData   - full fish-data.json object
+ * @param {Array}  inventory           - [{fishId, qty, form: 'raw'|'cooked'}]
+ *                                      fishId may be a fish id OR a specialItem id
+ * @param {object} fishData            - full fish-data.json object
+ * @param {Set|null} availableIngredients - Set of ingredient names the player has,
+ *                                          or null/undefined for "all available"
  * @returns {{ cookedSales, rawSales, soloRawSales, leftover, grandTotal }}
  */
-function calculateSellPlan(inventory, fishData) {
+function calculateSellPlan(inventory, fishData, availableIngredients = null) {
   const { fish = [], cookedPairs = [], rawPairs = [] } = fishData;
 
   // ── Build lookup maps ──────────────────────────────────────
@@ -63,15 +65,6 @@ function calculateSellPlan(inventory, fishData) {
 
   // ── Helpers ────────────────────────────────────────────────
 
-  // How many of fishId are available for cooking?
-  // (raw cookable fish + pre-cooked fish)
-  function availableForCooked(fishId) {
-    const f = fishById[fishId];
-    if (!f) return 0;
-    if (!f.cookable) return cookedQty[fishId] || 0;
-    return (rawQty[fishId] || 0) + (cookedQty[fishId] || 0);
-  }
-
   // Deduct `count` from cooked pool (prefer cooked stock first, then raw).
   function deductCooked(fishId, count) {
     let remaining = count;
@@ -80,6 +73,21 @@ function calculateSellPlan(inventory, fishData) {
     remaining -= fromCooked;
     const fromRaw = Math.min(remaining, rawQty[fishId] || 0);
     rawQty[fishId] = (rawQty[fishId] || 0) - fromRaw;
+  }
+
+  // How many of fishId can be sold as a cooked dish, accounting for ingredient availability.
+  // Pre-cooked fish always count (already cooked — ingredients were already used).
+  // Raw fish only count toward the cooked plan if the required ingredients are available.
+  function availableForCookedSale(fishId) {
+    const f = fishById[fishId];
+    if (!f) return 0;
+    const fromPreCooked = cookedQty[fishId] || 0;
+    if (!f.cookable) return fromPreCooked;
+    const rawAvail = rawQty[fishId] || 0;
+    const canCookRaw = !availableIngredients ||
+      !f.cookingIngredients || !f.cookingIngredients.length ||
+      f.cookingIngredients.every(ing => availableIngredients.has(ing));
+    return fromPreCooked + (canCookRaw ? rawAvail : 0);
   }
 
   const cookedSales  = [];
@@ -92,15 +100,20 @@ function calculateSellPlan(inventory, fishData) {
       const fishId = pair.fishIds[0];
       const f = fishById[fishId];
       if (!f) continue;
-      const count = availableForCooked(fishId);
+      const count = availableForCookedSale(fishId);
       if (count > 0) {
+        // Only list ingredients for the portion being cooked from raw.
+        // deductCooked pulls from pre-cooked stock first, so rawUsed = count - preCooked.
+        const rawUsed = Math.max(0, count - (cookedQty[fishId] || 0));
+        const ingredientsNeeded = rawUsed > 0 ? [...(f.cookingIngredients || [])] : [];
         cookedSales.push({
-          pairId:       pair.id,
+          pairId:            pair.id,
           count,
-          pricePerPair: pair.price,
-          totalPrice:   count * pair.price,
-          dishes:       [f.cookedDish],
-          fish:         [f],
+          pricePerPair:      pair.price,
+          totalPrice:        count * pair.price,
+          dishes:            [f.cookedDish],
+          fish:              [f],
+          ingredientsNeeded,
         });
         deductCooked(fishId, count);
       }
@@ -110,17 +123,24 @@ function calculateSellPlan(inventory, fishData) {
   // ── Step 2: Cooked fish-fish pairs ────────────────────────
   for (const pair of cookedPairs) {
     if (pair.fishIds.length < 2) continue;
-    const qtys  = pair.fishIds.map(id => availableForCooked(id));
+    const qtys  = pair.fishIds.map(id => availableForCookedSale(id));
     const count = Math.min(...qtys);
     if (count > 0) {
       const fishInPair = pair.fishIds.map(id => fishById[id]);
+      // Only include ingredients for fish where raw stock will actually be cooked.
+      const ingredientsNeeded = [...new Set(
+        pair.fishIds
+          .filter(id => Math.max(0, count - (cookedQty[id] || 0)) > 0)
+          .flatMap(id => (fishById[id].cookingIngredients || []))
+      )];
       cookedSales.push({
-        pairId:       pair.id,
+        pairId:            pair.id,
         count,
-        pricePerPair: pair.price,
-        totalPrice:   count * pair.price,
-        dishes:       fishInPair.map(f => f.cookedDish),
-        fish:         fishInPair,
+        pricePerPair:      pair.price,
+        totalPrice:        count * pair.price,
+        dishes:            fishInPair.map(f => f.cookedDish),
+        fish:              fishInPair,
+        ingredientsNeeded,
       });
       pair.fishIds.forEach(id => deductCooked(id, count));
     }
@@ -181,9 +201,11 @@ function calculateSellPlan(inventory, fishData) {
  *
  * @param {string} season
  * @param {object} fishData
+ * @param {Set|null} availableIngredients - Set of ingredient names the player has,
+ *                                          or null/undefined for "all available"
  * @returns {Array} ranked pair recommendations
  */
-function bestPairsThisSeason(season, luck, fishData) {
+function bestPairsThisSeason(season, luck, fishData, availableIngredients = null) {
   const { fish = [], cookedPairs = [], rawPairs = [] } = fishData;
   const fishById = {};
   fish.forEach(f => { fishById[f.id] = f; });
@@ -200,6 +222,13 @@ function bestPairsThisSeason(season, luck, fishData) {
     // Skip pairs where no fish at all are catchable with current luck+season
     if (catchable.length === 0) continue;
 
+    // Compute which ingredients (if any) block this cooked pair
+    let blockedBy = [];
+    if (availableIngredients) {
+      const allIngs = [...new Set(fishInPair.flatMap(f => f.cookingIngredients || []))];
+      blockedBy = allIngs.filter(ing => !availableIngredients.has(ing));
+    }
+
     results.push({
       pairId:        pair.id,
       type:          'cooked',
@@ -208,6 +237,7 @@ function bestPairsThisSeason(season, luck, fishData) {
       availableCount: catchable.length,
       totalInPair:   fishInPair.length,
       allAvailable:  catchable.length === fishInPair.length,
+      blockedBy,
     });
   }
 
@@ -237,6 +267,7 @@ function bestPairsThisSeason(season, luck, fishData) {
       availableCount: catchable.length,
       totalInPair:   fishInPair.length,
       allAvailable:  catchable.length === fishInPair.length,
+      blockedBy:     [],
     });
   }
 
@@ -401,15 +432,17 @@ function getLeftoverCatchOpportunities(leftover, season, luck, fishData) {
  * return all pairing options sorted by price desc. This powers the "Better Pairings"
  * section showing that e.g. Wakasagi cooked with Ugui (¥100) beats raw with Amago (¥60).
  *
- * @param {Array}  inventory - [{fishId, qty, form}]
+ * @param {Array}  inventory           - [{fishId, qty, form}]
  * @param {object} fishData
+ * @param {Set|null} availableIngredients - Set of ingredient names the player has,
+ *                                          or null/undefined for "all available"
  * @returns {Array} [{
  *   fish,
  *   qty,
- *   pairings: [{ type, pair, price, partners: [fish], requiresItem: {id,name}|null }],
+ *   pairings: [{ type, pair, price, partners: [fish], blockedBy: string[] }],
  * }]
  */
-function getBetterPairings(inventory, fishData) {
+function getBetterPairings(inventory, fishData, availableIngredients = null) {
   const { fish: allFish = [], cookedPairs = [], rawPairs = [] } = fishData;
   const fishById = {};
   allFish.forEach(f => { fishById[f.id] = f; });
@@ -440,14 +473,22 @@ function getBetterPairings(inventory, fishData) {
       .filter(id => id !== fish.id)
       .map(id => fishById[id])
       .filter(Boolean);
-    pairings.push({ type: 'cooked', pair: cp, price: cp.price, partners: cookedPartners });
+    // Only check ingredients for raw fish — pre-cooked fish are already done.
+    const hasRawEntries = inventory.some(i => i.fishId === fishId && i.form === 'raw');
+    let cookedBlockedBy = [];
+    if (availableIngredients && hasRawEntries) {
+      const allFishInPair = [fish, ...cookedPartners];
+      const allIngs = [...new Set(allFishInPair.flatMap(f => f.cookingIngredients || []))];
+      cookedBlockedBy = allIngs.filter(ing => !availableIngredients.has(ing));
+    }
+    pairings.push({ type: 'cooked', pair: cp, price: cp.price, partners: cookedPartners, blockedBy: cookedBlockedBy });
 
     // Raw pairing
     const rawPartners = rp.fishIds
       .filter(id => id !== fish.id)
       .map(id => fishById[id])
       .filter(Boolean);
-    pairings.push({ type: 'raw', pair: rp, price: rp.price, partners: rawPartners });
+    pairings.push({ type: 'raw', pair: rp, price: rp.price, partners: rawPartners, blockedBy: [] });
 
     // Sort by price desc
     pairings.sort((a, b) => b.price - a.price);

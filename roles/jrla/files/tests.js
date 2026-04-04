@@ -784,6 +784,252 @@ function runLuckFilterTests() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// GROUP: Ingredient filtering
+// ═══════════════════════════════════════════════════════════
+function runIngredientFilterTests() {
+  if (typeof process !== 'undefined') console.log('\nIngredient Filtering:');
+
+  // ── Pre-cooked fish bypass ingredient filtering ───────────
+
+  test('Pre-cooked Ito (= Ito Sashimi) → always sells as Ito Sashimi ¥300, even with no ingredients checked', () => {
+    const avail = new Set(); // no ingredients available
+    const r = _calc([inv('ito', 1, 'cooked')], FISH_DATA, avail);
+    const sale = findCookedSale(r, 'cp-ito-sashimi');
+    assert(sale && sale.count === 1, 'Pre-cooked Ito should sell as Ito Sashimi regardless of ingredients');
+    assertEqual(r.grandTotal, 300);
+    assert(!findLeftover(r, 'ito'), 'Pre-cooked Ito should not be in leftover');
+  });
+
+  test('Pre-cooked Sake (= Yakizake) → always sells as Yakizake ¥300, even with no ingredients checked', () => {
+    const avail = new Set(); // no ingredients available
+    const r = _calc([inv('sake', 1, 'cooked')], FISH_DATA, avail);
+    const sale = findCookedSale(r, 'cp-yakizake');
+    assert(sale && sale.count === 1, 'Pre-cooked Sake should sell as Yakizake regardless of ingredients');
+    assertEqual(r.grandTotal, 300);
+    assert(!findLeftover(r, 'sake'), 'Pre-cooked Sake should not be in leftover');
+  });
+
+  test('Pre-cooked Sake with Roasted Matsutake checked → still sells as Yakizake ¥300', () => {
+    const avail = new Set(['Roasted Matsutake']);
+    const r = _calc([inv('sake', 1, 'cooked')], FISH_DATA, avail);
+    const sale = findCookedSale(r, 'cp-yakizake');
+    assert(sale && sale.count === 1, 'Pre-cooked Sake should sell as Yakizake');
+    assertEqual(r.grandTotal, 300);
+  });
+
+  test('Mixed: 1 cooked Sake + 1 raw Sake, Roasted Matsutake missing → only cooked one sells (count=1)', () => {
+    const avail = new Set(['Salt', 'Soy Sauce']); // no Roasted Matsutake
+    const r = _calc([inv('sake', 1, 'cooked'), inv('sake', 1, 'raw')], FISH_DATA, avail);
+    const sale = findCookedSale(r, 'cp-yakizake');
+    assert(sale && sale.count === 1, 'Only the pre-cooked one sells as Yakizake');
+    assertEqual(r.grandTotal, 300);
+    const lo = findLeftover(r, 'sake');
+    assert(lo && lo.qty === 1, 'Raw Sake blocked by missing Roasted Matsutake becomes leftover');
+  });
+
+  test('Mixed: 1 cooked Sake + 1 raw Sake, all ingredients checked → both sell (count=2)', () => {
+    const avail = new Set(['Salt', 'Soy Sauce', 'Roasted Matsutake']);
+    const r = _calc([inv('sake', 1, 'cooked'), inv('sake', 1, 'raw')], FISH_DATA, avail);
+    const sale = findCookedSale(r, 'cp-yakizake');
+    assert(sale && sale.count === 2, 'Both pre-cooked and raw Sake sell when all ingredients available');
+    assertEqual(r.grandTotal, 600);
+  });
+
+  // ── ingredientsNeeded on cooked sale entries ──────────────
+
+  test('Pre-cooked Ito sale has empty ingredientsNeeded (already cooked, no note needed)', () => {
+    const r = _calc([inv('ito', 1, 'cooked')], FISH_DATA, new Set());
+    const sale = findCookedSale(r, 'cp-ito-sashimi');
+    assert(sale, 'Should have a sale');
+    assertLength(sale.ingredientsNeeded, 0, 'Pre-cooked fish: ingredientsNeeded should be empty');
+  });
+
+  test('Pre-cooked Sake sale has empty ingredientsNeeded', () => {
+    const r = _calc([inv('sake', 1, 'cooked')], FISH_DATA, new Set(['Salt', 'Soy Sauce', 'Roasted Matsutake']));
+    const sale = findCookedSale(r, 'cp-yakizake');
+    assert(sale, 'Should have a sale');
+    assertLength(sale.ingredientsNeeded, 0, 'Pre-cooked Sake: ingredientsNeeded should be empty');
+  });
+
+  test('Raw Sake sale with all ingredients → ingredientsNeeded lists all three', () => {
+    const r = _calc([inv('sake', 1, 'raw')], FISH_DATA, new Set(['Salt', 'Soy Sauce', 'Roasted Matsutake']));
+    const sale = findCookedSale(r, 'cp-yakizake');
+    assert(sale, 'Should have a sale');
+    assert(sale.ingredientsNeeded.includes('Salt'), 'Should list Salt');
+    assert(sale.ingredientsNeeded.includes('Soy Sauce'), 'Should list Soy Sauce');
+    assert(sale.ingredientsNeeded.includes('Roasted Matsutake'), 'Should list Roasted Matsutake');
+  });
+
+  test('Mixed 1 cooked + 1 raw Sake: ingredientsNeeded lists ingredients (raw portion being cooked)', () => {
+    const r = _calc([inv('sake', 1, 'cooked'), inv('sake', 1, 'raw')], FISH_DATA,
+      new Set(['Salt', 'Soy Sauce', 'Roasted Matsutake']));
+    const sale = findCookedSale(r, 'cp-yakizake');
+    assert(sale && sale.count === 2, 'Both should sell');
+    assert(sale.ingredientsNeeded.length > 0, 'Raw portion being cooked — ingredients should be listed');
+  });
+
+  // ── calculateSellPlan with availableIngredients ───────────
+
+  test('Sake with all ingredients explicitly available → sells as Yakizake ¥300', () => {
+    const avail = new Set(['Salt', 'Soy Sauce', 'Roasted Matsutake']);
+    const r = _calc([inv('sake', 1)], FISH_DATA, avail);
+    const sale = findCookedSale(r, 'cp-yakizake');
+    assert(sale && sale.count === 1, 'Should sell as Yakizake');
+    assertEqual(r.grandTotal, 300);
+  });
+
+  test('Sake with Soy Sauce missing → Yakizake blocked, falls to raw/leftover', () => {
+    const avail = new Set(['Salt', 'Roasted Matsutake']); // no Soy Sauce
+    const r = _calc([inv('sake', 1)], FISH_DATA, avail);
+    const cookedSale = findCookedSale(r, 'cp-yakizake');
+    assert(!cookedSale || cookedSale.count === 0, 'Yakizake should be blocked');
+    // Sake has a raw pair with Ito; without Ito it becomes leftover
+    const lo = findLeftover(r, 'sake');
+    assert(lo, 'Sake should end up as leftover (no raw partner)');
+  });
+
+  test('Sake with no ingredients available → Yakizake blocked', () => {
+    const avail = new Set();
+    const r = _calc([inv('sake', 1)], FISH_DATA, avail);
+    const cookedSale = findCookedSale(r, 'cp-yakizake');
+    assert(!cookedSale || cookedSale.count === 0, 'Yakizake blocked when no ingredients');
+  });
+
+  test('Ito with Soy Sauce missing → Ito Sashimi blocked', () => {
+    const avail = new Set(['Salt', 'Roasted Matsutake']); // no Soy Sauce
+    const r = _calc([inv('ito', 1)], FISH_DATA, avail);
+    const cookedSale = findCookedSale(r, 'cp-ito-sashimi');
+    assert(!cookedSale || cookedSale.count === 0, 'Ito Sashimi should be blocked');
+  });
+
+  test('Ugui+Wakasagi unaffected by missing ingredients (no cookingIngredients)', () => {
+    const avail = new Set(); // empty — no ingredients at all
+    const r = _calc([inv('ugui', 1), inv('wakasagi', 1)], FISH_DATA, avail);
+    const sale = findCookedSale(r, 'cp-ugui-wakasagi');
+    assert(sale && sale.count === 1, 'Ugui+Wakasagi cooked unaffected (no ingredients needed)');
+    assertEqual(r.grandTotal, 100);
+  });
+
+  test('Sake+Ito: Soy Sauce missing → both cooked sales blocked, fall to raw pair ¥250', () => {
+    const avail = new Set(['Salt', 'Roasted Matsutake']); // no Soy Sauce
+    const r = _calc([inv('sake', 1), inv('ito', 1)], FISH_DATA, avail);
+    assert(!findCookedSale(r, 'cp-yakizake'),    'Yakizake blocked');
+    assert(!findCookedSale(r, 'cp-ito-sashimi'), 'Ito Sashimi blocked');
+    const rawSale = findRawSale(r, 'rp-sake-ito');
+    assert(rawSale && rawSale.count === 1, 'Should fall through to raw pair Sake+Ito ¥250');
+    assertEqual(r.grandTotal, 250);
+  });
+
+  // ── getBetterPairings with availableIngredients ───────────
+
+  test('getBetterPairings: pre-cooked Ito → cooked pairing has empty blockedBy (already cooked)', () => {
+    const avail = new Set(); // no ingredients
+    const result = _betterPairings([inv('ito', 1, 'cooked')], FISH_DATA, avail);
+    const entry = result.find(r => r.fish.id === 'ito');
+    assert(entry, 'Ito should appear in better pairings');
+    const cookedPairing = entry.pairings.find(p => p.type === 'cooked');
+    assert(cookedPairing, 'Cooked pairing should exist');
+    assertEqual(cookedPairing.blockedBy.length, 0, 'Pre-cooked fish should not show blockedBy');
+  });
+
+  test('getBetterPairings: raw Ito with Soy Sauce missing → cooked pairing IS blocked', () => {
+    const avail = new Set(['Salt', 'Roasted Matsutake']); // no Soy Sauce
+    const result = _betterPairings([inv('ito', 1, 'raw')], FISH_DATA, avail);
+    const entry = result.find(r => r.fish.id === 'ito');
+    assert(entry, 'Ito should appear in better pairings');
+    const cookedPairing = entry.pairings.find(p => p.type === 'cooked');
+    assert(cookedPairing.blockedBy.includes('Soy Sauce'), 'Raw Ito IS blocked by missing Soy Sauce');
+  });
+
+  test('getBetterPairings: Sake with Soy Sauce missing → cooked pairing has blockedBy', () => {
+    const avail = new Set(['Salt', 'Roasted Matsutake']); // no Soy Sauce
+    const result = _betterPairings([inv('sake', 1)], FISH_DATA, avail);
+    // Sake only has a cookedPair (cp-yakizake), not a raw pair → won't appear in getBetterPairings
+    // Use Ito instead (has both cooked and raw pair)
+    const itoResult = _betterPairings([inv('ito', 1)], FISH_DATA, avail);
+    const entry = itoResult.find(r => r.fish.id === 'ito');
+    assert(entry, 'Ito should appear in better pairings');
+    const cookedPairing = entry.pairings.find(p => p.type === 'cooked');
+    assert(cookedPairing, 'Cooked pairing should exist');
+    assert(Array.isArray(cookedPairing.blockedBy), 'blockedBy should be an array');
+    assert(cookedPairing.blockedBy.includes('Soy Sauce'), 'Should be blocked by Soy Sauce');
+  });
+
+  test('getBetterPairings: Ito with all ingredients → cooked pairing has empty blockedBy', () => {
+    const avail = new Set(['Salt', 'Soy Sauce', 'Roasted Matsutake']);
+    const result = _betterPairings([inv('ito', 1)], FISH_DATA, avail);
+    const entry = result.find(r => r.fish.id === 'ito');
+    assert(entry, 'Ito should appear');
+    const cookedPairing = entry.pairings.find(p => p.type === 'cooked');
+    assert(Array.isArray(cookedPairing.blockedBy), 'blockedBy should be an array');
+    assertEqual(cookedPairing.blockedBy.length, 0, 'blockedBy should be empty when all available');
+  });
+
+  test('getBetterPairings: raw pairings always have empty blockedBy', () => {
+    const avail = new Set(); // no ingredients
+    const result = _betterPairings([inv('ito', 1)], FISH_DATA, avail);
+    const entry = result.find(r => r.fish.id === 'ito');
+    assert(entry, 'Ito should appear');
+    const rawPairing = entry.pairings.find(p => p.type === 'raw');
+    assert(rawPairing, 'Raw pairing should exist');
+    assertEqual(rawPairing.blockedBy.length, 0, 'Raw pairings never blocked by ingredients');
+  });
+
+  test('getBetterPairings: null availableIngredients (engine default) → all blockedBy are empty', () => {
+    // null = engine default = treat all as available (no filtering)
+    const result = _betterPairings([inv('ito', 1)], FISH_DATA, null);
+    const entry = result.find(r => r.fish.id === 'ito');
+    for (const pairing of entry.pairings) {
+      assertEqual(pairing.blockedBy.length, 0, 'No blocked pairings when engine receives null');
+    }
+  });
+
+  // ── bestPairsThisSeason with availableIngredients ─────────
+
+  test('bestPairsThisSeason: Salt missing → pairs needing Salt have blockedBy=[Salt]', () => {
+    const avail = new Set(['Soy Sauce', 'Roasted Matsutake']); // no Salt
+    const pairs = _best('Fall', 4, FISH_DATA, avail);
+    // Sake needs Salt — find its entry
+    const yakizake = pairs.find(p => p.pairId === 'cp-yakizake');
+    if (yakizake) {
+      assert(yakizake.blockedBy.includes('Salt'), 'Yakizake should be blocked by Salt');
+    }
+    // Oshurokoma+Higai also need Salt
+    const oshuro = pairs.find(p => p.pairId === 'cp-oshurokoma-higai');
+    if (oshuro) {
+      assert(oshuro.blockedBy.includes('Salt'), 'Oshurokoma+Higai should be blocked by Salt');
+    }
+  });
+
+  test('bestPairsThisSeason: null availableIngredients (engine default) → all blockedBy are empty', () => {
+    // null = engine default = treat all as available (no filtering)
+    const pairs = _best('Fall', 4, FISH_DATA, null);
+    for (const p of pairs) {
+      assert(Array.isArray(p.blockedBy), 'blockedBy should be an array');
+      assertEqual(p.blockedBy.length, 0, 'No blocked pairs when engine receives null');
+    }
+  });
+
+  test('bestPairsThisSeason: blocked pairs still appear in results (not hidden)', () => {
+    const avail = new Set(); // no ingredients
+    const pairs = _best('Fall', 4, FISH_DATA, avail);
+    // Yakizake (Sake, needs Salt) should still appear even when blocked
+    const yakizake = pairs.find(p => p.pairId === 'cp-yakizake');
+    assert(yakizake, 'Blocked pairs should still appear in results');
+    assert(yakizake.blockedBy.length > 0, 'Should be blocked');
+  });
+
+  test('bestPairsThisSeason: Ugui+Wakasagi never blocked (no cookingIngredients)', () => {
+    const avail = new Set(); // no ingredients
+    const pairs = _best('Fall', 4, FISH_DATA, avail);
+    const p = pairs.find(p => p.pairId === 'cp-ugui-wakasagi');
+    if (p) {
+      assertEqual(p.blockedBy.length, 0, 'Ugui+Wakasagi never blocked (no ingredients needed)');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
 // Run all tests
 // ═══════════════════════════════════════════════════════════
 function runAllTests() {
@@ -800,6 +1046,7 @@ function runAllTests() {
   runCatchOpportunityTests();
   runBetterPairingsTests();
   runLuckFilterTests();
+  runIngredientFilterTests();
   return _results;
 }
 

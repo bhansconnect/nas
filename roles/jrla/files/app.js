@@ -7,11 +7,23 @@
 
 const PERSIST_KEY = 'jrla-fish-state';
 
+// ── Ingredient emoji map ──────────────────────────────────
+const INGREDIENT_EMOJI = {
+  'Salt':              '🧂',
+  'Soy Sauce':         '🫙',
+  'Roasted Matsutake': '🍄',
+};
+function ingEmoji(name) { return INGREDIENT_EMOJI[name] || '🌿'; }
+
+// ── All unique cooking ingredients (populated in init()) ──
+let ALL_INGREDIENTS = [];
+
 // ── State ─────────────────────────────────────────────────
 let state = {
-  season:    'Spring',
-  luck:      1,    // 1–4 star filter
-  inventory: [], // [{id, fishId, qty, form: 'raw'|'cooked'}]
+  season:               'Spring',
+  luck:                 1,    // 1–4 star filter
+  inventory:            [], // [{id, fishId, qty, form: 'raw'|'cooked'}]
+  availableIngredients: null, // null = none available; string[] = explicit list
 };
 
 // ── DOM helpers ───────────────────────────────────────────
@@ -28,12 +40,19 @@ function setState(patch) {
   render();
 }
 
+// Returns a Set of ingredient names the player currently has available.
+function resolvedIngredients() {
+  if (!state.availableIngredients) return new Set(); // null = none available
+  return new Set(state.availableIngredients.filter(i => ALL_INGREDIENTS.includes(i)));
+}
+
 function saveState() {
   try {
     localStorage.setItem(PERSIST_KEY, JSON.stringify({
-      season:    state.season,
-      luck:      state.luck,
-      inventory: state.inventory,
+      season:               state.season,
+      luck:                 state.luck,
+      inventory:            state.inventory,
+      availableIngredients: state.availableIngredients,
     }));
   } catch (_) {}
 }
@@ -42,9 +61,13 @@ function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(PERSIST_KEY));
     if (!saved) return;
-    if (saved.season)                   state.season    = saved.season;
-    if (saved.luck >= 1 && saved.luck <= 4) state.luck  = saved.luck;
-    if (Array.isArray(saved.inventory)) state.inventory = saved.inventory;
+    if (saved.season)                       state.season    = saved.season;
+    if (saved.luck >= 1 && saved.luck <= 4) state.luck      = saved.luck;
+    if (Array.isArray(saved.inventory))     state.inventory = saved.inventory;
+    // Restore ingredient availability; new ingredients default to unchecked
+    if (saved.availableIngredients === null || Array.isArray(saved.availableIngredients)) {
+      state.availableIngredients = saved.availableIngredients;
+    }
   } catch (_) {}
 }
 
@@ -56,15 +79,50 @@ async function loadData() {
 }
 
 function init() {
+  ALL_INGREDIENTS = [...new Set(
+    (FISH_DATA.fish || []).flatMap(f => f.cookingIngredients || [])
+  )].sort();
+
   loadState();
   setupTheme();
   setupSeasonButtons();
   setupLuckButtons();
+  setupPantry();
   setupAutocomplete();
   setupFormToggle();
   setupAddFish();
   setupInventoryDelegation();
   render();
+}
+
+// ── Pantry ────────────────────────────────────────────────
+function setupPantry() {
+  $('pantry-list').addEventListener('change', e => {
+    const cb = e.target.closest('input[type="checkbox"][data-ingredient]');
+    if (!cb) return;
+    const available = resolvedIngredients();
+    if (cb.checked) {
+      available.add(cb.dataset.ingredient);
+    } else {
+      available.delete(cb.dataset.ingredient);
+    }
+    // Normalize to null if nothing is checked
+    const newVal = available.size === 0 ? null : [...available];
+    setState({ availableIngredients: newVal });
+  });
+}
+
+function renderPantry() {
+  const available = resolvedIngredients();
+  $('pantry-list').innerHTML = ALL_INGREDIENTS.map(ing => {
+    const checked = available.has(ing) ? 'checked' : '';
+    return `
+      <label class="pantry-item">
+        <input type="checkbox" data-ingredient="${esc(ing)}" ${checked} />
+        <span class="pantry-ing-name">${ingEmoji(ing)} ${esc(ing)}</span>
+      </label>
+    `;
+  }).join('');
 }
 
 // ── Theme ─────────────────────────────────────────────────
@@ -298,6 +356,7 @@ function render() {
   if (!FISH_DATA) return;
   updateSeasonActiveClass();
   updateLuckActiveClass();
+  renderPantry();
   renderInventoryList();
   renderSellPlan();
   renderBetterPairings();
@@ -342,7 +401,7 @@ function renderInventoryList() {
 
 // ── Sell plan ─────────────────────────────────────────────
 function renderSellPlan() {
-  const plan = calculateSellPlan(state.inventory, FISH_DATA);
+  const plan = calculateSellPlan(state.inventory, FISH_DATA, resolvedIngredients());
 
   // Stash plan on window so other sections can reuse it without recalculating
   window._lastPlan = plan;
@@ -353,7 +412,9 @@ function renderSellPlan() {
   $('sell-cooked-list').innerHTML = plan.cookedSales.length
     ? plan.cookedSales.map(sale => {
         const dishes   = sale.dishes.join(' + ');
-        const ingNote  = buildIngredientNote(sale.fish);
+        const ingNote  = sale.ingredientsNeeded && sale.ingredientsNeeded.length
+          ? `needs ${sale.ingredientsNeeded.join(' + ')}`
+          : '';
         return `
           <div class="sell-item">
             <div class="sell-item-name">
@@ -507,7 +568,7 @@ function renderLeftoverWithCatch(leftover) {
 function renderBetterPairings() {
   const section  = $('better-pairings-section');
   const list     = $('better-pairings-list');
-  const pairings = getBetterPairings(state.inventory, FISH_DATA);
+  const pairings = getBetterPairings(state.inventory, FISH_DATA, resolvedIngredients());
 
   if (!pairings.length) {
     section.style.display = 'none';
@@ -516,57 +577,98 @@ function renderBetterPairings() {
 
   section.style.display = '';
 
-  list.innerHTML = pairings.map(entry => {
-    const rows = entry.pairings.map((pairing, idx) => {
-      const isBest = idx === 0;
-      const dish = pairing.type === 'cooked'
-        ? (entry.fish.cookedDish || entry.fish.name)
-        : entry.fish.name;
+  // Renders one row within a better-pairings entry.
+  // isPreCooked = true means the fish is already in cooked form — hide ingredient badge,
+  // and blockedBy is irrelevant (already cooked).
+  function renderBPRow(pairing, idx, fish, isPreCooked) {
+    const isBest = idx === 0;
+    const dish = pairing.type === 'cooked'
+      ? (fish.cookedDish || fish.name)
+      : fish.name;
 
-      const partnerHtml = pairing.partners.map(p => {
-        const inInv   = state.inventory.some(i => i.fishId === p.id);
-        const inSzn   = fishAvailableInSeason(p, state.season);
-        const luckOk  = p.stars <= state.luck;
-        const locs    = p.location.join('/');
-        let badge;
-        if (inInv) {
-          badge = `<span class="catch-badge catch-yes">✓ in inventory</span>`;
-        } else if (inSzn && luckOk) {
-          badge = `<span class="catch-badge catch-yes">✓ ${esc(locs)} now</span>`;
-        } else if (!luckOk) {
-          badge = `<span class="catch-badge catch-luck">✗ need ${p.stars}★ luck</span>`;
-        } else {
-          badge = `<span class="catch-badge catch-no">✗ ${esc(p.seasons.join('/'))} only</span>`;
-        }
-        return `<span class="${inInv ? 'partner-have' : 'partner-need'}">${esc(p.name)}</span>${badge}`;
-      }).join(' <span class="bp-plus">+</span> ');
+    const partnerHtml = pairing.partners.map(p => {
+      const inInv  = state.inventory.some(i => i.fishId === p.id);
+      const inSzn  = fishAvailableInSeason(p, state.season);
+      const luckOk = p.stars <= state.luck;
+      const locs   = p.location.join('/');
+      let badge;
+      if (inInv) {
+        badge = `<span class="catch-badge catch-yes">✓ in inventory</span>`;
+      } else if (inSzn && luckOk) {
+        badge = `<span class="catch-badge catch-yes">✓ ${esc(locs)} now</span>`;
+      } else if (!luckOk) {
+        badge = `<span class="catch-badge catch-luck">✗ need ${p.stars}★ luck</span>`;
+      } else {
+        badge = `<span class="catch-badge catch-no">✗ ${esc(p.seasons.join('/'))} only</span>`;
+      }
+      return `<span class="${inInv ? 'partner-have' : 'partner-need'}">${esc(p.name)}</span>${badge}`;
+    }).join(' <span class="bp-plus">+</span> ');
 
-      // Cooking ingredients only apply to cooked pairings
-      const ingredients = pairing.type === 'cooked'
-        ? [...new Set([entry.fish, ...pairing.partners].flatMap(f => f.cookingIngredients || []))]
-        : [];
-      const ingHtml = ingredients.length
-        ? `<span class="bp-ing">🧂 ${ingredients.map(esc).join(', ')}</span>`
-        : '';
+    // Pre-cooked fish already used their ingredients — no badge needed
+    const ingredients = (pairing.type === 'cooked' && !isPreCooked)
+      ? [...new Set([fish, ...pairing.partners].flatMap(f => f.cookingIngredients || []))]
+      : [];
+    const ingHtml = ingredients.length
+      ? `<span class="bp-ing">🧂 ${ingredients.map(esc).join(', ')}</span>`
+      : '';
 
-      return `
-        <div class="bp-pairing-row">
-          <span class="bp-label ${isBest ? 'bp-label-best' : 'bp-label-alt'}">${isBest ? 'Best' : 'Alt'}</span>
-          <span class="bp-dish">${esc(dish)}</span>
-          <span class="bp-plus">+</span>
-          <span class="bp-partners">${partnerHtml}</span>
-          ${ingHtml}
-          <span class="bp-price ${isBest ? '' : 'alt-price'}">${coin(pairing.price)}</span>
-        </div>
-      `;
-    }).join('');
+    const isBlocked = !isPreCooked && pairing.blockedBy && pairing.blockedBy.length > 0;
+    const blockedHtml = isBlocked
+      ? `<span class="blocked-badge">🚫 blocked by ${pairing.blockedBy.map(esc).join(', ')}</span>`
+      : '';
 
     return `
-      <div class="better-pair-row">
-        <div class="bp-fish">${esc(entry.fish.name)} ×${entry.qty}</div>
-        ${rows}
+      <div class="bp-pairing-row${isBlocked ? ' bp-row-blocked' : ''}">
+        <span class="bp-label ${isBest ? 'bp-label-best' : 'bp-label-alt'}">${isBest ? 'Best' : 'Alt'}</span>
+        <span class="bp-dish">${esc(dish)}</span>
+        <span class="bp-plus">+</span>
+        <span class="bp-partners">${partnerHtml}</span>
+        ${ingHtml}
+        ${blockedHtml}
+        <span class="bp-price ${isBest ? '' : 'alt-price'}">${coin(pairing.price)}</span>
       </div>
     `;
+  }
+
+  // For each engine entry, emit separate sub-entries for raw and cooked inventory
+  // so they are never merged into a single row with a summed count.
+  list.innerHTML = pairings.flatMap(entry => {
+    const invEntries = state.inventory.filter(i => i.fishId === entry.fish.id);
+    const rawQty    = invEntries.filter(i => i.form === 'raw'   ).reduce((s, i) => s + i.qty, 0);
+    const cookedQty = invEntries.filter(i => i.form === 'cooked').reduce((s, i) => s + i.qty, 0);
+
+    const blocks = [];
+
+    // ── Cooked inventory sub-entry ──────────────────────────
+    if (cookedQty > 0) {
+      const headingName = entry.fish.cookedDish || entry.fish.name;
+      // Raw pairing is inapplicable for already-cooked fish
+      const rows = entry.pairings
+        .filter(p => p.type === 'cooked')
+        .map((p, i) => renderBPRow(p, i, entry.fish, true))
+        .join('');
+      blocks.push(`
+        <div class="better-pair-row">
+          <div class="bp-fish">${esc(headingName)} ×${cookedQty}</div>
+          ${rows}
+        </div>
+      `);
+    }
+
+    // ── Raw inventory sub-entry ─────────────────────────────
+    if (rawQty > 0) {
+      const rows = entry.pairings
+        .map((p, i) => renderBPRow(p, i, entry.fish, false))
+        .join('');
+      blocks.push(`
+        <div class="better-pair-row">
+          <div class="bp-fish">${esc(entry.fish.name)} ×${rawQty}</div>
+          ${rows}
+        </div>
+      `);
+    }
+
+    return blocks;
   }).join('');
 }
 
@@ -574,7 +676,7 @@ function renderBetterPairings() {
 function renderBeforeSell() {
   $('before-sell-season-label').textContent = `Best to catch in ${state.season}`;
   const grid  = $('before-sell-grid');
-  const pairs = bestPairsThisSeason(state.season, state.luck, FISH_DATA).slice(0, 6);
+  const pairs = bestPairsThisSeason(state.season, state.luck, FISH_DATA, resolvedIngredients()).slice(0, 6);
 
   if (!pairs.length) {
     grid.innerHTML = '<div class="empty-state">No pairs available this season.</div>';
@@ -599,14 +701,20 @@ function renderBeforeSell() {
       ? `<div class="before-sell-ingredients">🧂 needs: ${ingredients.map(esc).join(', ')}</div>`
       : '';
 
+    const isBlocked = p.blockedBy && p.blockedBy.length > 0;
+    const blockedLine = isBlocked
+      ? `<div class="before-sell-blocked">🚫 blocked by ${p.blockedBy.map(esc).join(', ')}</div>`
+      : '';
+
     return `
-      <div class="before-sell-card">
+      <div class="before-sell-card${isBlocked ? ' before-sell-card-blocked' : ''}">
         <div class="before-sell-rank">#${i + 1} ${availBadge}</div>
         <div class="before-sell-name">${esc(fishNames)}</div>
         <div class="before-sell-loc">${esc(locs)}</div>
         <div class="before-sell-value">${coin(p.price)}</div>
         <div class="before-sell-dish">${esc(dishLine)}</div>
         ${ingLine}
+        ${blockedLine}
       </div>
     `;
   }).join('');
