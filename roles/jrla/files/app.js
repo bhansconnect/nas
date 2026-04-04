@@ -92,6 +92,7 @@ function init() {
   setupFormToggle();
   setupAddFish();
   setupInventoryDelegation();
+  setupMobileUI();
   render();
 }
 
@@ -674,7 +675,7 @@ function renderBetterPairings() {
 
 // ── Before You Sell ───────────────────────────────────────
 function renderBeforeSell() {
-  $('before-sell-season-label').textContent = `Best to catch in ${state.season}`;
+  $('best-catch-title').textContent = `Best Catch in ${state.season}`;
   const grid  = $('before-sell-grid');
   const pairs = bestPairsThisSeason(state.season, state.luck, FISH_DATA, resolvedIngredients()).slice(0, 6);
 
@@ -812,6 +813,146 @@ function renderCatch() {
     `;
   }).join('');
 }
+
+// ── Mobile UI: header/sidebar toggle + drag resize ────────
+function setupMobileUI() {
+  const header        = document.querySelector('.app-header');
+  const headerToggle  = $('header-toggle-bar');
+  const sidebarEl     = $('sidebar');
+  const sidebarHandle = $('sidebar-handle');
+  const sidebarToggle = $('sidebar-toggle-btn');
+
+  // Only apply saved state when in mobile layout (handle is visible)
+  function isMobile() {
+    return getComputedStyle(sidebarHandle).display !== 'none';
+  }
+
+  // Restore saved state
+  if (isMobile()) {
+    if (localStorage.getItem('jrla-header-hidden') === '1') {
+      header.classList.add('header-hidden');
+    }
+    if (localStorage.getItem('jrla-sidebar-hidden') === '1') {
+      sidebarEl.classList.add('sidebar-hidden');
+    }
+    const savedH = localStorage.getItem('jrla-sidebar-h');
+    if (savedH && !sidebarEl.classList.contains('sidebar-hidden')) {
+      sidebarEl.style.maxHeight = savedH;
+      sidebarEl.style.height    = savedH;
+    }
+  }
+
+  // Header toggle
+  headerToggle.addEventListener('click', () => {
+    header.classList.toggle('header-hidden');
+    localStorage.setItem('jrla-header-hidden',
+      header.classList.contains('header-hidden') ? '1' : '0');
+  });
+
+  // Sidebar visibility toggle button
+  sidebarToggle.addEventListener('click', e => {
+    e.stopPropagation();
+    sidebarEl.classList.toggle('sidebar-hidden');
+    const hidden = sidebarEl.classList.contains('sidebar-hidden');
+    localStorage.setItem('jrla-sidebar-hidden', hidden ? '1' : '0');
+    if (!hidden) {
+      const savedH = localStorage.getItem('jrla-sidebar-h');
+      if (savedH) {
+        sidebarEl.style.maxHeight = savedH;
+        sidebarEl.style.height    = savedH;
+      }
+    }
+  });
+
+  // Drag-to-resize sidebar height
+  let dragStartY = 0;
+  let dragStartH = 0;
+  let dragging   = false;
+
+  function startDrag(clientY) {
+    if (sidebarEl.classList.contains('sidebar-hidden')) return false;
+    dragStartY = clientY;
+    dragStartH = sidebarEl.offsetHeight;
+    dragging   = true;
+    return true;
+  }
+
+  function doDrag(clientY) {
+    if (!dragging) return;
+    const dy   = clientY - dragStartY;
+    const minH = 64;
+    const maxH = Math.round(window.innerHeight * 0.82);
+    const newH = Math.max(minH, Math.min(maxH, dragStartH + dy));
+    sidebarEl.style.maxHeight = newH + 'px';
+    sidebarEl.style.height    = newH + 'px';
+  }
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    if (sidebarEl.style.maxHeight) {
+      localStorage.setItem('jrla-sidebar-h', sidebarEl.style.maxHeight);
+    }
+  }
+
+  // Touch
+  sidebarHandle.addEventListener('touchstart', e => {
+    startDrag(e.touches[0].clientY);
+  }, { passive: true });
+
+  sidebarHandle.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    doDrag(e.touches[0].clientY);
+    e.preventDefault();
+  }, { passive: false });
+
+  sidebarHandle.addEventListener('touchend', endDrag, { passive: true });
+
+  // Mouse (useful for desktop testing)
+  sidebarHandle.addEventListener('mousedown', e => {
+    if (sidebarToggle.contains(e.target)) return;
+    if (startDrag(e.clientY)) e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (dragging) doDrag(e.clientY);
+  });
+
+  document.addEventListener('mouseup', endDrag);
+}
+
+// ── Collapsible sections ──────────────────────────────────
+const COLLAPSE_KEY = 'jrla-collapsed';
+
+function saveCollapseState() {
+  const collapsed = [];
+  document.querySelectorAll('.card.collapsed, .control-section.collapsed').forEach(el => {
+    if (el.id) collapsed.push(el.id);
+  });
+  localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed));
+}
+
+function restoreCollapseState() {
+  try {
+    const ids = JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]');
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('collapsed');
+    });
+  } catch {}
+}
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.collapse-btn');
+  if (!btn) return;
+  const section = btn.closest('.card, .control-section');
+  if (section) {
+    section.classList.toggle('collapsed');
+    saveCollapseState();
+  }
+});
+
+restoreCollapseState();
 
 // ── Start ─────────────────────────────────────────────────
 loadData();

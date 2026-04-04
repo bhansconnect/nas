@@ -45,6 +45,13 @@
     </div>
   </header>
 
+  <!-- Header toggle bar (mobile only) -->
+  <div class="header-toggle-bar" id="header-toggle-bar">
+    <button class="header-toggle-btn" id="header-toggle-btn" aria-label="Toggle header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+
   <!-- Main layout -->
   <div class="app-layout">
 
@@ -53,13 +60,19 @@
       <div class="sidebar-scroll">
 
         <section class="control-section" id="pantry-section">
-          <h2 class="section-title">Pantry</h2>
+          <div class="section-header-row">
+            <h2 class="section-title">Pantry</h2>
+            <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
           <p class="pantry-hint">Check ingredients you can get.</p>
           <div class="pantry-list" id="pantry-list"><!-- populated by renderPantry() --></div>
         </section>
 
-        <section class="control-section">
-          <h2 class="section-title">Your Fish</h2>
+        <section class="control-section" id="your-fish-section">
+          <div class="section-header-row">
+            <h2 class="section-title">Your Fish</h2>
+            <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          </div>
           <div class="add-fish-form">
             <div class="autocomplete-wrap">
               <input type="text" id="fish-search" class="input" placeholder="Search fish or item…" autocomplete="off" />
@@ -80,10 +93,11 @@
           </div>
         </section>
 
-        <section class="control-section">
+        <section class="control-section" id="inventory-section">
           <div class="section-header-row">
             <h2 class="section-title">Inventory</h2>
             <button class="btn btn-ghost btn-xs" id="btn-clear-all">Clear all</button>
+            <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           </div>
           <ul class="inventory-list" id="inventory-list">
             <li class="inventory-empty" id="inventory-empty">No fish added yet.</li>
@@ -93,14 +107,22 @@
       </div>
     </aside>
 
+    <!-- Sidebar handle: drag to resize, button to hide (mobile only) -->
+    <div class="sidebar-handle" id="sidebar-handle">
+      <div class="sidebar-grip"></div>
+      <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+      </button>
+    </div>
+
     <!-- Main content -->
     <main class="main-content">
 
-      <!-- Before You Sell -->
+      <!-- Best Catch in Season -->
       <section class="card card-highlight" id="card-before-sell">
         <div class="card-header">
-          <h2 class="card-title">Before You Sell</h2>
-          <span class="card-subtitle" id="before-sell-season-label">Best to catch this season</span>
+          <h2 class="card-title" id="best-catch-title">Best Catch in –</h2>
+          <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
         <div class="before-sell-grid" id="before-sell-grid">
           <div class="empty-state">Select a season to see recommendations.</div>
@@ -109,20 +131,22 @@
 
       <!-- Sell plan -->
       <div class="sell-row">
-        <section class="card">
+        <section class="card" id="card-sell-cooked">
           <div class="card-header">
             <h2 class="card-title">Sell Cooked</h2>
             <span class="card-badge badge-green" id="cooked-total">¥0</span>
+            <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           </div>
           <div class="sell-list" id="sell-cooked-list">
             <div class="empty-state">Add cookable fish to see what to cook.</div>
           </div>
         </section>
 
-        <section class="card">
+        <section class="card" id="card-sell-raw">
           <div class="card-header">
             <h2 class="card-title">Sell Raw</h2>
             <span class="card-badge badge-blue" id="raw-total">¥0</span>
+            <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           </div>
           <div class="sell-list" id="sell-raw-list">
             <div class="empty-state">Non-cookable or unpaired fish appear here.</div>
@@ -141,6 +165,7 @@
         <div class="card-header">
           <h2 class="card-title">Unsellable — Catch to Complete</h2>
           <span class="card-subtitle">items that can't form a complete sale yet</span>
+          <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
         <div class="sell-list" id="leftover-list"></div>
       </section>
@@ -150,6 +175,7 @@
         <div class="card-header">
           <h2 class="card-title">All Pairings</h2>
           <span class="card-subtitle">all sell options for your fish — cooked is usually better</span>
+          <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
         <div class="sell-list" id="better-pairings-list"></div>
       </section>
@@ -159,6 +185,7 @@
         <div class="card-header">
           <h2 class="card-title">Available This Season</h2>
           <span class="card-subtitle" id="catch-season-label">–</span>
+          <button class="collapse-btn" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
         <div id="catch-by-location"></div>
       </section>
