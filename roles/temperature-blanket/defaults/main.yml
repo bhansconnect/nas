@@ -1,0 +1,3 @@
+---
+temperature_blanket_dataset: "{{ apps_dataset }}/temperature_blanket"
+temperature_blanket_dir: "{{ apps_dir }}/temperature_blanket"
