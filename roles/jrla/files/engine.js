@@ -275,61 +275,110 @@ function getBestPairForFish(fish, fishData) {
  *   requiresItem: { id, name } | null,
  * }]
  */
+/**
+ * For each leftover item (or group of items sharing the same pair),
+ * return what needs to be caught to complete the best available pair.
+ *
+ * Key grouping rule: if multiple leftover fish are in the SAME raw pair
+ * (e.g. Aji + Saba both in the trio rp-aji-saba-iwashi), they are combined
+ * into ONE entry whose needed list only shows what's STILL missing (Iwashi).
+ *
+ * Return shape:
+ * [{
+ *   haveItems: [{ fish, qty, form }],   // one or more grouped leftover items
+ *   pairings:  [{                       // sorted by price desc
+ *     pair, type, price,
+ *     needed: [{ fish, catchableNow, locations, seasons }]
+ *   }]
+ * }]
+ */
 function getLeftoverCatchOpportunities(leftover, season, fishData) {
   const { fish: allFish = [], cookedPairs = [], rawPairs = [] } = fishData;
   const fishById = {};
   allFish.forEach(f => { fishById[f.id] = f; });
 
+  // Index leftover by fish ID for fast lookup
+  const leftoverByFishId = {};
+  for (const lo of leftover) {
+    if (lo.fish) leftoverByFishId[lo.fish.id] = lo;
+  }
+  const leftoverFishIds = new Set(Object.keys(leftoverByFishId));
+
   const results = [];
+  const processedFishIds = new Set(); // avoid creating duplicate entries
+
+  function makeNeeded(pair, excludeIds) {
+    return pair.fishIds
+      .filter(id => !excludeIds.has(id))
+      .map(id => {
+        const pf = fishById[id];
+        if (!pf) return null;
+        return {
+          fish:         pf,
+          catchableNow: fishAvailableInSeason(pf, season),
+          locations:    pf.location,
+          seasons:      pf.seasons,
+        };
+      })
+      .filter(Boolean);
+  }
 
   for (const lo of leftover) {
+    if (!lo.fish) continue;
     const fish = lo.fish;
-    if (!fish) continue;
+    if (processedFishIds.has(fish.id)) continue;
+
+    // Determine the full set of leftover fish sharing this fish's raw pair.
+    // This is the "have" group for raw-pair entries.
+    let rawGroupIds = new Set([fish.id]);
+    if (fish.rawPairId) {
+      const rp = rawPairs.find(p => p.id === fish.rawPairId);
+      if (rp) rawGroupIds = new Set(rp.fishIds.filter(id => leftoverFishIds.has(id)));
+    }
 
     const pairings = [];
 
-    // Helper: build needed-partners array for a pair definition
-    function buildNeeded(pair) {
-      return pair.fishIds
-        .filter(id => id !== fish.id)
-        .map(id => {
-          const pf = fishById[id];
-          if (!pf) return null;
-          return {
-            fish:         pf,
-            catchableNow: fishAvailableInSeason(pf, season),
-            locations:    pf.location,
-            seasons:      pf.seasons,
-          };
-        })
-        .filter(Boolean);
-    }
-
-    // Cooked pair option (skip solo-cooked — no partners to catch)
-    if (fish.cookedPairId) {
-      const cp = cookedPairs.find(p => p.id === fish.cookedPairId);
-      if (cp) {
-        const needed = buildNeeded(cp);
-        if (needed.length > 0) {
-          pairings.push({ pair: cp, type: 'cooked', price: cp.price, needed });
-        }
+    // ── Cooked pair ────────────────────────────────────────
+    // Each fish in the raw group may have a different cooked pair,
+    // so build cooked pairings per-fish (not per-group).
+    for (const gId of rawGroupIds) {
+      const gFish = fishById[gId];
+      if (!gFish || !gFish.cookedPairId) continue;
+      const cp = cookedPairs.find(p => p.id === gFish.cookedPairId);
+      if (!cp) continue;
+      // Partners = fish in cooked pair that are NOT in our leftover group
+      const excludeForCooked = new Set(cp.fishIds.filter(id => leftoverFishIds.has(id)));
+      const needed = makeNeeded(cp, excludeForCooked);
+      if (needed.length > 0 && !pairings.some(p => p.pair.id === cp.id)) {
+        pairings.push({ pair: cp, type: 'cooked', price: cp.price, needed });
       }
     }
 
-    // Raw pair option
+    // ── Raw pair ───────────────────────────────────────────
     if (fish.rawPairId) {
       const rp = rawPairs.find(p => p.id === fish.rawPairId);
       if (rp) {
-        pairings.push({ pair: rp, type: 'raw', price: rp.price, needed: buildNeeded(rp) });
+        // Partners = fish in raw pair NOT already in our leftover group
+        const needed = makeNeeded(rp, rawGroupIds);
+        if (needed.length > 0) {
+          pairings.push({ pair: rp, type: 'raw', price: rp.price, needed });
+        }
       }
     }
 
     if (pairings.length === 0) continue;
 
-    // Sort by price desc so pairings[0] is always the best option
     pairings.sort((a, b) => b.price - a.price);
 
-    results.push({ haveItem: lo, pairings });
+    // Mark all fish in the raw group as processed
+    rawGroupIds.forEach(id => processedFishIds.add(id));
+
+    // Build haveItems in pair order so display is deterministic
+    const haveItems = Array.from(rawGroupIds)
+      .map(id => leftoverByFishId[id])
+      .filter(Boolean);
+
+    results.push({ haveItems, pairings });
   }
 
   return results;

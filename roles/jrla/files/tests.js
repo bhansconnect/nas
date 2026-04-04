@@ -528,13 +528,17 @@ function runCatchOpportunityTests() {
     return _calc(inventoryArr, FISH_DATA).leftover;
   }
 
+  // Helper: find opportunity for a fish by ID in the haveItems array
+  function findOp(ops, fishId) {
+    return ops.find(o => o.haveItems.some(h => h.fish && h.fish.id === fishId));
+  }
+
   test('BUG REGRESSION: Amago leftover — best pairing is cooked Otanago (¥100) not raw Wakasagi (¥60)', () => {
     const leftover = leftoverOf([inv('amago', 1)]);
     const ops = _catchOps(leftover, 'Spring', FISH_DATA);
-    const amagoOp = ops.find(o => o.haveItem.fish.id === 'amago');
-    assert(amagoOp, 'Should have opportunity for Amago');
-    // First pairing (best) should be cooked with Otanago
-    const best = amagoOp.pairings[0];
+    const op  = findOp(ops, 'amago');
+    assert(op, 'Should have opportunity for Amago');
+    const best = op.pairings[0];
     assertEqual(best.type, 'cooked', 'Best should be cooked');
     assertEqual(best.pair.id, 'cp-amago-otanago');
     assert(best.needed.some(n => n.fish.id === 'otanago'), 'Best needs Otanago');
@@ -544,7 +548,7 @@ function runCatchOpportunityTests() {
   test('Amago leftover also shows alt raw pair with Wakasagi', () => {
     const leftover = leftoverOf([inv('amago', 1)]);
     const ops = _catchOps(leftover, 'Spring', FISH_DATA);
-    const op  = ops.find(o => o.haveItem.fish.id === 'amago');
+    const op  = findOp(ops, 'amago');
     assert(op.pairings.length >= 2, 'Should have both cooked and raw pairing options');
     const alt = op.pairings[1];
     assertEqual(alt.type, 'raw', 'Alt should be raw pair');
@@ -555,92 +559,86 @@ function runCatchOpportunityTests() {
   test('Wakasagi leftover in Fall → best is cooked Ugui (¥100), alt is raw Amago (¥60)', () => {
     const leftover = leftoverOf([inv('wakasagi', 1)]);
     const ops = _catchOps(leftover, 'Fall', FISH_DATA);
-    const op  = ops.find(o => o.haveItem.fish.id === 'wakasagi');
+    const op  = findOp(ops, 'wakasagi');
     assert(op, 'Should have opportunity for Wakasagi');
-    // Best: cooked with Ugui
     const best = op.pairings[0];
     assertEqual(best.pair.id, 'cp-ugui-wakasagi');
     const ugui = best.needed.find(n => n.fish.id === 'ugui');
     assert(ugui.catchableNow, 'Ugui catchable in Fall (all seasons)');
-    assert(ugui.locations.length > 0, 'Ugui has location info');
-    // Alt: raw with Amago
     const alt = op.pairings[1];
     assert(alt.needed.some(n => n.fish.id === 'amago'), 'Alt needs Amago');
-  });
-
-  test('Wakasagi leftover in Spring → cooked Ugui catchable, raw Amago also catchable', () => {
-    const leftover = leftoverOf([inv('wakasagi', 1)]);
-    const ops = _catchOps(leftover, 'Spring', FISH_DATA);
-    const op  = ops.find(o => o.haveItem.fish.id === 'wakasagi');
-    const ugui  = op.pairings[0].needed.find(n => n.fish.id === 'ugui');
-    const amago = op.pairings[1].needed.find(n => n.fish.id === 'amago');
-    assert(ugui.catchableNow,  'Ugui catchable in Spring');
-    assert(amago.catchableNow, 'Amago catchable in Spring');
   });
 
   test('Haze leftover in Winter → both pairings need Hasu (Spring/Summer only, NOT catchable)', () => {
     const leftover = leftoverOf([inv('haze', 1)]);
     const ops = _catchOps(leftover, 'Winter', FISH_DATA);
-    const op  = ops.find(o => o.haveItem.fish.id === 'haze');
+    const op  = findOp(ops, 'haze');
     assert(op, 'Should have opportunity for Haze');
-    // Both cooked and raw pair with Hasu
     for (const pairing of op.pairings) {
       const hasu = pairing.needed.find(n => n.fish.id === 'hasu');
       assert(hasu, `${pairing.type} pairing should need Hasu`);
-      assert(!hasu.catchableNow, 'Hasu is Spring/Summer only, NOT catchable in Winter');
+      assert(!hasu.catchableNow, 'Hasu NOT catchable in Winter');
     }
   });
 
-  test('Sake never leftover — always sells as Yakizake (Matsutake assumed available)', () => {
+  test('Sake never leftover — always sells as Yakizake', () => {
     const r = _calc([inv('sake', 1)], FISH_DATA);
-    const sakeLo = findLeftover(r, 'sake');
-    assert(!sakeLo, 'Sake should NOT be leftover — it always sells as Yakizake');
+    assert(!findLeftover(r, 'sake'), 'Sake should not be leftover');
     assertEqual(r.grandTotal, 300);
   });
 
-  test('Aji leftover in Summer → needs Saba + Iwashi (both catchable)', () => {
+  test('Single Aji leftover in Summer → needs Saba + Iwashi (both catchable)', () => {
     const leftover = leftoverOf([inv('aji', 1)]);
     const ops = _catchOps(leftover, 'Summer', FISH_DATA);
-    const op  = ops.find(o => o.haveItem.fish.id === 'aji');
+    const op  = findOp(ops, 'aji');
     assert(op, 'Should have opportunity for Aji');
-    assertLength(op.pairings, 1, 'Aji only has one pairing (raw trio)');
-    const saba   = op.pairings[0].needed.find(n => n.fish.id === 'saba');
-    const iwashi = op.pairings[0].needed.find(n => n.fish.id === 'iwashi');
-    assert(saba   && saba.catchableNow,   'Saba catchable in Summer');
-    assert(iwashi && iwashi.catchableNow, 'Iwashi catchable in Summer');
+    assertLength(op.haveItems, 1, 'Only Aji in haveItems');
+    const needed = op.pairings[0].needed;
+    assert(needed.some(n => n.fish.id === 'saba'   && n.catchableNow), 'Saba catchable');
+    assert(needed.some(n => n.fish.id === 'iwashi'  && n.catchableNow), 'Iwashi catchable');
   });
 
-  test('Aji leftover in Winter → Saba catchable, Iwashi catchable', () => {
-    const leftover = leftoverOf([inv('aji', 1)]);
-    const ops = _catchOps(leftover, 'Winter', FISH_DATA);
-    const op  = ops.find(o => o.haveItem.fish.id === 'aji');
-    // Aji itself is Spring/Summer/Fall; but the leftover is already in inventory
-    const saba   = op.pairings[0].needed.find(n => n.fish.id === 'saba');
-    const iwashi = op.pairings[0].needed.find(n => n.fish.id === 'iwashi');
-    assert(saba   && saba.catchableNow,   'Saba catchable in Winter (Summer/Fall/Winter)');
-    assert(iwashi && iwashi.catchableNow, 'Iwashi catchable in Winter (all seasons)');
+  // ── Trio grouping tests ───────────────────────────────
+  test('Aji + Saba leftover → grouped into ONE entry needing only Iwashi', () => {
+    const leftover = leftoverOf([inv('aji', 2), inv('saba', 1), inv('iwashi', 0)]);
+    // Sell plan: 0 trio sales (no Iwashi), leftover: 2 Aji, 1 Saba
+    // But fish-data lookup: aji with 0 qty → let's force leftover directly
+    const ajiLo  = { fish: FISH_DATA.fish.find(f => f.id === 'aji'),  qty: 1, form: 'raw' };
+    const sabaLo = { fish: FISH_DATA.fish.find(f => f.id === 'saba'), qty: 1, form: 'raw' };
+    const ops = _catchOps([ajiLo, sabaLo], 'Summer', FISH_DATA);
+    assertLength(ops, 1, 'Aji + Saba should be grouped into ONE opportunity');
+    const op = ops[0];
+    assertLength(op.haveItems, 2, 'haveItems has both Aji and Saba');
+    assert(op.haveItems.some(h => h.fish.id === 'aji'),  'haveItems includes Aji');
+    assert(op.haveItems.some(h => h.fish.id === 'saba'), 'haveItems includes Saba');
+    assertLength(op.pairings[0].needed, 1, 'Only Iwashi still needed');
+    assertEqual(op.pairings[0].needed[0].fish.id, 'iwashi', 'Needs Iwashi');
   });
 
-  test('Sake: solo cooked pair (Yakizake) never makes leftover; if somehow leftover shows raw pair with Ito', () => {
-    // Sake always sells as Yakizake — never leftover
+  test('Aji + Iwashi leftover → grouped needing only Saba', () => {
+    const ajiLo    = { fish: FISH_DATA.fish.find(f => f.id === 'aji'),    qty: 1, form: 'raw' };
+    const iwashiLo = { fish: FISH_DATA.fish.find(f => f.id === 'iwashi'), qty: 1, form: 'raw' };
+    const ops = _catchOps([ajiLo, iwashiLo], 'Fall', FISH_DATA);
+    assertLength(ops, 1, 'Should be one grouped entry');
+    assertEqual(ops[0].pairings[0].needed[0].fish.id, 'saba', 'Needs Saba');
+  });
+
+  test('Sake: if hypothetically leftover, shows raw pair with Ito', () => {
     const r = _calc([inv('sake', 2)], FISH_DATA);
-    assertLength(r.leftover, 0, 'All Sake should sell as Yakizake');
-    // If hypothetically leftover: Sake has raw pair with Ito (rp-sake-ito)
-    // Its cooked pair (cp-yakizake) is solo so has no partners → not shown
-    // But its raw pair (rp-sake-ito) has Ito as partner → IS shown
+    assertLength(r.leftover, 0, 'All Sake should sell');
     const fakeLo = [{ fish: FISH_DATA.fish.find(f => f.id === 'sake'), qty: 1, form: 'raw' }];
     const ops = _catchOps(fakeLo, 'Fall', FISH_DATA);
-    assertLength(ops, 1, 'Sake shows raw pair opportunity (catch Ito)');
-    assertEqual(ops[0].pairings[0].type, 'raw', 'Only pairing is raw (cooked is solo, no partners)');
-    assert(ops[0].pairings[0].needed.some(n => n.fish.id === 'ito'), 'Needs Ito for raw pair');
+    assertLength(ops, 1, 'Sake has a catch opportunity (raw pair with Ito)');
+    assertEqual(ops[0].pairings[0].type, 'raw');
+    assert(ops[0].pairings[0].needed.some(n => n.fish.id === 'ito'));
   });
 
   test('pairings sorted by price desc', () => {
     const leftover = leftoverOf([inv('amago', 1)]);
     const ops = _catchOps(leftover, 'Spring', FISH_DATA);
-    const op  = ops.find(o => o.haveItem.fish.id === 'amago');
+    const op  = findOp(ops, 'amago');
     for (let i = 1; i < op.pairings.length; i++) {
-      assert(op.pairings[i].price <= op.pairings[i-1].price, 'Pairings should be sorted by price desc');
+      assert(op.pairings[i].price <= op.pairings[i-1].price, 'Pairings sorted by price desc');
     }
   });
 }

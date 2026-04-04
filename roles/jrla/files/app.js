@@ -414,53 +414,70 @@ function renderLeftoverWithCatch(leftover) {
   }
 
   section.style.display = '';
-  const ops = getLeftoverCatchOpportunities(leftover, state.season, FISH_DATA);
-  const opsByFishId = {};
-  ops.forEach(op => {
-    const id = op.haveItem.fish ? op.haveItem.fish.id : (op.haveItem.specialItem && op.haveItem.specialItem.id);
-    if (id) opsByFishId[id] = op;
-  });
 
-  list.innerHTML = leftover.map(lo => {
-    let name, catchHtml = '';
-    if (lo.specialItem) {
-      name = esc(lo.specialItem.name);
-    } else {
-      name = esc(lo.form === 'cooked' && lo.fish.cookedDish ? lo.fish.cookedDish : lo.fish.name);
-      const op = opsByFishId[lo.fish.id];
-      if (op) {
-        const pairingRows = op.pairings.map((pairing, idx) => {
-          const isBest = idx === 0;
-          const label = isBest ? 'Best' : 'Alt';
-          const pairLabel = pairing.type === 'cooked'
-            ? `${esc(lo.fish.cookedDish || lo.fish.name)} (cooked)`
-            : `${esc(lo.fish.name)} (raw)`;
-          const partnerLines = pairing.needed.map(n => {
-            const badge = n.catchableNow
-              ? `<span class="catch-badge catch-yes">✓ ${esc(n.locations.join('/'))} now</span>`
-              : `<span class="catch-badge catch-no">✗ ${esc(n.seasons.join('/'))} only</span>`;
-            return `<span class="catch-partner">${esc(n.fish.name)}</span>${badge}`;
-          }).join(' ');
-          return `
-            <div class="catch-pairing-row ${isBest ? 'catch-pairing-best' : 'catch-pairing-alt'}">
-              <span class="catch-option-label">${label}</span>
-              <span class="catch-pair-desc">${pairLabel} → ${coin(pairing.price)}/pair</span>
-              <span class="catch-needs">needs: ${partnerLines}</span>
-            </div>
-          `;
-        }).join('');
-        catchHtml = `<div class="catch-opportunity">${pairingRows}</div>`;
-      }
-    }
-    return `
+  const ops = getLeftoverCatchOpportunities(leftover, state.season, FISH_DATA);
+
+  // Track which fish IDs have been rendered via an opportunity group
+  const coveredIds = new Set();
+  ops.forEach(op => op.haveItems.forEach(hi => { if (hi.fish) coveredIds.add(hi.fish.id); }));
+
+  const rows = [];
+
+  // Render each opportunity (may cover multiple fish grouped together)
+  for (const op of ops) {
+    const header = op.haveItems.map(hi => {
+      const name = hi.form === 'cooked' && hi.fish.cookedDish ? hi.fish.cookedDish : hi.fish.name;
+      return `${esc(name)} ×${hi.qty}`;
+    }).join(' + ');
+
+    const pairingRows = op.pairings.map((pairing, idx) => {
+      const isBest   = idx === 0;
+      const label    = isBest ? 'Best' : 'Alt';
+      // Describe what we have and what dish it becomes
+      const haveDish = pairing.type === 'cooked'
+        ? op.haveItems.map(hi => esc(hi.fish.cookedDish || hi.fish.name)).join(' + ') + ' (cooked)'
+        : op.haveItems.map(hi => esc(hi.fish.name)).join(' + ') + ' (raw)';
+      const partnerLines = pairing.needed.map(n => {
+        const badge = n.catchableNow
+          ? `<span class="catch-badge catch-yes">✓ ${esc(n.locations.join('/'))} now</span>`
+          : `<span class="catch-badge catch-no">✗ ${esc(n.seasons.join('/'))} only</span>`;
+        return `<span class="catch-partner">${esc(n.fish.name)}</span>${badge}`;
+      }).join(' ');
+      return `
+        <div class="catch-pairing-row ${isBest ? 'catch-pairing-best' : 'catch-pairing-alt'}">
+          <span class="catch-option-label">${label}</span>
+          <span class="catch-pair-desc">${haveDish} → ${coin(pairing.price)}/pair</span>
+          <span class="catch-needs">needs: ${partnerLines}</span>
+        </div>
+      `;
+    }).join('');
+
+    rows.push(`
+      <div class="sell-item sell-item-leftover">
+        <div class="sell-item-name">
+          <div class="sell-fish-name">${header}</div>
+        </div>
+        <div class="catch-opportunity">${pairingRows}</div>
+      </div>
+    `);
+  }
+
+  // Render any leftover fish NOT covered by an opportunity (no pair guidance)
+  for (const lo of leftover) {
+    if (lo.specialItem) continue;
+    if (lo.fish && coveredIds.has(lo.fish.id)) continue;
+    const name = esc(lo.form === 'cooked' && lo.fish.cookedDish ? lo.fish.cookedDish : lo.fish.name);
+    rows.push(`
       <div class="sell-item sell-item-leftover">
         <div class="sell-item-name">
           <div class="sell-fish-name">${name} ×${lo.qty}</div>
+          <div class="sell-dish-name" style="color:var(--color-text-3)">no sale available</div>
         </div>
-        ${catchHtml}
       </div>
-    `;
-  }).join('');
+    `);
+  }
+
+  list.innerHTML = rows.join('');
 }
 
 // ── Better Pairings ───────────────────────────────────────
