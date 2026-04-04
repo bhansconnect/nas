@@ -38,7 +38,7 @@ function assertLength(arr, n, msg) {
 // In browser: both are already loaded as globals.
 
 let FISH_DATA;
-let _calc, _best, _available, _bestPair, _catchOps, _betterPairings;
+let _calc, _best, _available, _catchable, _bestPair, _catchOps, _betterPairings;
 
 function loadTestDeps(data, engineModule) {
   FISH_DATA = data;
@@ -46,6 +46,7 @@ function loadTestDeps(data, engineModule) {
     _calc          = engineModule.calculateSellPlan;
     _best          = engineModule.bestPairsThisSeason;
     _available     = engineModule.fishAvailableInSeason;
+    _catchable     = engineModule.fishCatchable;
     _bestPair      = engineModule.getBestPairForFish;
     _catchOps      = engineModule.getLeftoverCatchOpportunities;
     _betterPairings= engineModule.getBetterPairings;
@@ -54,6 +55,7 @@ function loadTestDeps(data, engineModule) {
     _calc          = calculateSellPlan;
     _best          = bestPairsThisSeason;
     _available     = fishAvailableInSeason;
+    _catchable     = fishCatchable;
     _bestPair      = getBestPairForFish;
     _catchOps      = getLeftoverCatchOpportunities;
     _betterPairings= getBetterPairings;
@@ -422,7 +424,7 @@ function runBestPairsTests() {
   if (typeof process !== 'undefined') console.log('\nBest Pairs This Season:');
 
   test('Fall: top cooked pair should be Oshurokoma+Higai (¥250)', () => {
-    const pairs = _best('Fall', FISH_DATA);
+    const pairs = _best('Fall', 4, FISH_DATA);
     // Find highest-priced pair where both fish are available in Fall
     const top = pairs.find(p => p.allAvailable && p.type === 'cooked');
     assert(top, 'Should have a fully-available cooked pair in Fall');
@@ -430,28 +432,28 @@ function runBestPairsTests() {
   });
 
   test('Fall: Oshurokoma+Higai pair is fully available', () => {
-    const pairs = _best('Fall', FISH_DATA);
+    const pairs = _best('Fall', 4, FISH_DATA);
     const shuro = pairs.find(p => p.pairId === 'cp-oshurokoma-higai');
     assert(shuro, 'cp-oshurokoma-higai should appear in Fall');
     assert(shuro.allAvailable, 'Both Oshurokoma and Higai are catchable in Fall');
   });
 
   test('Winter: Ito Sashimi solo (¥300) appears as available', () => {
-    const pairs = _best('Winter', FISH_DATA);
+    const pairs = _best('Winter', 4, FISH_DATA);
     const itoSolo = pairs.find(p => p.pairId === 'cp-ito-sashimi');
     assert(itoSolo, 'Ito Sashimi should appear in Winter');
     assertEqual(itoSolo.price, 300);
   });
 
   test('Winter: Herabuna+Nijimasu pair is fully available', () => {
-    const pairs = _best('Winter', FISH_DATA);
+    const pairs = _best('Winter', 4, FISH_DATA);
     const p = pairs.find(p => p.pairId === 'cp-herabuna-nijimasu');
     assert(p, 'cp-herabuna-nijimasu should appear in Winter');
     assert(p.allAvailable, 'Herabuna (Winter) and Nijimasu (Fall/Winter) both catchable');
   });
 
   test('Spring: Oshurokoma+Higai pair NOT fully available (Higai is Fall-only)', () => {
-    const pairs = _best('Spring', FISH_DATA);
+    const pairs = _best('Spring', 4, FISH_DATA);
     const p = pairs.find(p => p.pairId === 'cp-oshurokoma-higai');
     if (p) {
       assert(!p.allAvailable, 'Should not be fully available in Spring (Higai is Fall-only)');
@@ -460,7 +462,7 @@ function runBestPairsTests() {
   });
 
   test('bestPairsThisSeason returns array sorted by price desc for fully-available pairs', () => {
-    const pairs = _best('Fall', FISH_DATA);
+    const pairs = _best('Fall', 4, FISH_DATA);
     const fullPairs = pairs.filter(p => p.allAvailable);
     for (let i = 1; i < fullPairs.length; i++) {
       assert(
@@ -535,7 +537,7 @@ function runCatchOpportunityTests() {
 
   test('BUG REGRESSION: Amago leftover — best pairing is cooked Otanago (¥100) not raw Wakasagi (¥60)', () => {
     const leftover = leftoverOf([inv('amago', 1)]);
-    const ops = _catchOps(leftover, 'Spring', FISH_DATA);
+    const ops = _catchOps(leftover, 'Spring', 4, FISH_DATA);
     const op  = findOp(ops, 'amago');
     assert(op, 'Should have opportunity for Amago');
     const best = op.pairings[0];
@@ -547,7 +549,7 @@ function runCatchOpportunityTests() {
 
   test('Amago leftover also shows alt raw pair with Wakasagi', () => {
     const leftover = leftoverOf([inv('amago', 1)]);
-    const ops = _catchOps(leftover, 'Spring', FISH_DATA);
+    const ops = _catchOps(leftover, 'Spring', 4, FISH_DATA);
     const op  = findOp(ops, 'amago');
     assert(op.pairings.length >= 2, 'Should have both cooked and raw pairing options');
     const alt = op.pairings[1];
@@ -558,7 +560,7 @@ function runCatchOpportunityTests() {
 
   test('Wakasagi leftover in Fall → best is cooked Ugui (¥100), alt is raw Amago (¥60)', () => {
     const leftover = leftoverOf([inv('wakasagi', 1)]);
-    const ops = _catchOps(leftover, 'Fall', FISH_DATA);
+    const ops = _catchOps(leftover, 'Fall', 4, FISH_DATA);
     const op  = findOp(ops, 'wakasagi');
     assert(op, 'Should have opportunity for Wakasagi');
     const best = op.pairings[0];
@@ -571,7 +573,7 @@ function runCatchOpportunityTests() {
 
   test('Haze leftover in Winter → both pairings need Hasu (Spring/Summer only, NOT catchable)', () => {
     const leftover = leftoverOf([inv('haze', 1)]);
-    const ops = _catchOps(leftover, 'Winter', FISH_DATA);
+    const ops = _catchOps(leftover, 'Winter', 4, FISH_DATA);
     const op  = findOp(ops, 'haze');
     assert(op, 'Should have opportunity for Haze');
     for (const pairing of op.pairings) {
@@ -589,7 +591,7 @@ function runCatchOpportunityTests() {
 
   test('Single Aji leftover in Summer → needs Saba + Iwashi (both catchable)', () => {
     const leftover = leftoverOf([inv('aji', 1)]);
-    const ops = _catchOps(leftover, 'Summer', FISH_DATA);
+    const ops = _catchOps(leftover, 'Summer', 4, FISH_DATA);
     const op  = findOp(ops, 'aji');
     assert(op, 'Should have opportunity for Aji');
     assertLength(op.haveItems, 1, 'Only Aji in haveItems');
@@ -605,7 +607,7 @@ function runCatchOpportunityTests() {
     // But fish-data lookup: aji with 0 qty → let's force leftover directly
     const ajiLo  = { fish: FISH_DATA.fish.find(f => f.id === 'aji'),  qty: 1, form: 'raw' };
     const sabaLo = { fish: FISH_DATA.fish.find(f => f.id === 'saba'), qty: 1, form: 'raw' };
-    const ops = _catchOps([ajiLo, sabaLo], 'Summer', FISH_DATA);
+    const ops = _catchOps([ajiLo, sabaLo], 'Summer', 4, FISH_DATA);
     assertLength(ops, 1, 'Aji + Saba should be grouped into ONE opportunity');
     const op = ops[0];
     assertLength(op.haveItems, 2, 'haveItems has both Aji and Saba');
@@ -618,7 +620,7 @@ function runCatchOpportunityTests() {
   test('Aji + Iwashi leftover → grouped needing only Saba', () => {
     const ajiLo    = { fish: FISH_DATA.fish.find(f => f.id === 'aji'),    qty: 1, form: 'raw' };
     const iwashiLo = { fish: FISH_DATA.fish.find(f => f.id === 'iwashi'), qty: 1, form: 'raw' };
-    const ops = _catchOps([ajiLo, iwashiLo], 'Fall', FISH_DATA);
+    const ops = _catchOps([ajiLo, iwashiLo], 'Fall', 4, FISH_DATA);
     assertLength(ops, 1, 'Should be one grouped entry');
     assertEqual(ops[0].pairings[0].needed[0].fish.id, 'saba', 'Needs Saba');
   });
@@ -627,7 +629,7 @@ function runCatchOpportunityTests() {
     const r = _calc([inv('sake', 2)], FISH_DATA);
     assertLength(r.leftover, 0, 'All Sake should sell');
     const fakeLo = [{ fish: FISH_DATA.fish.find(f => f.id === 'sake'), qty: 1, form: 'raw' }];
-    const ops = _catchOps(fakeLo, 'Fall', FISH_DATA);
+    const ops = _catchOps(fakeLo, 'Fall', 4, FISH_DATA);
     assertLength(ops, 1, 'Sake has a catch opportunity (raw pair with Ito)');
     assertEqual(ops[0].pairings[0].type, 'raw');
     assert(ops[0].pairings[0].needed.some(n => n.fish.id === 'ito'));
@@ -635,7 +637,7 @@ function runCatchOpportunityTests() {
 
   test('pairings sorted by price desc', () => {
     const leftover = leftoverOf([inv('amago', 1)]);
-    const ops = _catchOps(leftover, 'Spring', FISH_DATA);
+    const ops = _catchOps(leftover, 'Spring', 4, FISH_DATA);
     const op  = findOp(ops, 'amago');
     for (let i = 1; i < op.pairings.length; i++) {
       assert(op.pairings[i].price <= op.pairings[i-1].price, 'Pairings sorted by price desc');
@@ -704,6 +706,84 @@ function runBetterPairingsTests() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// GROUP: Luck filter
+// ═══════════════════════════════════════════════════════════
+function runLuckFilterTests() {
+  if (typeof process !== 'undefined') console.log('\nLuck Filter:');
+
+  test('fishCatchable: 1-star fish catchable with luck=1 in season', () => {
+    const oikawa = FISH_DATA.fish.find(f => f.id === 'oikawa');
+    assert(_catchable(oikawa, 'Spring', 1), 'Oikawa (1★) catchable with luck=1');
+  });
+
+  test('fishCatchable: 4-star Ito NOT catchable with luck=1', () => {
+    const ito = FISH_DATA.fish.find(f => f.id === 'ito');
+    assert(!_catchable(ito, 'Spring', 1), 'Ito (4★) NOT catchable with luck=1');
+  });
+
+  test('fishCatchable: 4-star Ito catchable with luck=4 in season', () => {
+    const ito = FISH_DATA.fish.find(f => f.id === 'ito');
+    assert(_catchable(ito, 'Spring', 4), 'Ito (4★) catchable with luck=4 in Spring');
+  });
+
+  test('fishCatchable: luck sufficient but out of season → false', () => {
+    const higai = FISH_DATA.fish.find(f => f.id === 'higai');
+    assert(!_catchable(higai, 'Spring', 4), 'Higai not catchable in Spring (wrong season)');
+  });
+
+  test('fishCatchable: in season but luck too low → false', () => {
+    const higai = FISH_DATA.fish.find(f => f.id === 'higai');
+    assert(!_catchable(higai, 'Fall', 2), 'Higai (3★) NOT catchable with luck=2 even in Fall');
+  });
+
+  test('fishCatchable: koi always false (pond fish, not rod fishing)', () => {
+    const koi = FISH_DATA.fish.find(f => f.id === 'koi-hi-utsuri');
+    assert(!_catchable(koi, 'Spring', 4), 'Koi not catchable via fishing rod');
+  });
+
+  test('bestPairsThisSeason: luck=1 excludes Ito Sashimi (Ito is 4★)', () => {
+    const pairs = _best('Spring', 1, FISH_DATA);
+    assert(!pairs.find(p => p.pairId === 'cp-ito-sashimi'), 'Ito Sashimi hidden with luck=1');
+  });
+
+  test('bestPairsThisSeason: luck=4 includes Ito Sashimi', () => {
+    const pairs = _best('Spring', 4, FISH_DATA);
+    assert(pairs.find(p => p.pairId === 'cp-ito-sashimi'), 'Ito Sashimi shown with luck=4');
+  });
+
+  test('bestPairsThisSeason: luck=2 excludes Oshurokoma+Higai (both 3★) in Fall', () => {
+    const pairs = _best('Fall', 2, FISH_DATA);
+    assert(!pairs.find(p => p.pairId === 'cp-oshurokoma-higai'), 'Hidden with luck=2');
+  });
+
+  test('bestPairsThisSeason: luck=1 includes 1-star pairs in season', () => {
+    const pairs = _best('Spring', 1, FISH_DATA);
+    const p = pairs.find(p => p.pairId === 'cp-ezo-oikawa');
+    assert(p, 'Ezo Iwana + Oikawa (both 1★) shown with luck=1');
+    assert(p.allAvailable, 'Both catchable with luck=1 in Spring');
+  });
+
+  test('getLeftoverCatchOpportunities: needed partner exposes luckSufficient flag', () => {
+    // Oshurokoma leftover: cooked pair needs Higai (3★). With luck=1 → luck blocked.
+    const lo = { fish: FISH_DATA.fish.find(f => f.id === 'oshurokoma'), qty: 1, form: 'raw' };
+    const ops = _catchOps([lo], 'Fall', 1, FISH_DATA);
+    const higai = ops[0].pairings[0].needed.find(n => n.fish.id === 'higai');
+    assert(higai, 'Should need Higai');
+    assert(!higai.luckSufficient, 'Higai (3★) blocked by luck=1');
+    assert(!higai.catchableNow, 'Not catchable now (luck blocked)');
+    assert(higai.inSeason, 'But IS in season (Fall)');
+  });
+
+  test('getLeftoverCatchOpportunities: luck=4 makes same partner catchable', () => {
+    const lo = { fish: FISH_DATA.fish.find(f => f.id === 'oshurokoma'), qty: 1, form: 'raw' };
+    const ops = _catchOps([lo], 'Fall', 4, FISH_DATA);
+    const higai = ops[0].pairings[0].needed.find(n => n.fish.id === 'higai');
+    assert(higai.luckSufficient, 'Higai (3★) catchable with luck=4');
+    assert(higai.catchableNow, 'Catchable now in Fall with luck=4');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
 // Run all tests
 // ═══════════════════════════════════════════════════════════
 function runAllTests() {
@@ -719,6 +799,7 @@ function runAllTests() {
   runBestPairForFishTests();
   runCatchOpportunityTests();
   runBetterPairingsTests();
+  runLuckFilterTests();
   return _results;
 }
 

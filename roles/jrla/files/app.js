@@ -10,6 +10,7 @@ const PERSIST_KEY = 'jrla-fish-state';
 // ── State ─────────────────────────────────────────────────
 let state = {
   season:    'Spring',
+  luck:      1,    // 1–4 star filter
   inventory: [], // [{id, fishId, qty, form: 'raw'|'cooked'}]
 };
 
@@ -31,6 +32,7 @@ function saveState() {
   try {
     localStorage.setItem(PERSIST_KEY, JSON.stringify({
       season:    state.season,
+      luck:      state.luck,
       inventory: state.inventory,
     }));
   } catch (_) {}
@@ -41,6 +43,7 @@ function loadState() {
     const saved = JSON.parse(localStorage.getItem(PERSIST_KEY));
     if (!saved) return;
     if (saved.season)                   state.season    = saved.season;
+    if (saved.luck >= 1 && saved.luck <= 4) state.luck  = saved.luck;
     if (Array.isArray(saved.inventory)) state.inventory = saved.inventory;
   } catch (_) {}
 }
@@ -56,6 +59,7 @@ function init() {
   loadState();
   setupTheme();
   setupSeasonButtons();
+  setupLuckButtons();
   setupAutocomplete();
   setupFormToggle();
   setupAddFish();
@@ -84,6 +88,19 @@ function setupSeasonButtons() {
 function updateSeasonActiveClass() {
   $$('.season-btn').forEach(btn =>
     btn.classList.toggle('active', btn.dataset.season === state.season)
+  );
+}
+
+// ── Luck — one-time listener setup ───────────────────────
+function setupLuckButtons() {
+  $$('.luck-btn').forEach(btn => {
+    btn.addEventListener('click', () => setState({ luck: parseInt(btn.dataset.luck) }));
+  });
+}
+
+function updateLuckActiveClass() {
+  $$('.luck-btn').forEach(btn =>
+    btn.classList.toggle('active', parseInt(btn.dataset.luck) === state.luck)
   );
 }
 
@@ -280,6 +297,7 @@ function locIcon(loc) { return LOC_ICONS[loc] || '📍'; }
 function render() {
   if (!FISH_DATA) return;
   updateSeasonActiveClass();
+  updateLuckActiveClass();
   renderInventoryList();
   renderSellPlan();
   renderBetterPairings();
@@ -415,7 +433,7 @@ function renderLeftoverWithCatch(leftover) {
 
   section.style.display = '';
 
-  const ops = getLeftoverCatchOpportunities(leftover, state.season, FISH_DATA);
+  const ops = getLeftoverCatchOpportunities(leftover, state.season, state.luck, FISH_DATA);
 
   // Track which fish IDs have been rendered via an opportunity group
   const coveredIds = new Set();
@@ -438,9 +456,14 @@ function renderLeftoverWithCatch(leftover) {
         ? op.haveItems.map(hi => esc(hi.fish.cookedDish || hi.fish.name)).join(' + ') + ' (cooked)'
         : op.haveItems.map(hi => esc(hi.fish.name)).join(' + ') + ' (raw)';
       const partnerLines = pairing.needed.map(n => {
-        const badge = n.catchableNow
-          ? `<span class="catch-badge catch-yes">✓ ${esc(n.locations.join('/'))} now</span>`
-          : `<span class="catch-badge catch-no">✗ ${esc(n.seasons.join('/'))} only</span>`;
+        let badge;
+        if (n.catchableNow) {
+          badge = `<span class="catch-badge catch-yes">✓ ${esc(n.locations.join('/'))} now</span>`;
+        } else if (!n.luckSufficient) {
+          badge = `<span class="catch-badge catch-luck">✗ need ${n.fish.stars}★ luck</span>`;
+        } else {
+          badge = `<span class="catch-badge catch-no">✗ ${esc(n.seasons.join('/'))} only</span>`;
+        }
         return `<span class="catch-partner">${esc(n.fish.name)}</span>${badge}`;
       }).join(' ');
       return `
@@ -501,14 +524,17 @@ function renderBetterPairings() {
         : entry.fish.name;
 
       const partnerHtml = pairing.partners.map(p => {
-        const inInv       = state.inventory.some(i => i.fishId === p.id);
-        const catchable   = fishAvailableInSeason(p, state.season);
-        const locs        = p.location.join('/');
+        const inInv   = state.inventory.some(i => i.fishId === p.id);
+        const inSzn   = fishAvailableInSeason(p, state.season);
+        const luckOk  = p.stars <= state.luck;
+        const locs    = p.location.join('/');
         let badge;
         if (inInv) {
           badge = `<span class="catch-badge catch-yes">✓ in inventory</span>`;
-        } else if (catchable) {
+        } else if (inSzn && luckOk) {
           badge = `<span class="catch-badge catch-yes">✓ ${esc(locs)} now</span>`;
+        } else if (!luckOk) {
+          badge = `<span class="catch-badge catch-luck">✗ need ${p.stars}★ luck</span>`;
         } else {
           badge = `<span class="catch-badge catch-no">✗ ${esc(p.seasons.join('/'))} only</span>`;
         }
@@ -548,7 +574,7 @@ function renderBetterPairings() {
 function renderBeforeSell() {
   $('before-sell-season-label').textContent = `Best to catch in ${state.season}`;
   const grid  = $('before-sell-grid');
-  const pairs = bestPairsThisSeason(state.season, FISH_DATA).slice(0, 6);
+  const pairs = bestPairsThisSeason(state.season, state.luck, FISH_DATA).slice(0, 6);
 
   if (!pairs.length) {
     grid.innerHTML = '<div class="empty-state">No pairs available this season.</div>';
@@ -591,7 +617,7 @@ function renderCatch() {
   $('catch-season-label').textContent = state.season;
   const container = $('catch-by-location');
 
-  const seasonFish = FISH_DATA.fish.filter(f => !f.koi && fishAvailableInSeason(f, state.season));
+  const seasonFish = FISH_DATA.fish.filter(f => fishCatchable(f, state.season, state.luck));
 
   if (!seasonFish.length) {
     container.innerHTML = '<div class="empty-state">No regular fish available this season.</div>';

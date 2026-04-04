@@ -4,12 +4,24 @@
    ============================================================ */
 
 /**
- * Check whether a fish (or special item) is available in a given season.
- * @param {object} fish - fish entry from fish-data.json
+ * Check whether a fish is available in a given season.
+ * @param {object} fish
  * @param {string} season - "Spring"|"Summer"|"Fall"|"Winter"
  */
 function fishAvailableInSeason(fish, season) {
   return fish.seasons.includes(season);
+}
+
+/**
+ * Check whether a fish can currently be caught (season + luck).
+ * Koi are excluded — they come from the pond, not regular fishing.
+ * @param {object} fish
+ * @param {string} season
+ * @param {number} luck - 1–4 (player's current luck stat)
+ */
+function fishCatchable(fish, season, luck) {
+  if (fish.koi) return false;
+  return fish.seasons.includes(season) && fish.stars <= luck;
 }
 
 /**
@@ -171,7 +183,7 @@ function calculateSellPlan(inventory, fishData) {
  * @param {object} fishData
  * @returns {Array} ranked pair recommendations
  */
-function bestPairsThisSeason(season, fishData) {
+function bestPairsThisSeason(season, luck, fishData) {
   const { fish = [], cookedPairs = [], rawPairs = [] } = fishData;
   const fishById = {};
   fish.forEach(f => { fishById[f.id] = f; });
@@ -184,18 +196,18 @@ function bestPairsThisSeason(season, fishData) {
     // Skip if any fish in pair is a koi
     if (fishInPair.some(f => f.koi)) continue;
 
-    const available = fishInPair.filter(f => fishAvailableInSeason(f, season));
-    // Skip if no fish from this pair are available this season
-    if (available.length === 0 && !pair.requiresItem) continue;
+    const catchable = fishInPair.filter(f => fishCatchable(f, season, luck));
+    // Skip pairs where no fish at all are catchable with current luck+season
+    if (catchable.length === 0) continue;
 
     results.push({
       pairId:        pair.id,
       type:          'cooked',
       price:         pair.price,
       fish:          fishInPair,
-      availableCount: available.length,
+      availableCount: catchable.length,
       totalInPair:   fishInPair.length,
-      allAvailable:  available.length === fishInPair.length,
+      allAvailable:  catchable.length === fishInPair.length,
     });
   }
 
@@ -204,21 +216,17 @@ function bestPairsThisSeason(season, fishData) {
     const fishInPair = pair.fishIds.map(id => fishById[id]).filter(Boolean);
     if (fishInPair.some(f => f.koi)) continue;
 
-    const available = fishInPair.filter(f => fishAvailableInSeason(f, season));
-    if (available.length === 0) continue;
+    const catchable = fishInPair.filter(f => fishCatchable(f, season, luck));
+    if (catchable.length === 0) continue;
 
     // Skip raw pair if ALL fish in it have a cooked pair at higher value
-    // (we'll show the cooked pair instead)
     const allHaveCookedPair = fishInPair.every(f => f.cookedPairId);
     if (allHaveCookedPair) {
-      // Only include raw pair if price is meaningfully different from cooked
-      // (i.e., when the cooked pair partner is seasonal and may be unavailable)
       const cookedPairPrices = fishInPair.map(f => {
         const cp = cookedPairs.find(p => p.id === f.cookedPairId);
         return cp ? cp.price : 0;
       });
-      const maxCookedPrice = Math.max(...cookedPairPrices);
-      if (maxCookedPrice >= pair.price) continue; // cooked is always better
+      if (Math.max(...cookedPairPrices) >= pair.price) continue;
     }
 
     results.push({
@@ -226,9 +234,9 @@ function bestPairsThisSeason(season, fishData) {
       type:          'raw',
       price:         pair.price,
       fish:          fishInPair,
-      availableCount: available.length,
+      availableCount: catchable.length,
       totalInPair:   fishInPair.length,
-      allAvailable:  available.length === fishInPair.length,
+      allAvailable:  catchable.length === fishInPair.length,
     });
   }
 
@@ -292,7 +300,7 @@ function getBestPairForFish(fish, fishData) {
  *   }]
  * }]
  */
-function getLeftoverCatchOpportunities(leftover, season, fishData) {
+function getLeftoverCatchOpportunities(leftover, season, luck, fishData) {
   const { fish: allFish = [], cookedPairs = [], rawPairs = [] } = fishData;
   const fishById = {};
   allFish.forEach(f => { fishById[f.id] = f; });
@@ -313,11 +321,15 @@ function getLeftoverCatchOpportunities(leftover, season, fishData) {
       .map(id => {
         const pf = fishById[id];
         if (!pf) return null;
+        const inSeason       = fishAvailableInSeason(pf, season);
+        const luckSufficient = pf.stars <= luck;
         return {
-          fish:         pf,
-          catchableNow: fishAvailableInSeason(pf, season),
-          locations:    pf.location,
-          seasons:      pf.seasons,
+          fish:            pf,
+          catchableNow:    inSeason && luckSufficient,
+          inSeason,
+          luckSufficient,
+          locations:       pf.location,
+          seasons:         pf.seasons,
         };
       })
       .filter(Boolean);
@@ -457,6 +469,7 @@ if (typeof module !== 'undefined' && module.exports) {
     calculateSellPlan,
     bestPairsThisSeason,
     fishAvailableInSeason,
+    fishCatchable,
     getBestPairForFish,
     getLeftoverCatchOpportunities,
     getBetterPairings,

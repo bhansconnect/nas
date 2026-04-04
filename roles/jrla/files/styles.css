@@ -191,6 +191,46 @@ body {
   color: var(--season-winter);
 }
 
+.luck-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.luck-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.luck-btn {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-3);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+
+.luck-btn:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.luck-btn.active {
+  background: var(--color-gold-dim);
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
 .header-actions {
   display: flex;
   gap: var(--space-2);
@@ -902,6 +942,7 @@ body {
 
 .catch-yes  { background: rgba(109,196,160,0.15); color: var(--color-success); }
 .catch-no   { background: rgba(232,92,92,0.12);  color: var(--color-danger);  }
+.catch-luck { background: rgba(155,127,232,0.15); color: #c4adff;             }
 .catch-item { background: rgba(232,196,106,0.12); color: var(--color-gold);   }
 
 .catch-pairing-row {
