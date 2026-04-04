@@ -521,7 +521,7 @@ body {
   font-weight: 700;
   color: var(--color-accent);
   min-width: 24px;
-  text-align: right;
+  text-align: center;
 }
 
 .badge-form {
