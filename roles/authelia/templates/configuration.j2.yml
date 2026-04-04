@@ -42,6 +42,7 @@ access_control:
         - "roc-todos.{{ nas_domain }}"
         - "jellyfin.{{ nas_domain }}"
         - "temp.{{ nas_domain }}"
+        - "jrla.{{ nas_domain }}"
       policy: bypass
 
     # API Bypass
