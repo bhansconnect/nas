@@ -905,6 +905,11 @@ body {
   background: rgba(232, 92, 92, 0.04);
 }
 
+.sell-item-leftover {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .sell-item-leftover .sell-fish-name {
   color: var(--color-text-2);
 }
@@ -1219,7 +1224,7 @@ body {
   .app-header {
     height: auto;
     flex-wrap: wrap;
-    padding: var(--space-2) var(--space-3);
+    padding: calc(var(--space-2) + env(safe-area-inset-top, 0px)) var(--space-3) var(--space-2);
     row-gap: var(--space-2);
   }
 
@@ -1325,6 +1330,12 @@ body {
 
   .app-header.header-hidden {
     display: none;
+  }
+
+  /* When header is hidden, toggle bar is the topmost element — push it below the notch */
+  .app-header.header-hidden + .header-toggle-bar {
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(20px + env(safe-area-inset-top, 0px));
   }
 
   /* Sidebar handle */
