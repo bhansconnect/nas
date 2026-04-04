@@ -1,0 +1,3 @@
+---
+jrla_dataset: "{{ apps_dataset }}/jrla"
+jrla_dir: "{{ apps_dir }}/jrla"

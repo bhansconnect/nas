@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JRLA Fish Assistant</title>
+  <meta name="description" content="Japanese Rural Life Adventure — fish selling optimizer" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎣</text></svg>">
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <span class="logo-fish">🎣</span>
+      <div class="header-titles">
+        <span class="logo-text">Fish Assistant</span>
+        <span class="logo-sub">Japanese Rural Life Adventure</span>
+      </div>
+    </div>
+
+    <div class="season-bar">
+      <button class="season-btn" data-season="Spring"  id="btn-spring">🌸 Spring</button>
+      <button class="season-btn" data-season="Summer"  id="btn-summer">🌿 Summer</button>
+      <button class="season-btn" data-season="Fall"    id="btn-fall">🍁 Fall</button>
+      <button class="season-btn" data-season="Winter"  id="btn-winter">❄️ Winter</button>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-icon" id="btn-theme" title="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <div class="app-layout">
+
+    <!-- Left sidebar: Inventory input -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-scroll">
+
+        <section class="control-section">
+          <h2 class="section-title">Your Fish</h2>
+          <div class="add-fish-form">
+            <div class="autocomplete-wrap">
+              <input type="text" id="fish-search" class="input" placeholder="Search fish or item…" autocomplete="off" />
+              <ul class="autocomplete-list" id="autocomplete-list"></ul>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="fish-qty">Qty</label>
+              <input type="number" id="fish-qty" class="input input-sm" value="1" min="1" max="999" />
+            </div>
+            <div class="form-row">
+              <label class="form-label">Form</label>
+              <div class="toggle-group">
+                <button class="toggle-btn active" data-form="raw">Raw</button>
+                <button class="toggle-btn" data-form="cooked" id="toggle-cooked">Cooked</button>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" id="btn-add-fish">Add to Inventory</button>
+          </div>
+        </section>
+
+        <section class="control-section">
+          <div class="section-header-row">
+            <h2 class="section-title">Inventory</h2>
+            <button class="btn btn-ghost btn-xs" id="btn-clear-all">Clear all</button>
+          </div>
+          <ul class="inventory-list" id="inventory-list">
+            <li class="inventory-empty" id="inventory-empty">No fish added yet.</li>
+          </ul>
+        </section>
+
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+      <!-- Before You Sell -->
+      <section class="card card-highlight" id="card-before-sell">
+        <div class="card-header">
+          <h2 class="card-title">Before You Sell</h2>
+          <span class="card-subtitle" id="before-sell-season-label">Best to catch this season</span>
+        </div>
+        <div class="before-sell-grid" id="before-sell-grid">
+          <div class="empty-state">Select a season to see recommendations.</div>
+        </div>
+      </section>
+
+      <!-- Sell plan -->
+      <div class="sell-row">
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title">Sell Cooked</h2>
+            <span class="card-badge badge-green" id="cooked-total">¥0</span>
+          </div>
+          <div class="sell-list" id="sell-cooked-list">
+            <div class="empty-state">Add cookable fish to see what to cook.</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title">Sell Raw</h2>
+            <span class="card-badge badge-blue" id="raw-total">¥0</span>
+          </div>
+          <div class="sell-list" id="sell-raw-list">
+            <div class="empty-state">Non-cookable or unpaired fish appear here.</div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Grand total -->
+      <div class="grand-total-row" id="grand-total-row">
+        <span class="grand-total-label">Total Earnings</span>
+        <span class="grand-total-value" id="grand-total">¥0</span>
+      </div>
+
+      <!-- Leftover / Catch to Complete (hidden when empty) -->
+      <section class="card card-leftover" id="leftover-section" style="display:none">
+        <div class="card-header">
+          <h2 class="card-title">Unsellable — Catch to Complete</h2>
+          <span class="card-subtitle">items that can't form a complete sale yet</span>
+        </div>
+        <div class="sell-list" id="leftover-list"></div>
+      </section>
+
+      <!-- All Pairings (hidden when empty) -->
+      <section class="card card-better-pairings" id="better-pairings-section" style="display:none">
+        <div class="card-header">
+          <h2 class="card-title">All Pairings</h2>
+          <span class="card-subtitle">all sell options for your fish — cooked is usually better</span>
+        </div>
+        <div class="sell-list" id="better-pairings-list"></div>
+      </section>
+
+      <!-- Available this season -->
+      <section class="card" id="card-catch">
+        <div class="card-header">
+          <h2 class="card-title">Available This Season</h2>
+          <span class="card-subtitle" id="catch-season-label">–</span>
+        </div>
+        <div id="catch-by-location"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,949 @@
+{
+  "cookedPairs": [
+    {
+      "id": "cp-ezo-oikawa",
+      "fishIds": [
+        "ezo-iwana",
+        "oikawa"
+      ],
+      "price": 100
+    },
+    {
+      "id": "cp-ugui-wakasagi",
+      "fishIds": [
+        "ugui",
+        "wakasagi"
+      ],
+      "price": 100
+    },
+    {
+      "id": "cp-iwana-kajika",
+      "fishIds": [
+        "iwana",
+        "kajika"
+      ],
+      "price": 100
+    },
+    {
+      "id": "cp-aburahaya-zezera",
+      "fishIds": [
+        "aburahaya",
+        "zezera"
+      ],
+      "price": 100
+    },
+    {
+      "id": "cp-amago-otanago",
+      "fishIds": [
+        "amago",
+        "otanago"
+      ],
+      "price": 100
+    },
+    {
+      "id": "cp-kamatsuka-kawa",
+      "fishIds": [
+        "kamatsuka",
+        "kawamushi"
+      ],
+      "price": 100
+    },
+    {
+      "id": "cp-himemasu-yamame",
+      "fishIds": [
+        "himemasu",
+        "yamame"
+      ],
+      "price": 100
+    },
+    {
+      "id": "cp-haze-hasu",
+      "fishIds": [
+        "haze",
+        "hasu"
+      ],
+      "price": 100
+    },
+    {
+      "id": "cp-herabuna-nijimasu",
+      "fishIds": [
+        "herabuna",
+        "nijimasu"
+      ],
+      "price": 160
+    },
+    {
+      "id": "cp-oyanirami-ayu",
+      "fishIds": [
+        "oyanirami",
+        "ayu"
+      ],
+      "price": 160
+    },
+    {
+      "id": "cp-oshurokoma-higai",
+      "fishIds": [
+        "oshurokoma",
+        "higai"
+      ],
+      "price": 250
+    },
+    {
+      "id": "cp-yakizake",
+      "fishIds": [
+        "sake"
+      ],
+      "price": 300
+    },
+    {
+      "id": "cp-ito-sashimi",
+      "fishIds": [
+        "ito"
+      ],
+      "price": 300
+    }
+  ],
+  "rawPairs": [
+    {
+      "id": "rp-ezo-kamatsuka",
+      "fishIds": [
+        "ezo-iwana",
+        "kamatsuka"
+      ],
+      "price": 60
+    },
+    {
+      "id": "rp-oikawa-otanago",
+      "fishIds": [
+        "oikawa",
+        "otanago"
+      ],
+      "price": 60
+    },
+    {
+      "id": "rp-iwana-ugui",
+      "fishIds": [
+        "iwana",
+        "ugui"
+      ],
+      "price": 60
+    },
+    {
+      "id": "rp-kajika-aburahaya",
+      "fishIds": [
+        "kajika",
+        "aburahaya"
+      ],
+      "price": 60
+    },
+    {
+      "id": "rp-amago-wakasagi",
+      "fishIds": [
+        "amago",
+        "wakasagi"
+      ],
+      "price": 60
+    },
+    {
+      "id": "rp-kawamushi-zezera",
+      "fishIds": [
+        "kawamushi",
+        "zezera"
+      ],
+      "price": 60
+    },
+    {
+      "id": "rp-haze-hasu",
+      "fishIds": [
+        "haze",
+        "hasu"
+      ],
+      "price": 60
+    },
+    {
+      "id": "rp-himemasu-yamame",
+      "fishIds": [
+        "himemasu",
+        "yamame"
+      ],
+      "price": 60
+    },
+    {
+      "id": "rp-herabuna-ayu",
+      "fishIds": [
+        "herabuna",
+        "ayu"
+      ],
+      "price": 100
+    },
+    {
+      "id": "rp-oyanirami-nijimasu",
+      "fishIds": [
+        "oyanirami",
+        "nijimasu"
+      ],
+      "price": 100
+    },
+    {
+      "id": "rp-oshurokoma-higai",
+      "fishIds": [
+        "oshurokoma",
+        "higai"
+      ],
+      "price": 200
+    },
+    {
+      "id": "rp-aji-saba-iwashi",
+      "fishIds": [
+        "aji",
+        "saba",
+        "iwashi"
+      ],
+      "price": 120
+    },
+    {
+      "id": "rp-sake-ito",
+      "fishIds": [
+        "sake",
+        "ito"
+      ],
+      "price": 250
+    },
+    {
+      "id": "rp-kawahagi-kasago",
+      "fishIds": [
+        "kawahagi",
+        "kasago"
+      ],
+      "price": 250
+    }
+  ],
+  "specialItems": [],
+  "fish": [
+    {
+      "id": "aburahaya",
+      "name": "Aburahaya",
+      "stars": 1,
+      "location": [
+        "Above Waterfall"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Aburahaya Suyaki",
+      "cookedPairId": "cp-aburahaya-zezera",
+      "rawPairId": "rp-kajika-aburahaya",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "amago",
+      "name": "Amago",
+      "stars": 1,
+      "location": [
+        "Above Waterfall"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Amago Suyaki",
+      "cookedPairId": "cp-amago-otanago",
+      "rawPairId": "rp-amago-wakasagi",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "ayu",
+      "name": "Ayu",
+      "stars": 2,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 100,
+      "cookable": true,
+      "cookedDish": "Ayu Shioyaki",
+      "cookedPairId": "cp-oyanirami-ayu",
+      "rawPairId": "rp-herabuna-ayu",
+      "koi": false,
+      "cookingIngredients": [
+        "Salt"
+      ]
+    },
+    {
+      "id": "ezo-iwana",
+      "name": "Ezo Iwana",
+      "stars": 1,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Ezo Iwana Suyaki",
+      "cookedPairId": "cp-ezo-oikawa",
+      "rawPairId": "rp-ezo-kamatsuka",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "hasu",
+      "name": "Hasu",
+      "stars": 1,
+      "location": [
+        "Below Waterfall"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Hasu Suyaki",
+      "cookedPairId": "cp-haze-hasu",
+      "rawPairId": "rp-haze-hasu",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "haze",
+      "name": "Haze",
+      "stars": 1,
+      "location": [
+        "Below Waterfall"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Haze Suyaki",
+      "cookedPairId": "cp-haze-hasu",
+      "rawPairId": "rp-haze-hasu",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "herabuna",
+      "name": "Herabuna",
+      "stars": 1,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Winter"
+      ],
+      "rawPrice": 100,
+      "cookable": true,
+      "cookedDish": "Herabuna Suyaki",
+      "cookedPairId": "cp-herabuna-nijimasu",
+      "rawPairId": "rp-herabuna-ayu",
+      "koi": false,
+      "cookingIngredients": [
+        "Salt"
+      ]
+    },
+    {
+      "id": "higai",
+      "name": "Higai",
+      "stars": 3,
+      "location": [
+        "Above Waterfall",
+        "River"
+      ],
+      "seasons": [
+        "Fall"
+      ],
+      "rawPrice": 200,
+      "cookable": true,
+      "cookedDish": "Higai Shioyaki",
+      "cookedPairId": "cp-oshurokoma-higai",
+      "rawPairId": "rp-oshurokoma-higai",
+      "koi": false,
+      "cookingIngredients": [
+        "Salt"
+      ]
+    },
+    {
+      "id": "himemasu",
+      "name": "Himemasu",
+      "stars": 1,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Himemasu Suyaki",
+      "cookedPairId": "cp-himemasu-yamame",
+      "rawPairId": "rp-himemasu-yamame",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "ito",
+      "name": "Ito",
+      "stars": 4,
+      "location": [
+        "Above Waterfall",
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 250,
+      "cookable": true,
+      "cookedDish": "Ito Sashimi",
+      "cookedPairId": "cp-ito-sashimi",
+      "rawPairId": "rp-sake-ito",
+      "koi": false,
+      "cookingIngredients": [
+        "Soy Sauce"
+      ]
+    },
+    {
+      "id": "iwana",
+      "name": "Iwana",
+      "stars": 1,
+      "location": [
+        "Above Waterfall"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Iwana Suyaki",
+      "cookedPairId": "cp-iwana-kajika",
+      "rawPairId": "rp-iwana-ugui",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "kajika",
+      "name": "Kajika",
+      "stars": 1,
+      "location": [
+        "Above Waterfall"
+      ],
+      "seasons": [
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Kajika Suyaki",
+      "cookedPairId": "cp-iwana-kajika",
+      "rawPairId": "rp-kajika-aburahaya",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "kamatsuka",
+      "name": "Kamatsuka",
+      "stars": 1,
+      "location": [
+        "Above Waterfall",
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Kamatsuka Suyaki",
+      "cookedPairId": "cp-kamatsuka-kawa",
+      "rawPairId": "rp-ezo-kamatsuka",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "kawamushi",
+      "name": "Kawamushi",
+      "stars": 1,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Kawamushi Suyaki",
+      "cookedPairId": "cp-kamatsuka-kawa",
+      "rawPairId": "rp-kawamushi-zezera",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "nijimasu",
+      "name": "Nijimasu",
+      "stars": 2,
+      "location": [
+        "Above Waterfall",
+        "River"
+      ],
+      "seasons": [
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 100,
+      "cookable": true,
+      "cookedDish": "Nijimasu Shioyaki",
+      "cookedPairId": "cp-herabuna-nijimasu",
+      "rawPairId": "rp-oyanirami-nijimasu",
+      "koi": false,
+      "cookingIngredients": [
+        "Salt"
+      ]
+    },
+    {
+      "id": "oikawa",
+      "name": "Oikawa",
+      "stars": 1,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Oikawa Suyaki",
+      "cookedPairId": "cp-ezo-oikawa",
+      "rawPairId": "rp-oikawa-otanago",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "oshurokoma",
+      "name": "Oshurokoma",
+      "stars": 3,
+      "location": [
+        "Below Waterfall"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 200,
+      "cookable": true,
+      "cookedDish": "Oshurokoma Shioyaki",
+      "cookedPairId": "cp-oshurokoma-higai",
+      "rawPairId": "rp-oshurokoma-higai",
+      "koi": false,
+      "cookingIngredients": [
+        "Salt"
+      ]
+    },
+    {
+      "id": "otanago",
+      "name": "Otanago",
+      "stars": 1,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Otanago Suyaki",
+      "cookedPairId": "cp-amago-otanago",
+      "rawPairId": "rp-oikawa-otanago",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "oyanirami",
+      "name": "Oyanirami",
+      "stars": 2,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 100,
+      "cookable": true,
+      "cookedDish": "Oyanirami Shioyaki",
+      "cookedPairId": "cp-oyanirami-ayu",
+      "rawPairId": "rp-oyanirami-nijimasu",
+      "koi": false,
+      "cookingIngredients": [
+        "Salt"
+      ]
+    },
+    {
+      "id": "sake",
+      "name": "Sake",
+      "stars": 3,
+      "location": [
+        "Above Waterfall",
+        "River"
+      ],
+      "seasons": [
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 250,
+      "cookable": true,
+      "cookedDish": "Yakizake",
+      "cookedPairId": "cp-yakizake",
+      "rawPairId": "rp-sake-ito",
+      "koi": false,
+      "cookingIngredients": [
+        "Salt",
+        "Soy Sauce",
+        "Roasted Matsutake"
+      ]
+    },
+    {
+      "id": "ugui",
+      "name": "Ugui",
+      "stars": 1,
+      "location": [
+        "Above Waterfall",
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Ugui Suyaki",
+      "cookedPairId": "cp-ugui-wakasagi",
+      "rawPairId": "rp-iwana-ugui",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "wakasagi",
+      "name": "Wakasagi",
+      "stars": 1,
+      "location": [
+        "Above Waterfall",
+        "River"
+      ],
+      "seasons": [
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Wakasagi Suyaki",
+      "cookedPairId": "cp-ugui-wakasagi",
+      "rawPairId": "rp-amago-wakasagi",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "yamame",
+      "name": "Yamame",
+      "stars": 1,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Yamame Suyaki",
+      "cookedPairId": "cp-himemasu-yamame",
+      "rawPairId": "rp-himemasu-yamame",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "zezera",
+      "name": "Zezera",
+      "stars": 1,
+      "location": [
+        "River"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer"
+      ],
+      "rawPrice": 60,
+      "cookable": true,
+      "cookedDish": "Zezera Suyaki",
+      "cookedPairId": "cp-aburahaya-zezera",
+      "rawPairId": "rp-kawamushi-zezera",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "aji",
+      "name": "Aji",
+      "stars": 1,
+      "location": [
+        "Seaside"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 120,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": "rp-aji-saba-iwashi",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "iwashi",
+      "name": "Iwashi",
+      "stars": 1,
+      "location": [
+        "Seaside"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 120,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": "rp-aji-saba-iwashi",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "kasago",
+      "name": "Kasago",
+      "stars": 3,
+      "location": [
+        "Seaside"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall"
+      ],
+      "rawPrice": 250,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": "rp-kawahagi-kasago",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "kawahagi",
+      "name": "Kawahagi",
+      "stars": 4,
+      "location": [
+        "Seaside"
+      ],
+      "seasons": [
+        "Spring",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 250,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": "rp-kawahagi-kasago",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "saba",
+      "name": "Saba",
+      "stars": 1,
+      "location": [
+        "Seaside"
+      ],
+      "seasons": [
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 120,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": "rp-aji-saba-iwashi",
+      "koi": false,
+      "cookingIngredients": []
+    },
+    {
+      "id": "koi-fry",
+      "name": "Koi Fry",
+      "stars": 0,
+      "location": [
+        "Pond"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 20,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": null,
+      "koi": true,
+      "cookingIngredients": []
+    },
+    {
+      "id": "koi-kohaku",
+      "name": "Koi Kohaku",
+      "stars": 0,
+      "location": [
+        "Pond"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 1000,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": null,
+      "koi": true,
+      "cookingIngredients": []
+    },
+    {
+      "id": "koi-tancho",
+      "name": "Koi Tancho",
+      "stars": 0,
+      "location": [
+        "Pond"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 1000,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": null,
+      "koi": true,
+      "cookingIngredients": []
+    },
+    {
+      "id": "koi-shiro-utsuri",
+      "name": "Koi Shiro Utsuri",
+      "stars": 0,
+      "location": [
+        "Pond"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 1200,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": null,
+      "koi": true,
+      "cookingIngredients": []
+    },
+    {
+      "id": "koi-yamabuki-ogon",
+      "name": "Koi Yamabuki Ogon",
+      "stars": 0,
+      "location": [
+        "Pond"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 1500,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": null,
+      "koi": true,
+      "cookingIngredients": []
+    },
+    {
+      "id": "koi-hi-utsuri",
+      "name": "Koi Hi Utsuri",
+      "stars": 0,
+      "location": [
+        "Pond"
+      ],
+      "seasons": [
+        "Spring",
+        "Summer",
+        "Fall",
+        "Winter"
+      ],
+      "rawPrice": 2000,
+      "cookable": false,
+      "cookedDish": null,
+      "cookedPairId": null,
+      "rawPairId": null,
+      "koi": true,
+      "cookingIngredients": []
+    }
+  ]
+}

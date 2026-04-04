@@ -102,6 +102,7 @@
     - role: watchtower
     - role: openspeedtest
     - role: temperature-blanket
+    - role: jrla
     - role: transmission
     - role: byparr
     - role: prowlarr

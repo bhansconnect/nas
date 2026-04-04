@@ -1,0 +1,36 @@
+---
+- name: "Ensure jrla dataset exists"
+  community.general.zfs:
+    name: "{{ jrla_dataset }}"
+    state: present
+
+- name: Copy jrla files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ jrla_dir }}/{{ item }}"
+  loop:
+    - index.html
+    - styles.css
+    - engine.js
+    - app.js
+    - fish-data.json
+
+- name: jrla
+  docker_container:
+    name: jrla
+    image: nginx:alpine
+    pull: true
+    env:
+      TZ: "{{ nas_timezone }}"
+    volumes:
+      - "{{ jrla_dir }}:/usr/share/nginx/html:ro"
+    networks:
+      - name: "traefik"
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.jrla.rule: "Host(`jrla.{{ nas_domain }}`)"
+      traefik.http.routers.jrla.middlewares: "authelia@docker"
+      traefik.http.routers.jrla.entrypoints: "websecure"
+      traefik.http.routers.jrla.tls.certresolver: "letsencrypt"
+      traefik.http.services.jrla.loadbalancer.server.port: "80"

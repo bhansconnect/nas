@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JRLA Tests</title>
+  <style>
+    body { font-family: monospace; background: #0d0f14; color: #e2e4ef; margin: 2rem; }
+    h1 { color: #7db8e8; margin-bottom: 1rem; }
+    .summary { font-size: 1.2rem; margin: 1rem 0; padding: 0.75rem 1rem; border-radius: 8px; }
+    .pass { background: rgba(109,196,160,0.12); color: #6dc4a0; }
+    .fail { background: rgba(232,92,92,0.12); color: #e85c5c; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #282d42; color: #8890aa; font-weight: 600; }
+    td { padding: 0.4rem 0.75rem; border-bottom: 1px solid #1a1f2e; font-size: 0.85rem; }
+    .ok  td:first-child::before { content: '✓ '; color: #6dc4a0; }
+    .err td:first-child::before { content: '✗ '; color: #e85c5c; }
+    .err td { color: #e85c5c; }
+    .err-msg { color: #8890aa; font-size: 0.78rem; }
+    .group-row td { background: #131720; color: #7db8e8; font-weight: 700; padding-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>🎣 JRLA Unit Tests</h1>
+  <div id="summary" class="summary">Loading…</div>
+  <table>
+    <thead><tr><th>Test</th><th>Result</th></tr></thead>
+    <tbody id="results"></tbody>
+  </table>
+
+  <script src="engine.js"></script>
+  <script>
+    // Override module.exports guard so tests.js doesn't try to require()
+    const module = {};
+  </script>
+  <script src="tests.js"></script>
+  <script>
+    fetch('fish-data.json')
+      .then(r => r.json())
+      .then(data => {
+        loadTestDeps(data);
+
+        // Patch test() to collect group labels from console.log
+        let currentGroup = '';
+        const origTest = window.test;
+        const rows = [];
+
+        // Re-run with instrumented test()
+        _results.pass = 0;
+        _results.fail = 0;
+        _results.errors = [];
+
+        // Intercept console.log for group labels
+        const origLog = console.log;
+        console.log = (...args) => {
+          const msg = args.join(' ');
+          if (!msg.startsWith('  ')) currentGroup = msg.replace(/^\n/, '').trim();
+        };
+
+        const origTestFn = test;
+        // Override global test to capture row data
+        window.test = function(name, fn) {
+          try {
+            fn();
+            _results.pass++;
+            rows.push({ group: currentGroup, name, ok: true });
+          } catch(e) {
+            _results.fail++;
+            _results.errors.push({ name, error: e.message });
+            rows.push({ group: currentGroup, name, ok: false, error: e.message });
+          }
+        };
+
+        runAllTests();
+        console.log = origLog;
+
+        // Render
+        const tbody = document.getElementById('results');
+        let lastGroup = '';
+        for (const row of rows) {
+          if (row.group && row.group !== lastGroup) {
+            lastGroup = row.group;
+            tbody.insertAdjacentHTML('beforeend',
+              `<tr class="group-row"><td colspan="2">${row.group}</td></tr>`);
+          }
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr class="${row.ok ? 'ok' : 'err'}">
+              <td>${row.name}</td>
+              <td>${row.ok ? '–' : `<span class="err-msg">${row.error}</span>`}</td>
+            </tr>
+          `);
+        }
+
+        const sumEl = document.getElementById('summary');
+        sumEl.textContent = `${_results.pass} passed, ${_results.fail} failed`;
+        sumEl.className = 'summary ' + (_results.fail === 0 ? 'pass' : 'fail');
+      });
+  </script>
+</body>
+</html>

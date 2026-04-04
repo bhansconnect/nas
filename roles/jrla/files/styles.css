@@ -1,0 +1,1073 @@
+/* ============================================================
+   JRLA Fish Assistant — Design System + Styles
+   Japanese-inspired, dark-first
+   ============================================================ */
+
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap');
+
+/* ── Tokens ──────────────────────────────────────────────── */
+:root {
+  --font-display: 'Cabinet Grotesk', 'Satoshi', system-ui, sans-serif;
+  --font-body:    'Satoshi', system-ui, sans-serif;
+
+  --text-xs:   clamp(0.7rem,   0.65rem + 0.25vw, 0.8rem);
+  --text-sm:   clamp(0.8rem,   0.75rem + 0.25vw, 0.9rem);
+  --text-base: clamp(0.9rem,   0.85rem + 0.25vw, 1rem);
+  --text-lg:   clamp(1rem,     0.95rem + 0.35vw, 1.2rem);
+  --text-xl:   clamp(1.3rem,   1.1rem  + 1vw,    1.8rem);
+
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  --sidebar-w: 270px;
+  --header-h:  54px;
+
+  --transition: 150ms ease;
+
+  /* Season accent colors */
+  --season-spring: #e8a4b8;
+  --season-summer: #6dc4a0;
+  --season-fall:   #e89a52;
+  --season-winter: #7aafe8;
+}
+
+/* ── Dark Theme (default) ────────────────────────────────── */
+:root, [data-theme="dark"] {
+  --color-bg:         #0c0e12;
+  --color-surface:    #131720;
+  --color-surface-2:  #1a1f2e;
+  --color-surface-3:  #222840;
+  --color-border:     #282d42;
+  --color-border-2:   #33394f;
+  --color-text:       #e2e4ef;
+  --color-text-2:     #8890aa;
+  --color-text-3:     #50566e;
+  --color-accent:     #7db8e8;
+  --color-accent-dim: rgba(125, 184, 232, 0.1);
+  --color-danger:     #e85c5c;
+  --color-success:    #6dc4a0;
+  --color-gold:       #e8c46a;
+  --color-gold-dim:   rgba(232, 196, 106, 0.12);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+}
+
+[data-theme="light"] {
+  --color-bg:         #f2f3f7;
+  --color-surface:    #ffffff;
+  --color-surface-2:  #eef0f5;
+  --color-surface-3:  #e4e7ef;
+  --color-border:     #dde0ea;
+  --color-border-2:   #cdd0de;
+  --color-text:       #18192a;
+  --color-text-2:     #464d6a;
+  --color-text-3:     #8890aa;
+  --color-accent:     #2870b0;
+  --color-accent-dim: rgba(40, 112, 176, 0.08);
+  --color-danger:     #cc3040;
+  --color-success:    #2d8c68;
+  --color-gold:       #b87820;
+  --color-gold-dim:   rgba(184, 120, 32, 0.1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+}
+
+/* ── Reset ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.app-header {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-6);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.logo-fish {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-base);
+  color: var(--color-text);
+}
+
+.logo-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+}
+
+/* ── Season Bar ──────────────────────────────────────────── */
+.season-bar {
+  display: flex;
+  gap: var(--space-1);
+  flex: 1;
+  justify-content: center;
+}
+
+.season-btn {
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-2);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.season-btn:hover {
+  border-color: var(--color-border-2);
+  color: var(--color-text);
+}
+
+.season-btn.active[data-season="Spring"] {
+  background: rgba(232, 164, 184, 0.15);
+  border-color: var(--season-spring);
+  color: var(--season-spring);
+}
+.season-btn.active[data-season="Summer"] {
+  background: rgba(109, 196, 160, 0.15);
+  border-color: var(--season-summer);
+  color: var(--season-summer);
+}
+.season-btn.active[data-season="Fall"] {
+  background: rgba(232, 154, 82, 0.15);
+  border-color: var(--season-fall);
+  color: var(--season-fall);
+}
+.season-btn.active[data-season="Winter"] {
+  background: rgba(122, 175, 232, 0.15);
+  border-color: var(--season-winter);
+  color: var(--season-winter);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ── Layout ──────────────────────────────────────────────── */
+.app-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ── Control Sections ────────────────────────────────────── */
+.control-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--color-text);
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Add Fish Form ───────────────────────────────────────── */
+.add-fish-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.autocomplete-wrap {
+  position: relative;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+  margin-top: 2px;
+}
+
+.autocomplete-list.open {
+  display: block;
+}
+
+.autocomplete-list li {
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: background var(--transition);
+}
+
+.autocomplete-list li:hover,
+.autocomplete-list li.active {
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
+}
+
+.autocomplete-list li .stars {
+  color: var(--color-gold);
+  font-size: var(--text-xs);
+  flex-shrink: 0;
+}
+
+.autocomplete-list li .loc-tag {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+  margin-left: auto;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.form-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+  white-space: nowrap;
+  min-width: 30px;
+}
+
+/* ── Inputs ──────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.input:focus {
+  border-color: var(--color-accent);
+}
+
+.input-sm {
+  width: 70px;
+  text-align: center;
+}
+
+/* ── Toggle Group ────────────────────────────────────────── */
+.toggle-group {
+  display: flex;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex: 1;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: none;
+  color: var(--color-text-2);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.toggle-btn.active {
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
+}
+
+.toggle-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #0c0e12;
+  border-color: var(--color-accent);
+}
+
+.btn-primary:hover {
+  opacity: 0.88;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-2);
+  border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.btn-full { width: 100%; }
+
+.btn-icon {
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-xs {
+  padding: 2px var(--space-2);
+  font-size: var(--text-xs);
+}
+
+/* Theme icon swap */
+[data-theme="dark"]  .icon-sun  { display: none; }
+[data-theme="dark"]  .icon-moon { display: block; }
+[data-theme="light"] .icon-sun  { display: block; }
+[data-theme="light"] .icon-moon { display: none; }
+
+/* ── Inventory List ──────────────────────────────────────── */
+.inventory-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.inventory-empty {
+  color: var(--color-text-3);
+  font-size: var(--text-xs);
+  text-align: center;
+  padding: var(--space-3);
+}
+
+.inventory-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.inventory-item-name {
+  flex: 1;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.inventory-item-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+}
+
+.inventory-item-qty {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-accent);
+  min-width: 24px;
+  text-align: right;
+}
+
+.badge-form {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+}
+
+.badge-form.raw {
+  background: rgba(125, 184, 232, 0.12);
+  color: var(--color-accent);
+}
+
+.badge-form.cooked {
+  background: rgba(232, 196, 106, 0.12);
+  color: var(--color-gold);
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  color: var(--color-text-3);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color var(--transition);
+}
+
+.btn-remove:hover {
+  color: var(--color-danger);
+}
+
+/* ── Main Content ────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-highlight {
+  border-color: var(--color-gold);
+  background: var(--color-gold-dim);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.card-subtitle {
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+  margin-left: auto;
+}
+
+.card-badge {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-lg);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.badge-green {
+  background: rgba(109, 196, 160, 0.12);
+  color: var(--color-success);
+}
+
+.badge-blue {
+  background: rgba(125, 184, 232, 0.12);
+  color: var(--color-accent);
+}
+
+/* ── Before You Sell Grid ────────────────────────────────── */
+.before-sell-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.before-sell-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.before-sell-rank {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+  font-weight: 700;
+}
+
+.before-sell-name {
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--color-text);
+}
+
+.before-sell-loc {
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+}
+
+.before-sell-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-lg);
+  color: var(--color-gold);
+  margin-top: var(--space-1);
+}
+
+.before-sell-dish {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+}
+
+.stars-row {
+  display: flex;
+  gap: 1px;
+}
+
+.star {
+  font-size: 0.65rem;
+}
+
+.star.filled { color: var(--color-gold); }
+.star.empty  { color: var(--color-border-2); }
+
+/* ── Sell Row ────────────────────────────────────────────── */
+.sell-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+/* ── Sell List ───────────────────────────────────────────── */
+.sell-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sell-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.sell-item-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.sell-fish-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sell-dish-name {
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+}
+
+.sell-item-extra {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: rgba(232, 154, 82, 0.12);
+  color: var(--season-fall);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sell-item-price {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.sell-unit-price {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+}
+
+.sell-total {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+/* ── Grand Total ─────────────────────────────────────────── */
+.grand-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+}
+
+.grand-total-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+  font-weight: 600;
+}
+
+.grand-total-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-xl);
+  color: var(--color-gold);
+}
+
+/* ── Catch by Location ───────────────────────────────────── */
+#catch-by-location {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.location-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.location-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.location-icon { font-size: 1rem; }
+
+.location-name {
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--color-text);
+}
+
+.catch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+}
+
+.catch-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition);
+}
+
+.catch-card.top-value {
+  border-color: var(--color-gold);
+  background: var(--color-gold-dim);
+}
+
+.catch-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.catch-fish-name {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.catch-dish {
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+}
+
+.catch-prices {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.catch-cooked-price {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-success);
+}
+
+.catch-raw-price {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+}
+
+/* ── Empty States ────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  color: var(--color-text-3);
+  font-size: var(--text-xs);
+  padding: var(--space-4);
+}
+
+/* ── Scrollbars ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-3); }
+
+/* ── Qty controls ────────────────────────────────────────── */
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.btn-qty {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-3);
+  color: var(--color-text-2);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all var(--transition);
+}
+
+.btn-qty:hover {
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* ── Leftover card ───────────────────────────────────────── */
+.card-leftover {
+  border-color: var(--color-danger);
+  background: rgba(232, 92, 92, 0.04);
+}
+
+.sell-item-leftover .sell-fish-name {
+  color: var(--color-text-2);
+}
+
+/* ── Catch opportunity (inside leftover) ─────────────────── */
+.catch-opportunity {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.catch-label {
+  color: var(--color-text-2);
+  font-weight: 600;
+}
+
+.catch-needs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-3);
+}
+
+.catch-partner {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.catch-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.catch-yes  { background: rgba(109,196,160,0.15); color: var(--color-success); }
+.catch-no   { background: rgba(232,92,92,0.12);  color: var(--color-danger);  }
+.catch-item { background: rgba(232,196,106,0.12); color: var(--color-gold);   }
+
+.catch-pairing-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 3px 0;
+  font-size: var(--text-xs);
+}
+
+.catch-option-label {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  min-width: 32px;
+  text-align: center;
+}
+
+.catch-pairing-best .catch-option-label {
+  background: rgba(109,196,160,0.15);
+  color: var(--color-success);
+}
+
+.catch-pairing-alt .catch-option-label {
+  background: var(--color-surface-3);
+  color: var(--color-text-3);
+}
+
+.catch-pair-desc {
+  color: var(--color-text-2);
+  font-weight: 600;
+}
+
+.catch-pairing-alt .catch-pair-desc {
+  color: var(--color-text-3);
+}
+
+/* ── Better Pairings card ────────────────────────────────── */
+.card-better-pairings {
+  border-color: #9b7fe8;
+  background: rgba(155, 127, 232, 0.04);
+}
+
+.better-pair-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-3);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-2);
+}
+
+.better-pair-row:last-child { margin-bottom: 0; }
+
+.bp-fish {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.bp-best,
+.bp-alt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  flex-wrap: wrap;
+}
+
+.bp-label {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.bp-label-best { background: rgba(155,127,232,0.18); color: #c4adff; }
+.bp-label-alt  { background: var(--color-surface-3); color: var(--color-text-3); }
+
+.bp-dish { color: var(--color-text-2); flex: 1; }
+
+.bp-price {
+  font-weight: 700;
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+.alt-price { color: var(--color-text-3); }
+
+.partner-have { color: var(--color-success); font-weight: 600; }
+.partner-need { color: var(--color-accent);  font-weight: 600; }
+
+.bp-pairing-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.bp-partners {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.bp-plus {
+  color: var(--color-text-3);
+  font-size: var(--text-xs);
+}
+
+.bp-ing {
+  color: var(--color-text-3);
+  font-size: 10px;
+  padding: 1px 6px;
+  background: var(--color-surface-3);
+  border-radius: var(--radius-full);
+}
+
+/* ── Before You Sell — ingredients line ─────���───────────── */
+.before-sell-ingredients {
+  font-size: 10px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+/* ── Availability badges (Before You Sell) ───────────────── */
+.avail-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+}
+
+.avail-yes     { background: rgba(109,196,160,0.15); color: var(--color-success); }
+.avail-partial { background: rgba(232,196,106,0.12); color: var(--color-gold); }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .sell-row { grid-template-columns: 1fr; }
+  .before-sell-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  :root { --sidebar-w: 100%; }
+
+  .app-layout { flex-direction: column; }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    max-height: 40vh;
+  }
+
+  .season-bar { gap: 4px; }
+
+  .season-btn { padding: 4px var(--space-2); font-size: 0.65rem; }
+
+  .logo-sub { display: none; }
+}
