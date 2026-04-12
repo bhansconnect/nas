@@ -200,6 +200,8 @@ const state = {
   gradientEnd:   '#750e13',  // default: hot crimson
   shiftSH: true,
   fahrenheit: true,
+  dataMetric: 'high',   // 'high' | 'low' | 'mean' | 'precip' | 'hourly'
+  hourlyHour: 12,       // 0–23
   highlightZone: null,
   cache: {},
   rendered: [],
@@ -225,6 +227,38 @@ function tempFmt(t) {
   if (t == null) return 'N/A';
   if (state.fahrenheit) return `${t.toFixed(1)}°F`;
   return `${((t - 32) * 5/9).toFixed(1)}°C`;
+}
+
+function precipFmt(mm) {
+  if (mm == null) return 'N/A';
+  if (state.fahrenheit) return `${(mm * 0.0394).toFixed(2)}"`;
+  return `${mm.toFixed(1)} mm`;
+}
+
+function valueFmt(v, metric = state.dataMetric) {
+  return metric === 'precip' ? precipFmt(v) : tempFmt(v);
+}
+
+const HOUR_LABELS = [
+  '12 AM (midnight)', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM',
+  '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM',
+  '12 PM (noon)', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM',
+  '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM',
+];
+
+function getMetricLabel(metric = state.dataMetric, hourlyHour = state.hourlyHour) {
+  switch (metric) {
+    case 'low':    return 'Low';
+    case 'mean':   return 'Avg';
+    case 'precip': return 'Precip';
+    case 'hourly': {
+      const h = hourlyHour;
+      const period = h < 12 ? 'AM' : 'PM';
+      const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      return `${h12} ${period}`;
+    }
+    default: return 'High';
+  }
 }
 
 // ── Date logic ───────────────────────────────────────────────
@@ -278,8 +312,10 @@ function getCityEffective(city) {
     dateMode,
     dateStart,
     dateEnd,
-    palette:    ov.palette    || state.palette,
-    bucketMode: ov.bucketMode || state.bucketMode,
+    palette:     ov.palette     || state.palette,
+    bucketMode:  ov.bucketMode  || state.bucketMode,
+    dataMetric:  ov.dataMetric  != null ? ov.dataMetric  : state.dataMetric,
+    hourlyHour:  ov.hourlyHour  != null ? ov.hourlyHour  : state.hourlyHour,
   };
 }
 
@@ -327,7 +363,7 @@ const PERSIST_FIELDS = [
   'baselineStart','baselineEnd','baselineMode',
   'scaleMode','anchorCityId','bucketMode',
   'palette','customColors12','customColors10','gradientStart','gradientEnd',
-  'shiftSH','fahrenheit',
+  'shiftSH','fahrenheit','dataMetric','hourlyHour',
 ];
 
 function serializeState() {
@@ -387,9 +423,11 @@ function applySavedState(saved) {
   for (const k of PERSIST_FIELDS) {
     if (k in saved && saved[k] !== undefined) state[k] = saved[k];
   }
-  // Validate palette and bucket mode against current definitions
+  // Validate palette, bucket mode, and data metric
   if (!PALETTES[state.palette]) state.palette = 'thermal';
   if (!BUCKET_MODES[state.bucketMode]) state.bucketMode = 'dense12';
+  if (!['high','low','mean','precip','hourly'].includes(state.dataMetric)) state.dataMetric = 'high';
+  if (state.hourlyHour < 0 || state.hourlyHour > 23 || !Number.isInteger(state.hourlyHour)) state.hourlyHour = 12;
   // Ensure cities have required fields
   state.cities = (state.cities || []).filter(c => c.name && c.lat != null && c.lon != null);
   return true;
@@ -449,9 +487,18 @@ function restoreUIFromState() {
   if (state.gradientEnd)   $('gradient-end').value   = state.gradientEnd;
   rebuildGradient();
 
+  // Data metric
+  const metricRadio = document.querySelector(`input[name="metric"][value="${state.dataMetric}"]`);
+  if (metricRadio) metricRadio.checked = true;
+  const hourPickerEl = $('hour-picker');
+  if (hourPickerEl) hourPickerEl.value = state.hourlyHour;
+  const hourRow = $('hour-picker-row');
+  if (hourRow) hourRow.classList.toggle('hidden', state.dataMetric !== 'hourly');
+
   // Toggles
   $('toggle-sh').checked = state.shiftSH;
   $('toggle-fahrenheit').checked = state.fahrenheit;
+  syncFahrenheitLabel();
 
   // Anchor selector
   updateAnchorSelector();
@@ -525,6 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBucketMode();
   initPaletteGrid();
   initOptions();
+  initDataMetric();
   initZoomControls();
   initDownload();
   initPopover();
@@ -812,6 +860,19 @@ function initBucketMode() {
   });
 }
 
+function syncFahrenheitLabel() {
+  const row = document.querySelector('[data-testid="toggle-fahrenheit"]');
+  if (!row) return;
+  const spans = row.querySelectorAll('.toggle-label > span');
+  if (state.dataMetric === 'precip') {
+    spans[0].textContent = 'Display in inches';
+    spans[1].textContent = 'Off = millimeters';
+  } else {
+    spans[0].textContent = 'Display in Fahrenheit';
+    spans[1].textContent = 'Off = Celsius';
+  }
+}
+
 function initOptions() {
   $('toggle-sh').addEventListener('change', e => {
     state.shiftSH = e.target.checked;
@@ -823,6 +884,35 @@ function initOptions() {
     if (state.rendered.length) renderLegend(state.rendered[0]?.bounds);
     saveToLocalStorage();
   });
+}
+
+function initDataMetric() {
+  // Populate hour picker (12-hour format)
+  const hourPicker = $('hour-picker');
+  hourPicker.innerHTML = HOUR_LABELS.map((lbl, h) =>
+    `<option value="${h}"${h === state.hourlyHour ? ' selected' : ''}>${lbl}</option>`
+  ).join('');
+
+  function syncUI() {
+    $('hour-picker-row').classList.toggle('hidden', state.dataMetric !== 'hourly');
+    syncFahrenheitLabel();
+  }
+
+  $$('input[name="metric"]').forEach(r => {
+    if (r.value === state.dataMetric) r.checked = true;
+    r.addEventListener('change', () => {
+      state.dataMetric = r.value;
+      syncUI();
+      scheduleGenerate();
+    });
+  });
+
+  hourPicker.addEventListener('change', e => {
+    state.hourlyHour = +e.target.value;
+    scheduleGenerate();
+  });
+
+  syncUI();
 }
 
 // ── Palette ───────────────────────────────────────────────────
@@ -923,15 +1013,17 @@ function renderLegend(fallbackBounds) {
     const seen = new Map();
     state.rendered.forEach(rd => {
       const eff = getCityEffective(rd.city);
-      const key = `${eff.palette}|${eff.bucketMode}`;
+      const key = `${eff.palette}|${eff.bucketMode}|${eff.dataMetric}|${eff.hourlyHour}`;
       if (!seen.has(key)) {
         seen.set(key, legendGroups.length);
         legendGroups.push({
-          palette: eff.palette,
-          bucketMode: eff.bucketMode,
-          colors: getCityColors(rd.city),
-          bounds: rd.bounds,
-          cityNames: [rd.city.name],
+          palette:     eff.palette,
+          bucketMode:  eff.bucketMode,
+          dataMetric:  eff.dataMetric,
+          hourlyHour:  eff.hourlyHour,
+          colors:      getCityColors(rd.city),
+          bounds:      rd.bounds,
+          cityNames:   [rd.city.name],
         });
       } else {
         legendGroups[seen.get(key)].cityNames.push(rd.city.name);
@@ -941,11 +1033,13 @@ function renderLegend(fallbackBounds) {
     // Fallback: use global state (before any cities are rendered)
     const colors = getCurrentColors();
     legendGroups = [{
-      palette: state.palette,
+      palette:    state.palette,
       bucketMode: state.bucketMode,
+      dataMetric: state.dataMetric,
+      hourlyHour: state.hourlyHour,
       colors,
-      bounds: fallbackBounds,
-      cityNames: [],
+      bounds:     fallbackBounds,
+      cityNames:  [],
     }];
   }
 
@@ -967,7 +1061,7 @@ function renderLegend(fallbackBounds) {
       const pLo  = mode.bounds ? mode.bounds[i]   : i * 10;
       const pHi  = mode.bounds ? mode.bounds[i+1] : (i+1) * 10;
       const label = g.bounds
-        ? `${tempFmt(g.bounds[i])}–${tempFmt(g.bounds[i+1])}`
+        ? `${valueFmt(g.bounds[i], g.dataMetric)}–${valueFmt(g.bounds[i+1], g.dataMetric)}`
         : `p${pLo}–${pHi}`;
       html += `
         <div class="legend-item" data-zone="${i}">
@@ -1053,22 +1147,73 @@ function cacheKey(lat, lon, start, end) {
 }
 
 async function fetchTemps(lat, lon, tz, start, end) {
-  const key = cacheKey(lat, lon, start, end);
+  const key = 'daily:' + cacheKey(lat, lon, start, end);
   if (state.cache[key]) return state.cache[key];
 
   const params = new URLSearchParams({
     latitude: lat, longitude: lon,
     start_date: start, end_date: end,
-    daily: 'temperature_2m_max',
+    daily: 'temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum',
     temperature_unit: 'fahrenheit',
     timezone: tz,
   });
   const res  = await fetch(`${ARCHIVE_URL}?${params}`);
   if (!res.ok) throw new Error(`API error ${res.status} for ${tz}`);
   const data = await res.json();
-  const result = { dates: data.daily.time, highs: data.daily.temperature_2m_max };
+  const result = {
+    dates:  data.daily.time,
+    highs:  data.daily.temperature_2m_max,
+    lows:   data.daily.temperature_2m_min,
+    means:  data.daily.temperature_2m_mean,
+    precip: data.daily.precipitation_sum,
+  };
   state.cache[key] = result;
   return result;
+}
+
+// Fetches daily + raw hourly data in one request. rawHourly is used by
+// getMetricValues to extract the chosen hour on demand (avoids re-fetching
+// when the user changes the selected hour).
+async function fetchTempsWithHourly(lat, lon, tz, start, end) {
+  const key = 'hourly:' + cacheKey(lat, lon, start, end);
+  if (state.cache[key]) return state.cache[key];
+
+  const params = new URLSearchParams({
+    latitude: lat, longitude: lon,
+    start_date: start, end_date: end,
+    daily: 'temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum',
+    hourly: 'temperature_2m',
+    temperature_unit: 'fahrenheit',
+    timezone: tz,
+  });
+  const res  = await fetch(`${ARCHIVE_URL}?${params}`);
+  if (!res.ok) throw new Error(`API error ${res.status} for ${tz}`);
+  const data = await res.json();
+  const result = {
+    dates:     data.daily.time,
+    highs:     data.daily.temperature_2m_max,
+    lows:      data.daily.temperature_2m_min,
+    means:     data.daily.temperature_2m_mean,
+    precip:    data.daily.precipitation_sum,
+    rawHourly: data.hourly.temperature_2m,
+  };
+  state.cache[key] = result;
+  return result;
+}
+
+// Returns the values array for the given metric from a data object.
+function getMetricValues(dataObj, metric = state.dataMetric, hourlyHour = state.hourlyHour) {
+  switch (metric) {
+    case 'low':    return dataObj.lows;
+    case 'mean':   return dataObj.means;
+    case 'precip': return dataObj.precip;
+    case 'hourly': {
+      const raw   = dataObj.rawHourly;
+      const nDays = dataObj.dates.length;
+      return Array.from({length: nDays}, (_, d) => raw[d * 24 + hourlyHour] ?? null);
+    }
+    default: return dataObj.highs;
+  }
 }
 
 // ── Zone computation ──────────────────────────────────────────
@@ -1117,64 +1262,92 @@ async function generate() {
 
     const cityResults = [];
     for (const city of state.cities) {
+      const eff = getCityEffective(city);
+      const fetchFn = eff.dataMetric === 'hourly' ? fetchTempsWithHourly : fetchTemps;
+
       // Use per-city effective date range
       const cityRange     = getCityDateRange(city);
       const blanketRange  = (cityRange.start && cityRange.end) ? cityRange : globalBlanketRange;
       const baselineRange = getBaselineRange(blanketRange);
 
       $('loading-text').textContent = `${city.name}: baseline…`;
-      const baseline = await fetchTemps(city.lat, city.lon, city.tz, baselineRange.start, baselineRange.end);
+      const baseline = await fetchFn(city.lat, city.lon, city.tz, baselineRange.start, baselineRange.end);
       done++;
       setProgress(Math.round(done / total * 100));
 
       $('loading-text').textContent = `${city.name}: blanket year…`;
-      const blanket = await fetchTemps(city.lat, city.lon, city.tz, blanketRange.start, blanketRange.end);
+      const blanket = await fetchFn(city.lat, city.lon, city.tz, blanketRange.start, blanketRange.end);
       done++;
       setProgress(Math.round(done / total * 100));
 
-      cityResults.push({ city, baseline, blanket });
+      cityResults.push({ city, baseline, blanket, eff });
     }
 
     setProgress(100);
     $('loading-text').textContent = 'Computing zones…';
 
-    // Pool baseline highs for shared bounds (using global bucket mode)
-    const allHighs = cityResults.flatMap(r => r.baseline.highs.filter(h => h != null));
+    // All temperature metrics (high, low, mean, hourly) are in °F/°C and share
+    // one pooled scale. Precipitation is a different unit and gets its own pool.
+    const isTemp = m => m !== 'precip';
 
-    let sharedBounds;
+    const allTempBaseline   = cityResults.flatMap(r =>
+      isTemp(r.eff.dataMetric)
+        ? getMetricValues(r.baseline, r.eff.dataMetric, r.eff.hourlyHour).filter(v => v != null)
+        : []
+    );
+    const allPrecipBaseline = cityResults.flatMap(r =>
+      r.eff.dataMetric === 'precip'
+        ? getMetricValues(r.baseline, r.eff.dataMetric, r.eff.hourlyHour).filter(v => v != null)
+        : []
+    );
+
+    // Anchor city sets the scale for whichever pool it belongs to.
+    let sharedTempBounds, sharedPrecipBounds;
     if (state.scaleMode === 'anchor' && state.anchorCityId) {
       const anchor = cityResults.find(r => r.city.id === state.anchorCityId);
-      sharedBounds = computeBounds(anchor ? anchor.baseline.highs : allHighs);
-    } else {
-      sharedBounds = computeBounds(allHighs);
+      if (anchor) {
+        const anchorVals = getMetricValues(anchor.baseline, anchor.eff.dataMetric, anchor.eff.hourlyHour);
+        if (isTemp(anchor.eff.dataMetric)) sharedTempBounds   = computeBounds(anchorVals);
+        else                               sharedPrecipBounds = computeBounds(anchorVals);
+      }
     }
+    if (!sharedTempBounds)   sharedTempBounds   = computeBounds(allTempBaseline.length   ? allTempBaseline   : [0]);
+    if (!sharedPrecipBounds) sharedPrecipBounds = computeBounds(allPrecipBaseline.length ? allPrecipBaseline : [0]);
 
     state.rendered = cityResults.map(r => {
-      let highs = [...r.blanket.highs];
-      let dates = [...r.blanket.dates];
+      const eff = r.eff;
+      let values = [...getMetricValues(r.blanket, eff.dataMetric, eff.hourlyHour)];
+      let dates  = [...r.blanket.dates];
       if (state.shiftSH && r.city.isSH) {
         const shift = 182;
-        highs = [...highs.slice(shift), ...highs.slice(0, shift)];
+        values = [...values.slice(shift), ...values.slice(0, shift)];
       }
-      const eff         = getCityEffective(r.city);
-      const cityBounds  = computeBoundsForMode(r.baseline.highs.filter(h => h != null).length > 0
-        ? r.baseline.highs : allHighs, eff.bucketMode);
-      // Use city-specific bounds for zone assignment if bucket mode differs from global
-      const boundsToUse = (eff.bucketMode !== state.bucketMode) ? cityBounds : sharedBounds;
+      const baselineValues = getMetricValues(r.baseline, eff.dataMetric, eff.hourlyHour);
+      const sharedBounds   = isTemp(eff.dataMetric) ? sharedTempBounds : sharedPrecipBounds;
+      const allPool        = isTemp(eff.dataMetric) ? allTempBaseline  : allPrecipBaseline;
+      const cityBounds     = computeBoundsForMode(
+        baselineValues.filter(v => v != null).length > 0 ? baselineValues : allPool,
+        eff.bucketMode
+      );
+      // Only break from shared scale when the bucket mode is overridden.
+      // Metric type (high/low/mean/hourly) and precipitation each have their own
+      // pool already; within a pool everything shares the same scale.
+      const boundsToUse = eff.bucketMode !== state.bucketMode ? cityBounds : sharedBounds;
       return {
         city: r.city,
-        dates, highs,
-        zones: assignZones(highs, boundsToUse),
+        dates, highs: values,
+        zones: assignZones(values, boundsToUse),
         bounds: boundsToUse,
-        sharedBounds,
         effectivePalette:    eff.palette,
         effectiveBucketMode: eff.bucketMode,
-        baselineHighs: r.baseline.highs,
+        effectiveDataMetric: eff.dataMetric,
+        effectiveHourlyHour: eff.hourlyHour,
+        baselineHighs: baselineValues,
       };
     });
 
     hideLoading();
-    renderLegend(sharedBounds);
+    renderLegend(sharedTempBounds);
     renderBlankets();
 
   } catch(err) {
@@ -1434,24 +1607,27 @@ function bindCanvasEvents(canvas, rd, rowH) {
     const dayIdx = Math.min(Math.floor(y / rowH), rd.dates.length - 1);
     if (dayIdx < 0) return;
 
-    const d    = rd.dates[dayIdx];
-    const temp = rd.highs[dayIdx];
-    const zone = rd.zones[dayIdx];
+    const d     = rd.dates[dayIdx];
+    const value = rd.highs[dayIdx];
+    const zone  = rd.zones[dayIdx];
     const colors = getCityColors(rd.city);
     const n      = colors.length;
     const eff    = getCityEffective(rd.city);
     const names  = n === 12 ? ZONE_NAMES_12 : (eff.bucketMode === 'uniform-pct' ? ZONE_NAMES_UNIFORM : ZONE_NAMES_10);
 
-    const dt      = new Date(d + 'T12:00:00');
-    const dateStr = dt.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
-    const tempStr = temp != null ? tempFmt(temp) : 'No data';
-    const color   = zone >= 0 ? colors[Math.min(zone, n-1)] : '#888';
-    const zoneLbl = zone >= 0 ? `Zone ${zone+1} · ${names[Math.min(zone, names.length-1)]}` : 'no data';
+    const effMetric  = getCityEffective(rd.city);
+    const dt         = new Date(d + 'T12:00:00');
+    const dateStr    = dt.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+    const valueStr   = value != null
+      ? `${getMetricLabel(effMetric.dataMetric, effMetric.hourlyHour)}: ${valueFmt(value, effMetric.dataMetric)}`
+      : 'No data';
+    const color    = zone >= 0 ? colors[Math.min(zone, n-1)] : '#888';
+    const zoneLbl  = zone >= 0 ? `Zone ${zone+1} · ${names[Math.min(zone, names.length-1)]}` : 'no data';
 
     // City name in tooltip
     $('tooltip-city').textContent  = `${rd.city.name}, ${rd.city.country}`;
     $('tooltip-date').textContent  = dateStr;
-    $('tooltip-temp').textContent  = tempStr;
+    $('tooltip-temp').textContent  = valueStr;
     $('tooltip-temp').style.color  = color;
     $('tooltip-zone').textContent  = zoneLbl;
 
@@ -1710,6 +1886,45 @@ function fillPopover(city) {
     });
   });
 
+  // ── Data metric ──
+  const METRIC_OPTIONS = [
+    { value: 'high',   label: 'Daily high' },
+    { value: 'low',    label: 'Daily low' },
+    { value: 'mean',   label: 'Daily average' },
+    { value: 'hourly', label: 'Specific hour' },
+    { value: 'precip', label: 'Precipitation' },
+  ];
+  const metricEl = $('popover-metric');
+  metricEl.innerHTML = METRIC_OPTIONS.map(m => `
+    <label class="radio-option radio-option-sm${m.value === 'hourly' ? ' radio-option-hourly' : ''}">
+      <input type="radio" name="popover-metric-${city.id}" value="${m.value}" ${m.value === eff.dataMetric ? 'checked' : ''} />
+      <span class="radio-label"><span class="radio-title">${m.label}</span></span>
+      ${m.value === 'hourly' ? `
+        <div class="hour-picker-row${eff.dataMetric !== 'hourly' ? ' hidden' : ''}" id="popover-hour-picker-row">
+          <select class="input" id="popover-hour-picker">
+            ${HOUR_LABELS.map((lbl, h) => `<option value="${h}"${h === eff.hourlyHour ? ' selected' : ''}>${lbl}</option>`).join('')}
+          </select>
+        </div>` : ''}
+    </label>
+  `).join('');
+
+  metricEl.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      city.overrides.dataMetric = r.value;
+      const row = $('popover-hour-picker-row');
+      if (row) row.classList.toggle('hidden', r.value !== 'hourly');
+      scheduleGenerate(100);
+    });
+  });
+
+  const popoverHourPicker = $('popover-hour-picker');
+  if (popoverHourPicker) {
+    popoverHourPicker.addEventListener('change', e => {
+      city.overrides.hourlyHour = +e.target.value;
+      scheduleGenerate(100);
+    });
+  }
+
   // ── Reset button ──
   $('popover-reset').onclick = () => {
     city.overrides = {};
@@ -1807,15 +2022,16 @@ function downloadPNG() {
   const seenLegend = new Map();
   state.rendered.forEach(rd => {
     const eff = getCityEffective(rd.city);
-    const key = `${eff.palette}|${eff.bucketMode}`;
+    const key = `${eff.palette}|${eff.bucketMode}|${eff.dataMetric}|${eff.hourlyHour}`;
     if (!seenLegend.has(key)) {
       seenLegend.set(key, legendGroups.length);
       legendGroups.push({
-        palette: eff.palette,
+        palette:    eff.palette,
         bucketMode: eff.bucketMode,
-        colors: getCityColors(rd.city),
-        bounds: rd.bounds,
-        cityNames: [rd.city.name],
+        dataMetric: eff.dataMetric,
+        colors:     getCityColors(rd.city),
+        bounds:     rd.bounds,
+        cityNames:  [rd.city.name],
       });
     } else {
       legendGroups[seenLegend.get(key)].cityNames.push(rd.city.name);
@@ -1939,7 +2155,7 @@ function downloadPNG() {
       const pLo = mode.bounds ? mode.bounds[i] : i * 10;
       const pHi = mode.bounds ? mode.bounds[i + 1] : (i + 1) * 10;
       const rangeLabel = g.bounds
-        ? `${tempFmt(g.bounds[i])}–${tempFmt(g.bounds[i + 1])}`
+        ? `${valueFmt(g.bounds[i], g.dataMetric)}–${valueFmt(g.bounds[i + 1], g.dataMetric)}`
         : `p${pLo}–${pHi}`;
 
       ctx.fillStyle = '#e8eaf0';

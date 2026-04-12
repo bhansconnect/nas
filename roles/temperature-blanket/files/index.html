@@ -79,6 +79,51 @@
           <span class="date-range-text" id="date-range-text"></span>
         </section>
 
+        <!-- Data metric -->
+        <section class="control-section">
+          <h2 class="section-title">Data Metric</h2>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="metric" value="high" checked />
+              <span class="radio-label">
+                <span class="radio-title">Daily high</span>
+                <span class="radio-desc">Hottest temperature of the day</span>
+              </span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="metric" value="low" />
+              <span class="radio-label">
+                <span class="radio-title">Daily low</span>
+                <span class="radio-desc">Coldest temperature of the day</span>
+              </span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="metric" value="mean" />
+              <span class="radio-label">
+                <span class="radio-title">Daily average</span>
+                <span class="radio-desc">Mean of high and low</span>
+              </span>
+            </label>
+            <label class="radio-option radio-option-hourly">
+              <input type="radio" name="metric" value="hourly" />
+              <span class="radio-label">
+                <span class="radio-title">Specific hour</span>
+                <span class="radio-desc">Temperature at a chosen time</span>
+              </span>
+              <div class="hidden hour-picker-row" id="hour-picker-row">
+                <select class="input" id="hour-picker"></select>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="metric" value="precip" />
+              <span class="radio-label">
+                <span class="radio-title">Precipitation</span>
+                <span class="radio-desc">Daily total rainfall/snowfall</span>
+              </span>
+            </label>
+          </div>
+        </section>
+
         <!-- Baseline -->
         <section class="control-section">
           <h2 class="section-title">Baseline (for scale)</h2>
@@ -239,7 +284,7 @@
           </svg>
         </div>
         <h2 class="empty-title">Add cities to begin</h2>
-        <p class="empty-desc">Search for any city worldwide — each day of the year becomes a colored row based on the high temperature. The blanket updates automatically as you make selections.</p>
+        <p class="empty-desc">Search for any city worldwide — each day of the year becomes a colored row based on your chosen metric. The blanket updates automatically as you make selections.</p>
       </div>
 
       <!-- Error state -->
@@ -327,6 +372,10 @@
     <div class="popover-section">
       <div class="popover-label">Zone Scheme</div>
       <div class="popover-zones" id="popover-zones"></div>
+    </div>
+    <div class="popover-section">
+      <div class="popover-label">Data Metric</div>
+      <div class="popover-metric" id="popover-metric"></div>
     </div>
     <button class="btn btn-ghost btn-sm btn-full" id="popover-reset">Reset to global defaults</button>
   </div>
