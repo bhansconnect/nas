@@ -347,6 +347,26 @@ function computeBoundsForMode(baselineHighs, bucketMode) {
   return computePercentiles(valid, mode.bounds);
 }
 
+// Precipitation-aware bounds: percentiles computed only on non-zero values,
+// with bounds[0] forced to 0 so that dry days (h=0) land in zone 0.
+function computePrecipBoundsForMode(baselineValues, bucketMode) {
+  const mode    = BUCKET_MODES[bucketMode] || BUCKET_MODES.dense12;
+  const nonZero = baselineValues.filter(h => h != null && h > 0);
+  const nBounds = mode.bounds ? mode.bounds.length : 11;
+
+  if (nonZero.length === 0) return Array(nBounds).fill(0);
+
+  if (bucketMode === 'uniform-temp') {
+    const mn = Math.min(...nonZero), mx = Math.max(...nonZero);
+    const n  = nBounds - 1;
+    return [0, ...Array.from({length: n}, (_, i) => mn + (mx - mn) * i / (n - 1))];
+  }
+
+  const bounds = computePercentiles(nonZero, mode.bounds);
+  bounds[0] = 0;  // anchor bottom at 0 so dry days (h=0) fall into zone 0
+  return bounds;
+}
+
 function updateDateDisplay() {
   const range = getDateRange();
   if (!range.start || !range.end) return;
@@ -1231,6 +1251,10 @@ function computeBounds(baselineHighs) {
   return computeBoundsForMode(baselineHighs, state.bucketMode);
 }
 
+function computePrecipBounds(baselineValues) {
+  return computePrecipBoundsForMode(baselineValues, state.bucketMode);
+}
+
 function assignZones(highs, bounds) {
   return highs.map(h => {
     if (h == null) return -1;
@@ -1308,11 +1332,11 @@ async function generate() {
       if (anchor) {
         const anchorVals = getMetricValues(anchor.baseline, anchor.eff.dataMetric, anchor.eff.hourlyHour);
         if (isTemp(anchor.eff.dataMetric)) sharedTempBounds   = computeBounds(anchorVals);
-        else                               sharedPrecipBounds = computeBounds(anchorVals);
+        else                               sharedPrecipBounds = computePrecipBounds(anchorVals);
       }
     }
     if (!sharedTempBounds)   sharedTempBounds   = computeBounds(allTempBaseline.length   ? allTempBaseline   : [0]);
-    if (!sharedPrecipBounds) sharedPrecipBounds = computeBounds(allPrecipBaseline.length ? allPrecipBaseline : [0]);
+    if (!sharedPrecipBounds) sharedPrecipBounds = computePrecipBounds(allPrecipBaseline.length ? allPrecipBaseline : []);
 
     state.rendered = cityResults.map(r => {
       const eff = r.eff;
@@ -1325,10 +1349,16 @@ async function generate() {
       const baselineValues = getMetricValues(r.baseline, eff.dataMetric, eff.hourlyHour);
       const sharedBounds   = isTemp(eff.dataMetric) ? sharedTempBounds : sharedPrecipBounds;
       const allPool        = isTemp(eff.dataMetric) ? allTempBaseline  : allPrecipBaseline;
-      const cityBounds     = computeBoundsForMode(
-        baselineValues.filter(v => v != null).length > 0 ? baselineValues : allPool,
-        eff.bucketMode
-      );
+      const precipMode = eff.dataMetric === 'precip';
+      const cityBounds = precipMode
+        ? computePrecipBoundsForMode(
+            baselineValues.filter(v => v != null).length > 0 ? baselineValues : allPool,
+            eff.bucketMode
+          )
+        : computeBoundsForMode(
+            baselineValues.filter(v => v != null).length > 0 ? baselineValues : allPool,
+            eff.bucketMode
+          );
       // Only break from shared scale when the bucket mode is overridden.
       // Metric type (high/low/mean/hourly) and precipitation each have their own
       // pool already; within a pool everything shares the same scale.
