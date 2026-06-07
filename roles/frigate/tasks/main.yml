@@ -23,10 +23,10 @@
 - name: frigate
   docker_container:
     name: frigate
-    image: ghcr.io/blakeblackshear/frigate:stable-tensorrt
+    image: ghcr.io/blakeblackshear/frigate:stable
     pull: true
     restart: "{{ frigate_config.changed }}"
-    shm_size: "128MB"
+    shm_size: "256MB"
     volumes:
       - "{{ frigate_dir }}:/config:rw"
       - "{{ nvr_dir }}:/media/frigate:rw"
