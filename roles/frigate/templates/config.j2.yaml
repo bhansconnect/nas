@@ -7,20 +7,19 @@ tls:
 auth:
   enabled: false
 
+# Object detection isn't needed, so disable it entirely. The tensorrt
+# detector no longer works on amd64 (see https://docs.frigate.video/configuration/object_detectors#onnx),
+# and ONNX requires manually providing a model, so just fall back to the
+# bundled cpu detector and turn detection off everywhere.
 detectors:
-  tensorrt:
-    type: tensorrt
-    device: 0
+  cpu:
+    type: cpu
+
+detect:
+  enabled: false
 
 birdseye:
   mode: continuous
-
-model:
-  path: /config/model_cache/tensorrt/yolov7-320.trt
-  input_tensor: nchw
-  input_pixel_format: rgb
-  width: 320
-  height: 320
 
 cameras:
   rhea_cam:
