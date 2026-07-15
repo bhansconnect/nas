@@ -15,16 +15,22 @@
     state: present
   register: install_driver
 
-- name: Add NVIDIA apt key
-  apt_key:
-    url: https://nvidia.github.io/nvidia-docker/gpgkey
-    state: present
+- name: create /etc/apt/keyrings
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
 
-- name: Fetch NVIDIA apt repository list
+- name: Add NVIDIA apt key
   get_url:
-    # TODO: change back to distribution when debian12 explicitly supported
-    # url: https://nvidia.github.io/nvidia-docker/{{ distribution }}/nvidia-docker.list
-    url: https://nvidia.github.io/nvidia-docker/debian11/nvidia-docker.list
+    url: https://nvidia.github.io/libnvidia-container/gpgkey
+    dest: /etc/apt/keyrings/nvidia-docker.key
+
+- name: Add NVIDIA apt repository list
+  copy:
+    content: |
+      deb [signed-by=/etc/apt/keyrings/nvidia-docker.key] https://nvidia.github.io/libnvidia-container/stable/deb/$(ARCH) /
+      # deb [signed-by=/etc/apt/keyrings/nvidia-docker.key] https://nvidia.github.io/libnvidia-container/experimental/deb/$(ARCH) /
     dest: /etc/apt/sources.list.d/nvidia-docker.list
 
 - name: Update apt caches and install nvidia-container-toolkit
