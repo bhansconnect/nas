@@ -24,6 +24,11 @@
         - rule: limit
           to_port: "{{ ansible_port }}"
           proto: tcp
+        # Real SSH port lan
+        - rule: allow
+          src: 192.168.1.0/24
+          to_port: "{{ ansible_port }}"
+          proto: tcp
         # Website
         - rule: allow
           to_port: 80
